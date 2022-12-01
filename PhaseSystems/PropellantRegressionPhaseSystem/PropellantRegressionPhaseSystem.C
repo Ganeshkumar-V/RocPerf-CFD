@@ -184,8 +184,8 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::dmdt
     const phasePairKey& key
 ) const
 {
-    return BasePhaseSystem::dmdt(key) + this->rDmdt(key);
-    // return BasePhaseSystem::dmdt(key);
+    // return BasePhaseSystem::dmdt(key) + this->rDmdt(key);
+    return BasePhaseSystem::dmdt(key);
 }
 
 

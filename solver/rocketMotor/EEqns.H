@@ -36,12 +36,17 @@ for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
         fvOptions.constrain(EEqn);
         EEqn.solve();
         fvOptions.correct(phase.thermoRef().he());
-        Info<< phase.name() << " min/max T "
-            << min(phase.thermo().T()).value()
-            << " - "
-            << max(phase.thermo().T()).value()
-            << endl;
 
+        // Info<< phase.name() << " min/max T "
+        //     << min(phase.thermo().T()).value()
+        //     << " - "
+        //     << max(phase.thermo().T()).value()
+        //     << endl;
+
+      // for(label i = 0; i < 100; i++)
+      // {
+      //   Info << phase.thermo().T()[i*20 + 10] << "  ";
+      // }
       // Info << phase.thermo().T() << endl;
     }
 

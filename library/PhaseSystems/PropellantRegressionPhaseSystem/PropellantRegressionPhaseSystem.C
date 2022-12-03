@@ -243,19 +243,19 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::heatTransfer() const
     const phaseModel& phase1 = pair.phase1();
     const phaseModel& phase2 = pair.phase2();
 
-    // specific Heat Capacity
-    const volScalarField Cp1(phase1.thermo().Cp());
-    const volScalarField Cp2(phase2.thermo().Cp());
+    // Enthalpy source
+    volScalarField hs1(phase1.thermo().he(phase1.thermo().p(), Tad));
+    volScalarField hs2(phase2.thermo().he(phase2.thermo().p(), Tad));
 
     // Equations
     fvScalarMatrix& eqn1 = *eqns[phase1.name()];
     fvScalarMatrix& eqn2 = *eqns[phase2.name()];
 
-    // Enthalpy Source
+    // Energy Source
     eqn1 += - fvm::Sp(coeff*rDmdt, eqn1.psi())
-            + coeff*rDmdt*Cp1*Tad;
+            + coeff*rDmdt*hs1;
     eqn2 += - fvm::Sp((1.0 - coeff)*rDmdt, eqn2.psi())
-            + (1.0 - coeff)*rDmdt*Cp2*Tad;
+            + (1.0 - coeff)*rDmdt*hs2;
 
     // // Stabilization Terms
     // eqn1 += coeff*rDmdt*phase1.thermo().he()

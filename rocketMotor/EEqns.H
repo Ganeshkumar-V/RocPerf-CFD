@@ -16,7 +16,7 @@ for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
         const volVectorField& U = phase.U();
 
         // Check for presence of phase
-        if (max(alpha).value() < 1e-9)
+        if (max(alpha).value() < 1e-13)
         {
           Warning << phase.name() << " is not present"
                   << " Max alpha: " << max(alpha).value() << endl;

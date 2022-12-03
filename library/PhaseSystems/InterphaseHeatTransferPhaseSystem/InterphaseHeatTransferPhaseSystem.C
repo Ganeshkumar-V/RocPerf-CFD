@@ -114,6 +114,22 @@ heatTransfer() const
       *eqns[phase2.name()] +=
             - fvm::Sp(pos(alpha2-tol_)*K/phase2.thermo().Cpv(), phase2.thermo().he())
             + pos(alpha2-tol_)*K/phase1.thermo().Cpv()*(phase1.thermo().he());
+
+      // // Correction for Reference Enthalpy
+      // *eqns[phase1.name()] -=
+      //       - pos(alpha2-tol_)*K/phase1.thermo().Cpv()*(href)
+      //       + pos(alpha2-tol_)*K/phase2.thermo().Cpv()*(href);
+      // *eqns[phase2.name()] +=
+      //       - pos(alpha2-tol_)*K/phase1.thermo().Cpv()*(href)
+      //       + pos(alpha2-tol_)*K/phase2.thermo().Cpv()*(href);
+
+      // Addition Heat diffusion in particle phase
+      *eqns[phase1.name()] -=
+            - fvm::laplacian
+              (
+               fvc::interpolate(phase1)*fvc::interpolate(Kd/phase1.thermo().Cp()),
+               phase1.thermo().he()
+              );
     }
 
     return eqnsPtr;

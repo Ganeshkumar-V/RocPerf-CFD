@@ -324,7 +324,7 @@ void Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::solve()
   }
 
   // Solve other phase volume fraction equations
-  BasePhaseSystem::solve();
+  // BasePhaseSystem::solve();
 }
 
 template<class BasePhaseSystem>

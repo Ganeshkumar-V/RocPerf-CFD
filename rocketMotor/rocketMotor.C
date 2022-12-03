@@ -158,6 +158,8 @@ int main(int argc, char *argv[])
         while (pimple.loop())
         {
             fluid.solve();
+            #include "alphaEqn.H"
+            
             fluid.correct();
 
             #include "YEqns.H"

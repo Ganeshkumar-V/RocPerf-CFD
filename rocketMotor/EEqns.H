@@ -1,4 +1,3 @@
-#include "findPropellantCells.H"
 for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
 {
     fluid.correctEnergyTransport();
@@ -49,16 +48,4 @@ for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
 
     fluid.correctThermo();
     fluid.correct();
-}
-
-
-forAll(phases, phasei)
-{
-    phaseModel& phase = phases[phasei];
-
-    Info<< phase.name() << " min/max T "
-        << min(phase.thermo().T()).value()
-        << " - "
-        << max(phase.thermo().T()).value()
-        << endl;
 }

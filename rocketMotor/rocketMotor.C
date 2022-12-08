@@ -159,6 +159,36 @@ int main(int argc, char *argv[])
         {
             fluid.solve();  // Just regress propellant surface
             #include "alphaEqn.H"
+            // #include "findPropellantCells.H"
+            label purePropellantSize = 0;
+            {
+              const volScalarField& propellant = phases[propellantIndex];
+
+              forAll(propellant, i)
+              {
+                if (propellant[i] == 1)
+                {
+                  purePropellantSize++;
+                }
+              }
+            }
+            labelList purePropellantCells(purePropellantSize);
+            scalar Tad = fluid.get<scalar>("Tad");
+            scalarField setTemp(purePropellantSize, Tad);
+            vectorField setVelocity(purePropellantSize, vector(0, 0, 0));
+            {
+              const volScalarField& propellant = phases[propellantIndex];
+
+              label j = 0;
+              forAll(propellant, i)
+              {
+                if (propellant[i] == 1)
+                {
+                  purePropellantCells[j] = i;
+                  j++;
+                }
+              }
+            }
 
             fluid.correct();
 
@@ -185,6 +215,16 @@ int main(int argc, char *argv[])
             }
         }
 
+        forAll(phases, phasei)
+        {
+            phaseModel& phase = phases[phasei];
+            if (phase.index() == propellantIndex) continue;
+            Info<< phase.name() << " min/max T "
+                << min(phase.thermo().T()).value()
+                << " - "
+                << max(phase.thermo().T()).value()
+                << endl;
+        }
         runTime.write();
 
         runTime.printExecutionTime(Info);

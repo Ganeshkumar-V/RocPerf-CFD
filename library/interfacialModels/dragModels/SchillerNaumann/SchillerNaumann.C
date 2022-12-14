@@ -33,39 +33,44 @@ License
 
 namespace Foam
 {
-namespace dragModels
+namespace particleDragModels
 {
     defineTypeNameAndDebug(SchillerNaumann, 0);
-    addToRunTimeSelectionTable(dragModel, SchillerNaumann, dictionary);
+    addToRunTimeSelectionTable(particleDragModel, SchillerNaumann, dictionary);
 }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dragModels::SchillerNaumann::SchillerNaumann
+Foam::particleDragModels::SchillerNaumann::SchillerNaumann
 (
     const dictionary& dict,
     const phasePair& pair,
     const bool registerObject
 )
 :
-    dragModel(dict, pair, registerObject),
+    particleDragModel(dict, pair, registerObject),
     residualRe_("residualRe", dimless, dict)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::dragModels::SchillerNaumann::~SchillerNaumann()
+Foam::particleDragModels::SchillerNaumann::~SchillerNaumann()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModels::SchillerNaumann::CdRe() const
+Foam::tmp<Foam::volScalarField> Foam::particleDragModels::SchillerNaumann::CdRe() const
 {
-    volScalarField Re(pair_.Re());
+    volScalarField Re
+    (
+      pair_.magUr()
+      *pair_.dispersed().d()*pair_.dispersed().rho()
+      /dimensionedScalar("", dimForce*dimTime/dimArea, 2.0713e-05)
+    );
 
     return
         neg(Re - 1000)*24*(1.0 + 0.15*pow(Re, 0.687))

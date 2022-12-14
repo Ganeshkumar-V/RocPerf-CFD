@@ -5,7 +5,7 @@ $(iTModel)/interfaceTrackingModel/interfaceTrackingModel.C
 $(iTModel)/subCellularInterfaceMotion/subCellularInterfaceMotion.C
 
 iFModel = interfacialModels
-$(iFModel)/dragModels/dragModel/dragModel.C
+$(iFModel)/dragModels/particleDragModel/particleDragModel.C
 $(iFModel)/dragModels/SchillerNaumann/SchillerNaumann.C
 
 HTModel = sharpInterfaceHeatTransferModels

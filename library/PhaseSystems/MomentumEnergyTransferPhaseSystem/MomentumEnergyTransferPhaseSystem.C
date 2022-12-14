@@ -29,7 +29,7 @@ License
 #include "MomentumEnergyTransferPhaseSystem.H"
 
 #include "BlendedInterfacialModel.H"
-#include "dragModel.H"
+#include "particleDragModel.H"
 #include "virtualMassModel.H"
 #include "liftModel.H"
 #include "wallLubricationModel.H"
@@ -57,17 +57,17 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::Kd
     const phasePairKey& key
 ) const
 {
-    if (dragModels_.found(key))
+    if (particleDragModels_.found(key))
     {
-        return dragModels_[key]->K();
+        return particleDragModels_[key]->K();
     }
     else
     {
         return volScalarField::New
         (
-            dragModel::typeName + ":K",
+            particleDragModel::typeName + ":K",
             this->mesh_,
-            dimensionedScalar(dragModel::dimK)
+            dimensionedScalar(particleDragModel::dimK)
         );
     }
 }
@@ -80,17 +80,17 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::Kdf
     const phasePairKey& key
 ) const
 {
-    if (dragModels_.found(key))
+    if (particleDragModels_.found(key))
     {
-        return dragModels_[key]->Kf();
+        return particleDragModels_[key]->Kf();
     }
     else
     {
         return surfaceScalarField::New
         (
-            dragModel::typeName + ":K",
+            particleDragModel::typeName + ":K",
             this->mesh_,
-            dimensionedScalar(dragModel::dimK)
+            dimensionedScalar(particleDragModel::dimK)
         );
     }
 }
@@ -176,7 +176,7 @@ MomentumEnergyTransferPhaseSystem
     this->generatePairsAndSubModels
     (
         "drag",
-        dragModels_
+        particleDragModels_
     );
 
     this->generatePairsAndSubModels
@@ -205,12 +205,12 @@ MomentumEnergyTransferPhaseSystem
 
     forAllConstIter
     (
-        dragModelTable,
-        dragModels_,
-        dragModelIter
+        particleDragModelTable,
+        particleDragModels_,
+        particleDragModelIter
     )
     {
-        const phasePair& pair(this->phasePairs_[dragModelIter.key()]);
+        const phasePair& pair(this->phasePairs_[particleDragModelIter.key()]);
 
         Kds_.set
         (
@@ -218,7 +218,7 @@ MomentumEnergyTransferPhaseSystem
             new volScalarField
             (
                 IOobject::groupName("Kd", pair.name()),
-                dragModelIter()->K()
+                particleDragModelIter()->K()
             )
         );
 
@@ -228,7 +228,7 @@ MomentumEnergyTransferPhaseSystem
             new surfaceScalarField
             (
                 IOobject::groupName("Kdf", pair.name()),
-                dragModelIter()->Kf()
+                particleDragModelIter()->Kf()
             )
         );
     }
@@ -301,13 +301,13 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::momentumTransfer()
     // Update the drag coefficients
     forAllConstIter
     (
-        dragModelTable,
-        dragModels_,
-        dragModelIter
+        particleDragModelTable,
+        particleDragModels_,
+        particleDragModelIter
     )
     {
-        *Kds_[dragModelIter.key()] = dragModelIter()->K();
-        *Kdfs_[dragModelIter.key()] = dragModelIter()->Kf();
+        *Kds_[particleDragModelIter.key()] = particleDragModelIter()->K();
+        *Kdfs_[particleDragModelIter.key()] = particleDragModelIter()->Kf();
     }
 
     // Add the implicit part of the drag force

@@ -25,17 +25,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dragModel
+    Foam::particleDragModel
 
 Description
 
 SourceFiles
-    dragModel.C
+    particleDragModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dragModel_H
-#define dragModel_H
+#ifndef particleDragModel_H
+#define particleDragModel_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,13 +48,12 @@ namespace Foam
 
 // Forward Declarations
 class phasePair;
-class swarmCorrection;
 
 /*---------------------------------------------------------------------------*\
-                           Class dragModel Declaration
+                           Class particleDragModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class dragModel
+class particleDragModel
 :
     public regIOobject
 {
@@ -68,7 +67,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("dragModel");
+    TypeName("particleDragModel");
 
 
     // Declare runtime construction
@@ -76,7 +75,7 @@ public:
         declareRunTimeSelectionTable
         (
             autoPtr,
-            dragModel,
+            particleDragModel,
             dictionary,
             (
                 const dictionary& dict,
@@ -96,14 +95,14 @@ public:
     // Constructors
 
         // Construct without residual constants
-        dragModel
+        particleDragModel
         (
             const phasePair& pair,
             const bool registerObject
         );
 
         // Construct with residual constants
-        dragModel
+        particleDragModel
         (
             const dictionary& dict,
             const phasePair& pair,
@@ -112,12 +111,12 @@ public:
 
 
     //- Destructor
-    virtual ~dragModel();
+    virtual ~particleDragModel();
 
 
     // Selectors
 
-        static autoPtr<dragModel> New
+        static autoPtr<particleDragModel> New
         (
             const dictionary& dict,
             const phasePair& pair

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dragModels::SchillerNaumann
+    Foam::particleDragModels::SchillerNaumann
 
 Description
     Schiller and Naumann drag model for dispersed bubbly flows.
@@ -37,7 +37,7 @@ SourceFiles
 #ifndef SchillerNaumann_H
 #define SchillerNaumann_H
 
-#include "dragModel.H"
+#include "particleDragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +46,7 @@ namespace Foam
 
 class phasePair;
 
-namespace dragModels
+namespace particleDragModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -55,7 +55,7 @@ namespace dragModels
 
 class SchillerNaumann
 :
-    public dragModel
+    public particleDragModel
 {
     // Private data
 
@@ -93,7 +93,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace dragModels
+} // End namespace particleDragModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

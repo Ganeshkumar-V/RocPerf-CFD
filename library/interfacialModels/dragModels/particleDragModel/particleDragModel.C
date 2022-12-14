@@ -26,25 +26,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dragModel.H"
+#include "particleDragModel.H"
 #include "phasePair.H"
-#include "swarmCorrection.H"
 #include "surfaceInterpolate.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(dragModel, 0);
-    defineRunTimeSelectionTable(dragModel, dictionary);
+    defineTypeNameAndDebug(particleDragModel, 0);
+    defineRunTimeSelectionTable(particleDragModel, dictionary);
 }
 
-const Foam::dimensionSet Foam::dragModel::dimK(1, -3, -1, 0, 0);
+const Foam::dimensionSet Foam::particleDragModel::dimK(1, -3, -1, 0, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dragModel::dragModel
+Foam::particleDragModel::particleDragModel
 (
     const phasePair& pair,
     const bool registerObject
@@ -66,7 +65,7 @@ Foam::dragModel::dragModel
 {}
 
 
-Foam::dragModel::dragModel
+Foam::particleDragModel::particleDragModel
 (
     const dictionary& dict,
     const phasePair& pair,
@@ -91,8 +90,8 @@ Foam::dragModel::dragModel
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::dragModel>
-Foam::dragModel::New
+Foam::autoPtr<Foam::particleDragModel>
+Foam::particleDragModel::New
 (
     const dictionary& dict,
     const phasePair& pair
@@ -100,7 +99,7 @@ Foam::dragModel::New
 {
     const word modelType(dict.get<word>("type"));
 
-    Info<< "Selecting dragModel for "
+    Info<< "Selecting particleDragModel for "
         << pair << ": " << modelType << endl;
 
     auto* ctorPtr = dictionaryConstructorTable(modelType);
@@ -110,7 +109,7 @@ Foam::dragModel::New
         FatalIOErrorInLookup
         (
             dict,
-            "dragModel",
+            "particleDragModel",
             modelType,
             *dictionaryConstructorTablePtr_
         ) << abort(FatalIOError);
@@ -122,30 +121,29 @@ Foam::dragModel::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::dragModel::~dragModel()
+Foam::particleDragModel::~particleDragModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::dragModel::Ki() const
+Foam::tmp<Foam::volScalarField> Foam::particleDragModel::Ki() const
 {
     return
         0.75
        *CdRe()
-       *pair_.continuous().rho()
-       *pair_.continuous().nu()
+       *dimensionedScalar("", dimForce*dimTime/dimArea, 2.0713e-05)
        /sqr(pair_.dispersed().d());
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::dragModel::K() const
+Foam::tmp<Foam::volScalarField> Foam::particleDragModel::K() const
 {
     return max(pair_.dispersed(), pair_.dispersed().residualAlpha())*Ki();
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::dragModel::Kf() const
+Foam::tmp<Foam::surfaceScalarField> Foam::particleDragModel::Kf() const
 {
     return
         max
@@ -156,7 +154,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::dragModel::Kf() const
 }
 
 
-bool Foam::dragModel::writeData(Ostream& os) const
+bool Foam::particleDragModel::writeData(Ostream& os) const
 {
     return os.good();
 }

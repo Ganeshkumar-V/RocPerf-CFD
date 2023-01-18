@@ -283,7 +283,7 @@ while (pimple.correct())
                         (
                             (alpha/rho)*
                             (
-                                phase.thermo().psi()*fvm::ddt(p_rgh)
+                                fvm::ddt(phase.thermo().psi(), p_rgh)
                               + fvm::div(phid, p_rgh)
                               - fvm::Sp(fvc::div(phid), p_rgh)
                             )

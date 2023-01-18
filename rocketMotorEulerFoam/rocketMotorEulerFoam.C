@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
               }
             }
             labelList purePropellantCells(purePropellantSize);
-            scalarField setTemp(purePropellantSize, 3000);
+            scalarField setTemp(purePropellantSize, 2000);
             vectorField setVelocity(purePropellantSize, vector(0, 0, 0));
             {
               const volScalarField& propellant = phases[propellantIndex];

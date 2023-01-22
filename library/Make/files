@@ -4,6 +4,7 @@ iTModel = interfaceTrackingModels
 $(iTModel)/interfaceTrackingModel/interfaceTrackingModel.C
 $(iTModel)/subCellularInterfaceMotion/subCellularInterfaceMotion.C
 $(iTModel)/burningRate/burningRate.C
+$(iTModel)/burningRateDy/burningRateDy.C
 
 iFModel = interfacialModels
 $(iFModel)/dragModels/particleDragModel/particleDragModel.C

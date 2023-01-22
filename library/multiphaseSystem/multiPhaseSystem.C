@@ -284,17 +284,33 @@ void Foam::multiPhaseSystem::solveAlphas()
             }
         }
 
-        MULES::explicitSolve
-        (
+        if (phase.moving())
+        {
+          MULES::explicitSolve
+          (
             geometricOneField(),
             alpha,
             alphaPhi,
             Sp,
             Su
-        );
-        phase.clip(SMALL, 1 - SMALL);
+          );
 
-        if (phase.moving()) phase.alphaPhiRef() = alphaPhi;
+          phase.alphaPhiRef() = alphaPhi;
+        }
+        else
+        {
+          Info << "not moving phase: " << phase.name() << endl;
+          MULES::explicitSolve
+          (
+            geometricOneField(),
+            alpha,
+            phase.alphaPhi(),
+            Sp,
+            Su
+          );
+        }
+
+        phase.clip(SMALL, 1 - SMALL);
     }
 
     // Report the phase fractions and the phase fraction sum

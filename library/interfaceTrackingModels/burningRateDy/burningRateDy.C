@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "burningRate.H"
+#include "burningRateDy.H"
 #include "phasePair.H"
 #include "phaseSystem.H"
 #include "addToRunTimeSelectionTable.H"
@@ -42,15 +42,17 @@ namespace Foam
 {
 namespace interfaceTrackingModels
 {
-    defineTypeNameAndDebug(burningRate, 0);
-    addToRunTimeSelectionTable(interfaceTrackingModel, burningRate, dictionary);
+    defineTypeNameAndDebug(burningRateDy, 0);
+    addToRunTimeSelectionTable(interfaceTrackingModel, burningRateDy, dictionary);
 }
 }
 // * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * * //
 
-void Foam::interfaceTrackingModels::burningRate::updateInterface()
+void Foam::interfaceTrackingModels::burningRateDy::updateInterface()
 {
     const volScalarField& alpha = propellantPhase_;
+    interfaceArea_ = dimensionedScalar(dimless/dimLength, 0)*alpha;
+    interfaceAreaVector_ = vector(0, 0, 0)*alpha;
 
     scalarField ap
     (
@@ -62,22 +64,18 @@ void Foam::interfaceTrackingModels::burningRate::updateInterface()
     forAll(interfaceArea_, celli)
     {
         label status = cutCell.calcSubCell(celli, isoAlpha_);
-        interfaceArea_[celli] = 0;
-        interfaceAreaVector_[celli] = vector(0, 0, 0);
         if (status == 0) // cell is cut
         {
-          if (mag(cutCell.faceArea().z()) < 1e-7)
-          {
-            interfaceArea_[celli] = mag(cutCell.faceArea().x())/mesh_.V()[celli];
+            interfaceArea_[celli] = pos(cutCell.faceArea().x())
+                          *cutCell.faceArea().x()/mesh_.V()[celli];
             interfaceAreaVector_[celli].x() = 1.0;
-          }
         }
     }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::interfaceTrackingModels::burningRate::burningRate
+Foam::interfaceTrackingModels::burningRateDy::burningRateDy
 (
     const dictionary& dict,
     const phasePair& pair
@@ -140,12 +138,12 @@ Foam::interfaceTrackingModels::burningRate::burningRate
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::interfaceTrackingModels::burningRate::~burningRate()
+Foam::interfaceTrackingModels::burningRateDy::~burningRateDy()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-void Foam::interfaceTrackingModels::burningRate::correct()
+void Foam::interfaceTrackingModels::burningRateDy::correct()
 {
 
   // rb = constant
@@ -166,32 +164,32 @@ void Foam::interfaceTrackingModels::burningRate::correct()
 }
 
 // find interface and stores interface in owner cell
-void Foam::interfaceTrackingModels::burningRate::regress
+void Foam::interfaceTrackingModels::burningRateDy::regress
 (
   volScalarField& alpha
 )
 {}
 
-void Foam::interfaceTrackingModels::burningRate::findInterface
+void Foam::interfaceTrackingModels::burningRateDy::findInterface
 (
   const volScalarField& alpha
 )
 {}
 
 Foam::tmp<Foam::volScalarField>
-Foam::interfaceTrackingModels::burningRate::rb() const
+Foam::interfaceTrackingModels::burningRateDy::rb() const
 {
     return Foam::tmp<Foam::volScalarField>(new volScalarField("trb", rb_));
 }
 
 Foam::tmp<Foam::volScalarField>
-Foam::interfaceTrackingModels::burningRate::As() const
+Foam::interfaceTrackingModels::burningRateDy::As() const
 {
     return Foam::tmp<Foam::volScalarField>(new volScalarField("tAs", interfaceArea_));
 }
 
 Foam::tmp<Foam::volVectorField>
-Foam::interfaceTrackingModels::burningRate::nHat() const
+Foam::interfaceTrackingModels::burningRateDy::nHat() const
 {
     return Foam::tmp<Foam::volVectorField>(new volVectorField("nHat", interfaceAreaVector_));
 }

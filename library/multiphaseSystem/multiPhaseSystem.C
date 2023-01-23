@@ -299,15 +299,23 @@ void Foam::multiPhaseSystem::solveAlphas()
         }
         else
         {
-          Info << "not moving phase: " << phase.name() << endl;
-          MULES::explicitSolve
-          (
-            geometricOneField(),
-            alpha,
-            phase.alphaPhi(),
-            Sp,
-            Su
-          );
+          if (isoAdvection_)
+          {
+            // Iso-Advection of Static Phase Model
+            advector->advect(Sp, Su);
+          }
+          else
+          {
+            // MULES
+            MULES::explicitSolve
+            (
+              geometricOneField(),
+              alpha,
+              phase.alphaPhi(),
+              Sp,
+              Su
+            );
+          }
         }
 
         phase.clip(SMALL, 1 - SMALL);
@@ -552,12 +560,34 @@ Foam::multiPhaseSystem::multiPhaseSystem
     (
         "deltaN",
         1e-8/pow(average(mesh_.V()), 1.0/3.0)
-    )
+    ),
+
+    isoAdvection_(this->get<bool>("isoAdvection"))
 {
     forAll(phases(), phasei)
     {
         volScalarField& alphai = phases()[phasei];
         mesh_.setFluxRequired(alphai.name());
+
+        // Set IsoAdvection Phase
+        if(!phases()[phasei].moving())
+        {
+          if(advector == nullptr)
+          {
+            advector =
+                new isoAdvection
+                (
+                  alphai,
+                  phases()[phasei].phi(),
+                  phases()[phasei].U()
+                );
+          }
+          else
+          {
+            FatalErrorInFunction << "More than one static phase model " <<
+            "is currently not supported by this solver" << exit(FatalError);
+          }
+        }
     }
 }
 

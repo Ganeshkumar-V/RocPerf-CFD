@@ -38,6 +38,7 @@ SourceFiles
 #define multiPhaseSystem_H
 
 #include "phaseSystem.H"
+#include "isoAdvection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -159,6 +160,10 @@ public:
             const fvMesh& mesh
         );
 
+    // isoAdvection for Static Phase Model
+
+        isoAdvection* advector = nullptr;
+        bool isoAdvection_;
 
     // Member Functions
 

@@ -11,4 +11,4 @@ wmake $targetType library
 
 wmake $targetType rocketMotorEulerFoam
 
-wmake $targetType rocketMotorDyFoam
+# wmake $targetType rocketMotorDyFoam

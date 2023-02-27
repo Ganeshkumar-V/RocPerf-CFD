@@ -695,12 +695,12 @@ void Foam::multiPhaseSystem::solve()
     forAll(phases(), phasei)
     {
         phaseModel& phase = phases()[phasei];
+        phase.clip(SMALL, 1 - SMALL);
+
         if (phase.stationary()) continue;
 
         phase.alphaRhoPhiRef() =
             fvc::interpolate(phase.rho())*phase.alphaPhi();
-
-        phase.clip(SMALL, 1 - SMALL);
     }
 
     calcAlphas();

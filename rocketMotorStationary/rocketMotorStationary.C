@@ -77,7 +77,13 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (!runTime.end())
+    // Correcting Phase Volume Fractions
+    forAll(fluid.phases(), phasei)
+    {
+      fluid.phases()[phasei].clip(SMALL, 1 - SMALL);
+    }
+
+    while (runTime.run())
     {
         #include "readTimeControls.H"
 
@@ -102,10 +108,6 @@ int main(int argc, char *argv[])
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
-          forAll(fluid.phases(), phasei)
-          {
-            fluid.phases()[phasei].clip(SMALL, 1 - SMALL);
-          }
             fluid.solve();
             fluid.correct();
 
@@ -143,7 +145,7 @@ int main(int argc, char *argv[])
               }
             }
             //***********  End Find Propellant size ***********//
-            
+
             #include "YEqns.H"
 
             if (faceMomentum)

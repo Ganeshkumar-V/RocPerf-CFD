@@ -66,10 +66,6 @@ int main(int argc, char *argv[])
         #include "setInitialDeltaT.H"
     }
 
-    Switch faceMomentum
-    (
-        pimple.dict().getOrDefault<Switch>("faceMomentum", false)
-    );
     Switch partialElimination
     (
         pimple.dict().getOrDefault<Switch>("partialElimination", false)
@@ -90,20 +86,9 @@ int main(int argc, char *argv[])
     scalarField setTemp(0, 0);
     vectorField setVelocity(0, vector(0, 0, 0));
     label propellantIndex = fluid.get<label>("propellantIndex");
-
-    // Mass Information
-    scalar massI = 0;
-    forAll(fluid.phases(), phasei)
-    {
-      const volScalarField& alpha = fluid.phases()[phasei];
-      const volScalarField& rho = fluid.phases()[phasei].rho();
-      const scalarField& V = mesh.V();
-
-      scalar massP = sum(alpha()*rho()*V);
-      massI += massP;
-      Info << "mass of " << fluid.phases()[phasei].name() << " phase: " << massP << " kg" << endl;
-    }
-    Info << "Initial Mass: " << massI << " kg" << endl;
+    labelList Wall(0);
+    labelList WallPatch(0);
+    findWalls(phases[propellantIndex], Wall, WallPatch);
 
     while (runTime.run())
     {
@@ -114,15 +99,8 @@ int main(int argc, char *argv[])
             pimple.dict().getOrDefault<int>("nEnergyCorrectors", 1)
         );
 
-        if (LTS)
-        {
-            #include "setRDeltaT.H"
-        }
-        else
-        {
-            #include "CourantNo.H"
-            #include "setDeltaTFactor.H"
-        }
+        #include "CourantNo.H"
+        #include "setDeltaTFactor.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
@@ -174,18 +152,9 @@ int main(int argc, char *argv[])
 
             #include "YEqns.H"
 
-            if (faceMomentum)
-            {
-                #include "pUf/UEqns.H"
-                #include "EEqns.H"
-                #include "pUf/pEqn.H"
-            }
-            else
-            {
-                #include "pU/UEqns.H"
-                #include "EEqns.H"
-                #include "pU/pEqn.H"
-            }
+            #include "pU/UEqns.H"
+            #include "EEqns.H"
+            #include "pU/pEqn.H"
 
             fluid.correctKinematics();
 
@@ -194,21 +163,6 @@ int main(int argc, char *argv[])
                 fluid.correctTurbulence();
             }
         }
-
-        // Check for Mass Conservation
-        scalar mass = 0;
-        forAll(fluid.phases(), phasei)
-        {
-          const volScalarField& alpha = fluid.phases()[phasei];
-          const volScalarField& rho = fluid.phases()[phasei].rho();
-          const scalarField& V = mesh.V();
-
-          scalar massP = sum(alpha()*rho()*V);
-          mass += massP;
-          Info << "mass of " << fluid.phases()[phasei].name() << " phase: " << massP << " kg" << endl;
-        }
-        Info << "Total Mass: " << mass << " kg" << endl;
-        Info << "Difference: " << massI - mass << " kg" << endl;
 
         runTime.write();
 

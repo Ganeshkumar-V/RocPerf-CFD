@@ -33,6 +33,7 @@
 
             // Clip Yi's
             Y[i].clip(SMALL, 1 - SMALL);
+            // ImposeWall(Y[i], phases[propellantIndex], Wall, WallPatch);
             ImposeWall(Y[i], phases[propellantIndex]);
         }
     }

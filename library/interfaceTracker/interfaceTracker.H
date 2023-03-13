@@ -6,7 +6,6 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +24,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::interfaceTrackingModel
+    Foam::interfaceTracker
 
 Description
 
 SourceFiles
-    interfaceTrackingModel.C
+    interfaceTracker.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interfaceTrackingModel_H
-#define interfaceTrackingModel_H
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#ifndef interfaceTracker_H
+#define interfaceTracker_H
 
 #include "volFields.H"
 #include "dictionary.H"
@@ -45,101 +42,44 @@ SourceFiles
 #include "PtrListDictionary.H"
 #include "phaseModel.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
-// Forward Declarations
 class phasePair;
-
 /*---------------------------------------------------------------------------*\
-                        Class interfaceTrackingModel Declaration
+                          Class interfaceTracker Declaration
 \*---------------------------------------------------------------------------*/
 
-class interfaceTrackingModel
+class interfaceTracker
 {
-protected:
-
-    // Protected Data
-
-        //- Phase pair
-        const phasePair& pair_;
-
-
-
 public:
 
     //- Runtime type information
-    TypeName("interfaceTrackingModel");
+    TypeName("interfaceTracker");
 
-    typedef PtrListDictionary<phaseModel> phaseModelList;
-
-    //- Propellant phase
-    word propellant_;
-
-    // Declare runtime construction
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            interfaceTrackingModel,
-            dictionary,
-            (
-                const dictionary& dict,
-                const phasePair& pair
-            ),
-            (dict, pair)
-        );
-
-
-    // Static Data Members
-
-        //- Mass transfer rate dimensions
-        static const dimensionSet dimDmdt;
-
+    //- Public Data
+    volScalarField interface_;
+    volScalarField Sf_;
+    volScalarField Vf_;
 
     // Constructors
 
-        //- Construct from a dictionary and a phase pair
-        interfaceTrackingModel
-        (
-            const dictionary& dict,
-            const phasePair& pair
-        );
+        //- Construct from components
+        interfaceTracker(const volScalarField& alpha);
 
 
     //- Destructor
-    virtual ~interfaceTrackingModel() = default;
-
-
-    // Selectors
-
-        static autoPtr<interfaceTrackingModel> New
-        (
-            const dictionary& dict,
-            const phasePair& pair
-        );
-
+    virtual ~interfaceTracker();
 
     // Member Functions
-    virtual void correct() = 0;
-    virtual void regress(volScalarField& alpha) = 0;
+    virtual void findInterface();
 
-    virtual void findInterface(const volScalarField& alpha) = 0;
+    virtual void interface();
 
-    //- The burning rate
-    virtual tmp<volScalarField> rb() const = 0;
+    virtual void Sf();
 
-    //- Interface Area/Volume
-    virtual tmp<volScalarField> As() const = 0;
-
-    //- Interface Area vector
-    virtual tmp<volVectorField> nHat() const;
-
-    //- Propellant Density
-    virtual tmp<volScalarField> rhop() const;
-
-    //- Mass Transfer Rate
-    virtual tmp<volScalarField> dmdt() const;
 };
 
 

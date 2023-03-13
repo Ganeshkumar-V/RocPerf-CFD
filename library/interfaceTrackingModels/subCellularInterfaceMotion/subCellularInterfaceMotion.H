@@ -70,6 +70,8 @@ public:
 
     volScalarField As_;
 
+    volScalarField dmdt_;
+
     dimensionedScalar crb_;
     // Constructors
 
@@ -99,6 +101,9 @@ public:
 
     //- Interface normal
     virtual tmp<volVectorField> nHat() const;
+
+    //- Mass Transfer Rate
+    virtual tmp<volScalarField> dmdt() const;
 };
 
 

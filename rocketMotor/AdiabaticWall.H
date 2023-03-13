@@ -3,15 +3,15 @@ inline void ImposeWall(volScalarField& psi, const volScalarField& alpha)
   const labelList& Own(psi.mesh().owner());
   const labelList& Nei(psi.mesh().neighbour());
 
-  scalar One(1.0 - SMALL);
+  scalar One(0.999); //1.0 - SMALL);
 
   forAll(Own, celli)
   {
-    if ((alpha[Own[celli]] < One) && (alpha[Nei[celli]] == One))
+    if ((alpha[Own[celli]] < One) && (alpha[Nei[celli]] >= One))
     {
       psi[Nei[celli]] = psi[Own[celli]];
     }
-    else if ((alpha[Nei[celli]] < One) && (alpha[Own[celli]] == One))
+    else if ((alpha[Nei[celli]] < One) && (alpha[Own[celli]] >= One))
     {
       psi[Own[celli]] = psi[Nei[celli]];
     }
@@ -21,7 +21,7 @@ inline void ImposeWall(volScalarField& psi, const volScalarField& alpha)
 
 inline void correctFlux(surfaceScalarField& flux, const volScalarField& propellant)
 {
-  /***
+  /***/
     const fvMesh& mesh(propellant.mesh());
     const labelList& Own(mesh.owner());
     const labelList& Nei(mesh.neighbour());
@@ -35,10 +35,10 @@ inline void correctFlux(surfaceScalarField& flux, const volScalarField& propella
       }
       else continue;
     }
-    ***/
+    /***/
 }
 
 inline void correctU(volVectorField& U, const volScalarField& propellant)
 {
-  // U = neg(propellant - (1 - SMALL))*U;
+  U = neg(propellant - (1 - SMALL))*U;
 }

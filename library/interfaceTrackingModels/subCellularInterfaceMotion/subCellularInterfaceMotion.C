@@ -83,6 +83,15 @@ Foam::interfaceTrackingModels::subCellularInterfaceMotion::subCellularInterfaceM
         dimensionedScalar("", dimArea/dimVolume, 0.0)
       )
     ),
+    dmdt_
+    (
+      volScalarField
+      (
+        IOobject("dmdt", pair_.phase1().mesh()),
+        pair_.phase1().mesh(),
+        dimensionedScalar("", dimVelocity/dimLength, 0.0)
+      )
+    ),
     crb_("", dimVelocity, dict.getOrDefault<scalar>("rb", -1))
 {
   const phaseModel& phase = pair_.phase1();
@@ -117,11 +126,146 @@ void Foam::interfaceTrackingModels::subCellularInterfaceMotion::correct()
 }
 
 // find interface and stores interface in owner cell
+// void Foam::interfaceTrackingModels::subCellularInterfaceMotion::regress
+// (
+//   volScalarField& alpha
+// )
+// {
+//   const volScalarField& alpha0 = alpha.oldTime();
+//
+//   const fvMesh& mesh = alpha.mesh();
+//   const labelList& Own = mesh.owner();
+//   const labelList& Nei = mesh.neighbour();
+//   const surfaceScalarField& Sf = mesh.magSf();
+//   const scalar dt = mesh.time().deltaTValue();
+//   const scalarField& V = mesh.V();
+//   const scalar One(1 - SMALL);
+//   const scalar Zero(SMALL);
+//   interface_ = dimensionedScalar(dimless, 0.0);
+//   As_ = dimensionedScalar(As_.dimensions(), 0.0);
+//
+//   // Internal Cells
+//   forAll(Own, i)
+//   {
+//     // case:1 Interface is present at the center of the owner cell
+//     if (alpha0[Own[i]] == 0.5 && alpha0[Nei[i]] == One)
+//     {
+//       interface_[Own[i]] = 1;
+//       As_[Own[i]] = Sf[i]/V[Own[i]];  // Area of face between owner and neighbour
+//       alpha[Own[i]] = alpha0[Own[i]] - rb_[Own[i]]*Sf[i]*dt/V[Own[i]];
+//       if (alpha[Own[i]] < 0)
+//       {
+//         scalar Vr = -alpha[Own[i]]*V[Own[i]];
+//         alpha[Nei[i]] = alpha0[Nei[i]] - Vr/V[Nei[i]];
+//         alpha[Own[i]] = 0;
+//         if (alpha[Nei[i]] < 0)
+//         {
+//           FatalErrorInFunction
+//             << "Regression is very fast!\n"
+//             << "Hint: Reduce time step."
+//             << exit(FatalError);
+//         }
+//       }
+//     }
+//     // case:2 Interface is present in between owner center and face
+//     else if ((alpha0[Own[i]] < 0.5) && (alpha0[Nei[i]] == One))
+//     {
+//       interface_[Own[i]] = 1;
+//       As_[Own[i]] = Sf[i]/V[Own[i]];  // Area of face between owner and neighbour
+//       alpha[Own[i]] = alpha0[Own[i]] - rb_[Own[i]]*Sf[i]*dt/V[Own[i]];
+//       if (alpha[Own[i]] < 0)
+//       {
+//         scalar Vr = -alpha[Own[i]]*V[Own[i]];
+//         alpha[Nei[i]] = alpha0[Nei[i]] - Vr/V[Nei[i]];
+//         alpha[Own[i]] = 0;
+//         if (alpha[Nei[i]] < 0)
+//         {
+//           FatalErrorInFunction
+//             << "Regression is very fast!\n"
+//             << "Hint: Reduce time step."
+//             << exit(FatalError);
+//         }
+//       }
+//     }
+//     // case:3 Interface is present exactly at the face
+//     else if ((alpha0[Own[i]] == Zero) && (alpha0[Nei[i]] == One))
+//     {
+//       interface_[Own[i]] = 1;
+//       As_[Own[i]] = Sf[i]/V[Nei[i]];  // Area of face between owner and neighbour
+//       alpha[Nei[i]] = alpha0[Nei[i]] - rb_[Own[i]]*Sf[i]*dt/V[Nei[i]];
+//       if (alpha[Nei[i]] < 0)
+//       {
+//         FatalErrorInFunction
+//           << "Regression is very fast!\n"
+//           << "Hint: Reduce time step."
+//           << exit(FatalError);
+//       }
+//     }
+//     // case:4 Interface is present in between face and neighbour center
+//     else if ((alpha0[Own[i]] == Zero) && (alpha0[Nei[i]] > 0.5))
+//     {
+//       if (alpha0[Nei[i]] > 0.5)
+//       {
+//         interface_[Own[i]] = 1;
+//         As_[Own[i]] = Sf[i]/V[Nei[i]];  // Area of face between owner and neighbour
+//         alpha[Nei[i]] = alpha0[Nei[i]] - rb_[Own[i]]*Sf[i]*dt/V[Nei[i]];
+//       }
+//       else
+//       {
+//         interface_[Nei[i]] = 1;
+//         As_[Nei[i]] = Sf[i]/V[Nei[i]];  // Area of face between owner and neighbour
+//         alpha[Nei[i]] = alpha0[Nei[i]] - rb_[Nei[i]]*Sf[i]*dt/V[Nei[i]];
+//       }
+//       if (alpha[Nei[i]] < 0)
+//       {
+//         FatalErrorInFunction
+//           << "Regression is very fast!\n"
+//           << "Hint: Reduce time step."
+//           << exit(FatalError);
+//       }
+//     }
+//     // case:5 Interface is not present (Ignore)
+//     else continue;
+//   }
+//
+//   // Boundary Patches
+//   forAll(mesh.boundary(), patchi)
+//   {
+//     const fvPatch& patch = mesh.boundary()[patchi];
+//     const labelList& fC = patch.faceCells();
+//     const scalarField pSf(patch.magSf());
+//     forAll(fC, celli)
+//     {
+//       if
+//       (
+//           (alpha0[fC[celli]] <= 0.5) &&
+//           (alpha0[fC[celli]] > Zero) &&
+//           (interface_[fC[celli]] == 0)
+//       )
+//       {
+//         interface_[fC[celli]] = 1.0;
+//         As_[fC[celli]] = pSf[celli]/V[fC[celli]];
+//         alpha[fC[celli]] = alpha0[fC[celli]] - rb_[fC[celli]]*As_[fC[celli]]*dt;
+//         if (alpha[fC[celli]] < 0)
+//         {
+//           alpha[fC[celli]] = Zero;
+//           As_[fC[celli]] = (alpha0[fC[celli]] - alpha[fC[celli]])
+//                             /(rb_[fC[celli]]*dt);
+//         }
+//       }
+//       else continue;
+//     }
+//   }
+// }
+
 void Foam::interfaceTrackingModels::subCellularInterfaceMotion::regress
 (
   volScalarField& alpha
 )
 {
+  const phaseModel& phase = pair_.phase1();
+  const volScalarField& p = phase.db().lookupObject<volScalarField>("p");
+
   const volScalarField& alpha0 = alpha.oldTime();
 
   const fvMesh& mesh = alpha.mesh();
@@ -134,79 +278,50 @@ void Foam::interfaceTrackingModels::subCellularInterfaceMotion::regress
   const scalar Zero(SMALL);
   interface_ = dimensionedScalar(dimless, 0.0);
   As_ = dimensionedScalar(As_.dimensions(), 0.0);
+  dmdt_ = dimensionedScalar(dmdt_.dimensions(), 0.0);
+  rb_ = dimensionedScalar(rb_.dimensions(), 0.0);
 
   // Internal Cells
   forAll(Own, i)
   {
-    // case:1 Interface is present at the center of the owner cell
-    if (alpha0[Own[i]] == 0.5 && alpha0[Nei[i]] == One)
-    {
-      interface_[Own[i]] = 1;
-      As_[Own[i]] = Sf[i]/V[Own[i]];  // Area of face between owner and neighbour
-      alpha[Own[i]] = alpha0[Own[i]] - rb_[Own[i]]*Sf[i]*dt/V[Own[i]];
-      if (alpha[Own[i]] < 0)
-      {
-        scalar Vr = -alpha[Own[i]]*V[Own[i]];
-        alpha[Nei[i]] = alpha0[Nei[i]] - Vr/V[Nei[i]];
-        alpha[Own[i]] = 0;
-        if (alpha[Nei[i]] < 0)
-        {
-          FatalErrorInFunction
-            << "Regression is very fast!\n"
-            << "Hint: Reduce time step."
-            << exit(FatalError);
-        }
-      }
-    }
+    // case:1 Interface is present at the center of the owner cell (or)
     // case:2 Interface is present in between owner center and face
-    else if ((alpha0[Own[i]] < 0.5) && (alpha0[Nei[i]] == One))
+    if (alpha0[Own[i]] <= 0.5 && alpha0[Nei[i]] == One)
     {
       interface_[Own[i]] = 1;
       As_[Own[i]] = Sf[i]/V[Own[i]];  // Area of face between owner and neighbour
-      alpha[Own[i]] = alpha0[Own[i]] - rb_[Own[i]]*Sf[i]*dt/V[Own[i]];
+      rb_[Own[i]] = (a*pow(p[Own[i]]/1e6, n)).value()*1e-2;  // burning Rate
+      dmdt_[Own[i]] = rb_[Own[i]]*As_[Own[i]];
+      alpha[Own[i]] = alpha0[Own[i]] - rb_[Own[i]]*As_[Own[i]]*dt;
       if (alpha[Own[i]] < 0)
       {
-        scalar Vr = -alpha[Own[i]]*V[Own[i]];
-        alpha[Nei[i]] = alpha0[Nei[i]] - Vr/V[Nei[i]];
-        alpha[Own[i]] = 0;
-        if (alpha[Nei[i]] < 0)
-        {
-          FatalErrorInFunction
-            << "Regression is very fast!\n"
-            << "Hint: Reduce time step."
-            << exit(FatalError);
-        }
+          scalar Vr = -alpha[Own[i]]*V[Own[i]];
+          alpha[Nei[i]] = alpha0[Nei[i]] - Vr/V[Nei[i]];
+          alpha[Own[i]] = 0;
+          if (alpha[Nei[i]] < 0)
+          {
+              FatalErrorInFunction
+                << "Regression is very fast!\n"
+                << "Hint: Reduce time step."
+                << exit(FatalError);
+          }
       }
     }
     // case:3 Interface is present exactly at the face
-    else if ((alpha0[Own[i]] == Zero) && (alpha0[Nei[i]] == One))
-    {
-      interface_[Own[i]] = 1;
-      As_[Own[i]] = Sf[i]/V[Nei[i]];  // Area of face between owner and neighbour
-      alpha[Nei[i]] = alpha0[Nei[i]] - rb_[Own[i]]*Sf[i]*dt/V[Nei[i]];
-      if (alpha[Nei[i]] < 0)
-      {
-        FatalErrorInFunction
-          << "Regression is very fast!\n"
-          << "Hint: Reduce time step."
-          << exit(FatalError);
-      }
-    }
     // case:4 Interface is present in between face and neighbour center
-    else if ((alpha0[Own[i]] == Zero) && (alpha0[Nei[i]] > 0.5))
+    else if ((alpha0[Own[i]] == Zero) && (alpha0[Nei[i]] >= 0.5))
     {
-      if (alpha0[Nei[i]] > 0.99)
-      {
-        interface_[Own[i]] = 1;
-        As_[Own[i]] = Sf[i]/V[Nei[i]];  // Area of face between owner and neighbour
-        alpha[Nei[i]] = alpha0[Nei[i]] - rb_[Own[i]]*Sf[i]*dt/V[Nei[i]];
-      }
-      else
-      {
-        interface_[Nei[i]] = 1;
-        As_[Nei[i]] = Sf[i]/V[Nei[i]];  // Area of face between owner and neighbour
-        alpha[Nei[i]] = alpha0[Nei[i]] - rb_[Nei[i]]*Sf[i]*dt/V[Nei[i]];
-      }
+      interface_[Nei[i]] = 1;
+      As_[Nei[i]] = Sf[i]/V[Nei[i]];  // Area of face between owner and neighbour
+      rb_[Nei[i]] = (a*pow(p[Nei[i]]/1e6, n)).value()*1e-2;  // burning Rate
+
+      // Source Term Distribution
+      dmdt_[Own[i]] = 2*(alpha0[Nei[i]] - 0.5)*(rb_[Nei[i]]*As_[Nei[i]]);
+      dmdt_[Nei[i]] = (1.0 - 2*(alpha0[Nei[i]] - 0.5))*rb_[Nei[i]]*As_[Nei[i]];
+      As_[Own[i]] = As_[Nei[i]];
+      rb_[Own[i]] = rb_[Nei[i]];
+
+      alpha[Nei[i]] = alpha0[Nei[i]] - rb_[Nei[i]]*As_[Nei[i]]*dt;
       if (alpha[Nei[i]] < 0)
       {
         FatalErrorInFunction
@@ -307,5 +422,11 @@ Foam::tmp<Foam::volVectorField>
 Foam::interfaceTrackingModels::subCellularInterfaceMotion::nHat() const
 {
     return As_*dimensionedScalar(dimLength, 1.0)*vector(1, 0, 0)/max(Foam::mag(As_*dimensionedScalar(dimLength, 1.0)), SMALL);
+}
+
+Foam::tmp<Foam::volScalarField>
+Foam::interfaceTrackingModels::subCellularInterfaceMotion::dmdt() const
+{
+    return Foam::tmp<Foam::volScalarField>(new volScalarField("tdmdt", dmdt_));
 }
 // ************************************************************************* //

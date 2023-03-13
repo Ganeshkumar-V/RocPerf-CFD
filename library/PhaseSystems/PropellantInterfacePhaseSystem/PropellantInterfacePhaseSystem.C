@@ -208,7 +208,7 @@ Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::PropellantInterfacePhaseS
       {
         // pcoeff = AAlC_*MW_.Al2O3/(2*MW_.Al*(1 + 1/eqR_)) + (1 - AAlC_);
         // gcoeff = AAlC_*(1.0 - MW_.Al2O3/(2*MW_.Al*(1 + 1/eqR_)));
-        pcoeff = (K_ + 0.5)/MW_.Prop;
+        pcoeff = (K_ + 0.5)*MW_.Al2O3/MW_.Prop;
         gcoeff = (1.5*MW_.H2 + ((1.5/eqR_) - 1.5)*MW_.H2O)/MW_.Prop;
       }
       else  // Rich mixture
@@ -463,6 +463,45 @@ void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::solve()
   BasePhaseSystem::solve();
 }
 
+// template<class BasePhaseSystem>
+// void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::correct()
+// {
+//     BasePhaseSystem::correct();
+//
+//     //- Finds burning rate (rb = aP^n)
+//     forAllIter
+//     (
+//         interfaceTrackingModelTable,
+//         interfaceTrackingModels_,
+//         interfaceTrackingModelIter
+//     )
+//     {
+//         interfaceTrackingModelIter()->correct();
+//         *rDmdt_[interfaceTrackingModelIter.key()]
+//                   = dimensionedScalar(dimDensity/dimTime);
+//     }
+//
+//     //- return burning Rate, As and propellant density -> find mdot of propellant
+//     forAllConstIter
+//     (
+//         interfaceTrackingModelTable,
+//         interfaceTrackingModels_,
+//         interfaceTrackingModelIter
+//     )
+//     {
+//         *rDmdt_[interfaceTrackingModelIter.key()]
+//               = interfaceTrackingModelIter()->rb()
+//                 *interfaceTrackingModelIter()->As()*rhoPropellant;
+//         rb_ = pos(interfaceTrackingModelIter()->As())
+//                 *interfaceTrackingModelIter()->rb();
+//         *nHat_[interfaceTrackingModelIter.key()]
+//               = interfaceTrackingModelIter()->nHat();
+//     }
+//
+//     // calculate velocity of the gas and particle source
+//     calculateVelocity();
+// }
+
 template<class BasePhaseSystem>
 void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::correct()
 {
@@ -476,7 +515,7 @@ void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::correct()
         interfaceTrackingModelIter
     )
     {
-        interfaceTrackingModelIter()->correct();
+        // interfaceTrackingModelIter()->correct();
         *rDmdt_[interfaceTrackingModelIter.key()]
                   = dimensionedScalar(dimDensity/dimTime);
     }
@@ -490,10 +529,8 @@ void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::correct()
     )
     {
         *rDmdt_[interfaceTrackingModelIter.key()]
-              = interfaceTrackingModelIter()->rb()
-                *interfaceTrackingModelIter()->As()*rhoPropellant;
-        rb_ = pos(interfaceTrackingModelIter()->As())
-                *interfaceTrackingModelIter()->rb();
+              = interfaceTrackingModelIter()->dmdt()*rhoPropellant;
+        rb_ = interfaceTrackingModelIter()->rb();
         *nHat_[interfaceTrackingModelIter.key()]
               = interfaceTrackingModelIter()->nHat();
     }

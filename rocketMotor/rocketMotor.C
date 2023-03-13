@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
             if (propellantIndex != -1)
             {
               label purePropellantSize = 0;
-              scalar cutoff = 0.99; //(1.0 - SMALL);
+              scalar cutoff = 0.999; //(1.0 - SMALL);
               {
                 const volScalarField& propellant = phases[propellantIndex];
 

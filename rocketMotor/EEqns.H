@@ -53,6 +53,29 @@ forAll(phases, phasei)
 {
     phaseModel& phase = phases[phasei];
 
+    if (phasei == 0)
+    {
+      // scalar minT(min(phase.thermo().T()).value());
+      // volScalarField T(phase.thermo().T());
+      // forAll(T, celli)
+      // {
+      //   if (T[celli] == minT)
+      //   {
+      //     Info << "Cell: " << celli << " has minT: " << minT << endl;
+      //   }
+      // }
+      // forAll(T.boundaryField(), bfi)
+      // {
+      //   forAll(T.boundaryField()[bfi], pi)
+      //   {
+      //     if (T.boundaryField()[bfi][pi] == minT)
+      //     {
+      //       Info << "boundaryField: " << T.mesh().boundary()[bfi].name() << " patchFace: " << pi << " has minT: " << minT << endl;
+      //     }
+      //   }
+      // }
+      // Info << T.boundaryField()[0] << endl;
+    }
     Info<< phase.name() << " min/max T "
         << min(phase.thermo().T()).value()
         << " - "

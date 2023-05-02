@@ -65,3 +65,21 @@ mesh.setFluxRequired(p_rgh.name());
 // {
 //   Info << "Surface Area is written" << exit(FatalError);
 // }
+
+// write gas Density
+volScalarField rhoG
+(
+  IOobject
+  (
+    "rhoG",
+    runTime.timeName(),
+    mesh,
+    IOobject::NO_READ,
+    IOobject::AUTO_WRITE
+  ),
+  phases[0].thermo().rho()
+);
+if (runTime.writeNow())
+{
+  Info << "Density is written " << exit(FatalError);
+}

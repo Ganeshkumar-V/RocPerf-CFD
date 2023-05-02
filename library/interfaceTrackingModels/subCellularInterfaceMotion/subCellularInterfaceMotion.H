@@ -94,6 +94,8 @@ public:
 
     virtual void findInterface(const volScalarField& alpha);
 
+    label findNeighbour(const volScalarField& alpha, scalar NEI);
+
     scalar rb(scalar P);
 
     //- The burning rate

@@ -85,6 +85,7 @@ Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::PropellantCombustionPhas
       )
     ),
     rhoPropellant("rhoprop", dimDensity, this->template get<scalar>("propellantRho")),
+    retainer_("retainer", dimless, 0.0),
     alphaOld
     (
       volScalarField
@@ -162,6 +163,9 @@ Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::PropellantCombustionPhas
         interfaceTrackingModels_
     );
     regress_ = this->template get<bool>("regression");
+    checkAndRegress_ = this->template get<word>("checkRegression");
+    stopRegress_ = this->template get<scalar>("stopRegression");
+    intialV_ = this->template get<scalar>("V0");
 
     forAllConstIter
     (
@@ -271,11 +275,11 @@ Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::dmdts() const
         const scalar pcoeff = mtf.particles;
         const scalar gcoeff = (mtf.H2 + mtf.H2O);
 
-        this->addField(pair.phase1(), "dmdt", pcoeff*rDmdt, dmdts);
+        this->addField(pair.phase1(), "dmdt", (1.0 - retainer_)*pcoeff*rDmdt, dmdts);
         this->addField(pair.phase2(), "dmdt", gcoeff*rDmdt, dmdts);
 
         // Subtract for Propellant Phase
-        this->addField(this->phases()[2], "dmdt", -rDmdt, dmdts);
+        this->addField(this->phases()[2], "dmdt", (retainer_*pcoeff - 1.0)*rDmdt, dmdts);
     }
     return dmdts;
 }
@@ -376,10 +380,21 @@ Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::heatTransfer() const
     fvScalarMatrix& eqn1 = *eqns[phase1.name()];
     fvScalarMatrix& eqn2 = *eqns[phase2.name()];
 
-    eqn1 += - fvm::Sp(pcoeff*rDmdt, eqn1.psi())
-            + pcoeff*rDmdt*hs1;
+    // Implementation - 1
+    eqn1 += - fvm::Sp((1.0 - retainer_)*pcoeff*rDmdt, eqn1.psi())
+            + (1.0 - retainer_)*pcoeff*rDmdt*hs1;
     eqn2 += - fvm::Sp(gcoeff*rDmdt, eqn2.psi())
             + gcoeff*rDmdt*hs2;
+
+    // Implementation - 2
+    // Old Enthalpy
+    // const tmp<volScalarField> th1(phase1.thermo().he());
+    // const volScalarField& h1(th1());
+    // const tmp<volScalarField> th2(phase2.thermo().he());
+    // const volScalarField& h2(th2());
+    //
+    // eqn1 += pcoeff*rDmdt*(hs1 - h1);
+    // eqn2 += gcoeff*rDmdt*(hs2 - h2);
   }
 
   return eqnsPtr;
@@ -411,8 +426,8 @@ Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::momentumTransfer()
     fvVectorMatrix& eqn2 = *eqns[phase2.name()];
 
     // Momentum Source
-    eqn1 += - fvm::Sp(pcoeff*rDmdt, eqn1.psi())
-            + pcoeff*rDmdt*Up_;
+    eqn1 += - fvm::Sp((1.0 - retainer_)*pcoeff*rDmdt, eqn1.psi())
+            + (1.0 - retainer_)*pcoeff*rDmdt*Up_;
     eqn2 += - fvm::Sp(gcoeff*rDmdt, eqn2.psi())
             + gcoeff*rDmdt*Ug_;
   }
@@ -433,10 +448,36 @@ void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::solve()
       interfaceTrackingModelIter
     )
     {
-      word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
-      volScalarField& alpha = this->db().template lookupObjectRef<volScalarField>(propellant);
-      interfaceTrackingModelIter()->regress(alpha, alphaOld);
-      alpha.clip(SMALL, 1-SMALL);
+      interfaceTrackingModelIter()->regress(regressionAlpha, alphaOld);
+      regressionAlpha.clip(SMALL, 1-SMALL);
+      if (checkAndRegress_ == "full")
+      {
+        word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+        volScalarField& alpha = this->db().template lookupObjectRef<volScalarField>(propellant);
+        alpha = regressionAlpha;
+      }
+      else if(checkAndRegress_ == "check")
+      {
+        scalar V = (sum(regressionAlpha.internalField()*this->mesh().V())).value();
+        if (V/intialV_ > stopRegress_)
+        {
+          word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+          volScalarField& alpha = this->db().template lookupObjectRef<volScalarField>(propellant);
+          alpha = regressionAlpha;
+          Info << "Regression is running! -> Remaining Propellant: "
+                                        << 100*V/intialV_ << " %" << endl;
+        }
+        else
+        {
+          retainer_ = 1.0;
+          Info << "Regression is stopped! -> Remaining Propellant: "
+                                        << 100*V/intialV_ << " %" << endl;
+        }
+      }
+      else
+      {
+        Info << "Propellant Reression is not done!" << endl;
+      }
     }
   }
 
@@ -484,16 +525,7 @@ void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::correct()
 template<class BasePhaseSystem>
 void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::store()
 {
-  forAllIter
-  (
-    interfaceTrackingModelTable,
-    interfaceTrackingModels_,
-    interfaceTrackingModelIter
-  )
-  {
-    word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
-    alphaOld = this->db().template lookupObject<volScalarField>(propellant);
-  }
+  alphaOld = regressionAlpha;
 }
 
 template<class BasePhaseSystem>

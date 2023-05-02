@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
     // Setting variables to initialize
     labelList purePropellantCells(0);
     scalarField setTemp(0, 0);
+    scalarField setPressure(0, 0);
     vectorField setVelocity(0, vector(0, 0, 0));
     label propellantIndex = fluid.get<label>("propellantIndex");
 
@@ -133,6 +134,7 @@ int main(int argc, char *argv[])
                 purePropellantSize,
                 fluid.getOrDefault<scalar>("Tset", 2000)
               );
+              setPressure = scalarField(purePropellantSize, 101325);
               setVelocity = vectorField(purePropellantSize, vector(0, 0, 0));
               {
                 const volScalarField& propellant = phases[propellantIndex];
@@ -150,7 +152,7 @@ int main(int argc, char *argv[])
             }
             //***********  End Find Propellant size ***********//
 
-            #include "YEqns.H"
+            // #include "YEqns.H"
 
             #include "pU/UEqns.H"
             #include "EEqns.H"

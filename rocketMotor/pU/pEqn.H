@@ -379,11 +379,20 @@ while (pimple.correct())
                 }
             }
 
+            // Fixing Pressure + Impose Walls
+            // if (propellantIndex != -1)
+            // {
+            //   pEqn.setValues(purePropellantCells, setPressure);
+            // }
+
             solve
             (
                 pEqn,
                 mesh.solver(p_rgh.select(pimple.finalInnerIter()))
             );
+
+            // ImposeWall
+            // ImposeWall(p_rgh, phases[propellantIndex]);
         }
 
         // Correct fluxes and velocities on last non-orthogonal iteration

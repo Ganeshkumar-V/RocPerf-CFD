@@ -90,7 +90,15 @@ protected:
 
         // propellant density
         dimensionedScalar rhoPropellant;
+
+        // Regression Control Parameters
         bool regress_;
+        word checkAndRegress_;
+        scalar stopRegress_;
+        scalar intialV_;
+        dimensionedScalar retainer_;
+
+        // Regresssion Parameters
         volScalarField alphaOld;
         volScalarField regressionAlpha;
         scalar epsilon;

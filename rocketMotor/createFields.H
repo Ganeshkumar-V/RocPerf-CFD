@@ -48,20 +48,39 @@ setRefCell
 );
 mesh.setFluxRequired(p_rgh.name());
 
-// // Write Surface Area of all faces
-// surfaceVectorField Sf
-// (
-//     IOobject
-//     (
-//         "Sf",
-//         runTime.timeName(),
-//         mesh,
-//         IOobject::NO_READ,
-//         IOobject::AUTO_WRITE
-//     ),
-//     mesh.Sf()
-// );
-// if (runTime.writeNow())
-// {
-//   Info << "Surface Area is written" << exit(FatalError);
-// }
+if (runTime.value() == 0)
+{
+  // Write Surface Area of all faces
+  surfaceVectorField Sf
+  (
+      IOobject
+      (
+          "Sf",
+          runTime.timeName(),
+          mesh,
+          IOobject::NO_READ,
+          IOobject::AUTO_WRITE
+      ),
+      mesh.Sf()
+  );
+  Sf.write();
+
+  // Write Magnitude of surface Areas
+  surfaceScalarField magSf
+  (
+      IOobject
+      (
+          "magSf",
+          runTime.timeName(),
+          mesh,
+          IOobject::NO_READ,
+          IOobject::AUTO_WRITE
+      ),
+      mesh.magSf()
+  );
+  magSf.write();
+
+  // Write Control Volumes
+  volScalarField::Internal V(mesh.V());
+  V.write();
+}

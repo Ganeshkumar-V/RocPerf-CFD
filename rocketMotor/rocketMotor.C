@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
             }
             //***********  End Find Propellant size ***********//
 
-            // #include "YEqns.H"
+            #include "YEqns.H"
 
             #include "pU/UEqns.H"
             #include "EEqns.H"

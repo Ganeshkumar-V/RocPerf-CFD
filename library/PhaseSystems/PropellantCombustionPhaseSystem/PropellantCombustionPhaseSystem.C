@@ -28,6 +28,7 @@ License
 #include "PropellantCombustionPhaseSystem.H"
 #include "interfaceTrackingModel.H"
 #include "fvmSup.H"
+#include "fvmDdt.H"
 #include "phaseSystem.H"
 #include "fvmLaplacian.H"
 
@@ -111,11 +112,11 @@ Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::PropellantCombustionPhas
           "regressionAlpha",
           mesh.time().timeName(),
           mesh,
-          IOobject::NO_READ,
+          IOobject::MUST_READ,
           IOobject::AUTO_WRITE
         ),
-        mesh,
-        dimensionedScalar("", dimless,0)
+        mesh
+        // dimensionedScalar("", dimless,0)
       )
     ),
     epsilon(this->template get<scalar>("trapingFactor")),
@@ -215,17 +216,17 @@ Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::PropellantCombustionPhas
     }
 
     // Old Alpha
-    forAllIter
-    (
-      interfaceTrackingModelTable,
-      interfaceTrackingModels_,
-      interfaceTrackingModelIter
-    )
-    {
-      word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
-      alphaOld = this->db().template lookupObject<volScalarField>(propellant);
-      regressionAlpha = alphaOld;
-    }
+    // forAllIter
+    // (
+    //   interfaceTrackingModelTable,
+    //   interfaceTrackingModels_,
+    //   interfaceTrackingModelIter
+    // )
+    // {
+    //   word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+    //   alphaOld = this->db().template lookupObject<volScalarField>(propellant);
+    //   regressionAlpha = alphaOld;
+    // }
 }
 
 
@@ -472,6 +473,21 @@ void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::solve()
           retainer_ = 1.0;
           Info << "Regression is stopped! -> Remaining Propellant: "
                                         << 100*V/intialV_ << " %" << endl;
+
+         // Solve Propellant density
+         const phasePair& pair(this->phasePairs_[interfaceTrackingModelIter.key()]);
+         const volScalarField dmdt(this->rDmdt(pair));
+
+         const factors mtf(eta.massTransfer());
+         const scalar gcoeff = (mtf.H2 + mtf.H2O);
+
+         volScalarField& rhoRef = this->db().template lookupObjectRef
+            <volScalarField>("thermo:rho." + interfaceTrackingModelIter()->propellant_);
+         const volScalarField& alpha = this->db().template lookupObject
+            <volScalarField>("alpha." + interfaceTrackingModelIter()->propellant_);
+
+         fvScalarMatrix rhoEqn(fvm::ddt(rhoRef) == -gcoeff*dmdt/alpha);
+         rhoEqn.solve();
         }
       }
       else
@@ -519,6 +535,15 @@ void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::correct()
       }
       else
       {
+        // Find interface and get interface field
+        word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+        volScalarField& alpha = this->db().template lookupObjectRef<volScalarField>(propellant);
+        interfaceTrackingModelIter()->findInterface(alpha);
+
+        const tmp<volScalarField> tinterface(interfaceTrackingModelIter()->interface());
+        const volScalarField& interface(tinterface());
+        const scalar sumInterface(gSum(interface));
+
         // Get variables
         const tmp<volScalarField> tdmdtRegress(interfaceTrackingModelIter()->dmdt());
         const volScalarField& dmdtRegress(tdmdtRegress());
@@ -530,25 +555,15 @@ void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::correct()
         dimensionedScalar dmdtAvg
         (
           "", dmdtRegress.dimensions(),
-          gSum(dmdtRegress.internalField())/
-          dmdtRegress.internalField().size()
+          gSum(dmdtRegress.internalField())/sumInterface
         );
         dimensionedScalar rbAvg
         (
           "", dimVelocity,
-          gSum(rbRegress.internalField())/
-          rbRegress.internalField().size()
+          0.5*gSum(rbRegress.internalField())/sumInterface
         );
 
-        // Find interface
-        word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
-        volScalarField& alpha = this->db().template lookupObjectRef<volScalarField>(propellant);
-        interfaceTrackingModelIter()->findInterface(alpha);
-
         // Compute dmdt, rb and nHat
-        const tmp<volScalarField> tinterface(interfaceTrackingModelIter()->interface());
-        const volScalarField& interface(tinterface());
-
         *nHat_[interfaceTrackingModelIter.key()] = interface*vector(1, 0, 0);
         rb_ = interface*rbAvg;
         *rDmdt_[interfaceTrackingModelIter.key()] = interface*dmdtAvg*rhoPropellant;

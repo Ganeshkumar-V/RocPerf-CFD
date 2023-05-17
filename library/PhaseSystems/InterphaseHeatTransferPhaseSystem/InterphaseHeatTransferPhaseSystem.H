@@ -81,6 +81,8 @@ protected:
             //- Heat transfer models
             sharpInterfaceHeatTransferModelTable sharpInterfaceHeatTransferModels_;
 
+        // data
+        volScalarField Tslip_;
 
 public:
 
@@ -107,6 +109,9 @@ public:
 
         //- Read base phaseProperties dictionary
         virtual bool read();
+
+        // - Store Temperature slip
+        virtual void store();
 };
 
 

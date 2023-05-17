@@ -566,6 +566,7 @@ void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::correct()
 template<class BasePhaseSystem>
 void Foam::PropellantCombustionPhaseSystem<BasePhaseSystem>::store()
 {
+  BasePhaseSystem::store();
   alphaOld = regressionAlpha;
 }
 

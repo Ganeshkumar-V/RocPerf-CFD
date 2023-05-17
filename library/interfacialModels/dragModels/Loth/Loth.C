@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "RanzMarshall.H"
+#include "Loth.H"
 #include "phasePair.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -33,54 +33,49 @@ License
 
 namespace Foam
 {
-namespace sharpInterfaceHeatTransferModels
+namespace particleDragModels
 {
-    defineTypeNameAndDebug(RanzMarshall, 0);
-    addToRunTimeSelectionTable(sharpInterfaceHeatTransferModel, RanzMarshall, dictionary);
+    defineTypeNameAndDebug(Loth, 0);
+    addToRunTimeSelectionTable(particleDragModel, Loth, dictionary);
 }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sharpInterfaceHeatTransferModels::RanzMarshall::RanzMarshall
+Foam::particleDragModels::Loth::Loth
 (
     const dictionary& dict,
-    const phasePair& pair
+    const phasePair& pair,
+    const bool registerObject
 )
 :
-    sharpInterfaceHeatTransferModel(dict, pair),
-    cutoff(dict.get<scalar>("cutoff"))
+    particleDragModel(dict, pair, registerObject),
+    residualRe_("residualRe", dimless, dict)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::sharpInterfaceHeatTransferModels::RanzMarshall::~RanzMarshall()
+Foam::particleDragModels::Loth::~Loth()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField>
-Foam::sharpInterfaceHeatTransferModels::RanzMarshall::K(const scalar residualAlpha) const
+Foam::tmp<Foam::volScalarField> Foam::particleDragModels::Loth::CdRe() const
 {
-  // volScalarField Re(pair_.Re());
-  // forAll(Re, i)
-  // {
-  //   if (Re[i] < 0)
-  //   {
-  //     Info << "Cell: " << i << " Re[i]: " << Re[i] << endl;
-  //   }
-  // }
-    volScalarField Nu(scalar(2) + 0.6*sqrt(pair_.Re())*cbrt(pair_.Pr()));
+    volScalarField Re
+    (
+      pair_.magUr()
+      *pair_.dispersed().d()*pair_.dispersed().rho()
+      /dimensionedScalar("", dimForce*dimTime/dimArea, 2.0713e-05)
+    );
 
     return
-        6.0
-       *pair_.dispersed()*pos(pair_.dispersed() - cutoff)
-       *pair_.continuous().kappa()
-       *Nu
-       /sqr(pair_.dispersed().d());
+        neg(Re - 1000)*24*(1.0 + 0.15*pow(Re, 0.687))
+      + pos0(Re - 1000)*0.44*max(Re, residualRe_);
 }
+
 
 // ************************************************************************* //

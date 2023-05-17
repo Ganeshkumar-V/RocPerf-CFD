@@ -24,21 +24,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::sharpInterfaceHeatTransferModels::RanzMarshall
+    Foam::particleDragModels::Loth
 
 Description
-    Ranz-Marshall correlation for turbulent heat transfer from the surface of a
-    sphere to the surrounding fluid.
+    Schiller and Naumann drag model for dispersed bubbly flows.
 
 SourceFiles
-    RanzMarshall.C
+    Loth.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef RanzMarshall_H
-#define RanzMarshall_H
+#ifndef Loth_H
+#define Loth_H
 
-#include "sharpInterfaceHeatTransferModel.H"
+#include "particleDragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,47 +46,54 @@ namespace Foam
 
 class phasePair;
 
-namespace sharpInterfaceHeatTransferModels
+namespace particleDragModels
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class RanzMarshall Declaration
+                           Class Loth Declaration
 \*---------------------------------------------------------------------------*/
 
-class RanzMarshall
+class Loth
 :
-    public sharpInterfaceHeatTransferModel
+    public particleDragModel
 {
+    // Private data
+
+        //- Residual Reynolds Number
+        const dimensionedScalar residualRe_;
+
+
 public:
 
     //- Runtime type information
-    TypeName("RanzMarshall");
+    TypeName("Loth");
 
 
     // Constructors
 
-        //- Construct from components
-        RanzMarshall
+        //- Construct from a dictionary and a phase pair
+        Loth
         (
             const dictionary& dict,
-            const phasePair& pair
+            const phasePair& pair,
+            const bool registerObject
         );
 
 
     //- Destructor
-    virtual ~RanzMarshall();
+    virtual ~Loth();
 
-    scalar cutoff;
+
     // Member Functions
 
-        //- The heat transfer function K used in the enthalpy equation
-        tmp<volScalarField> K(const scalar residualAlpha) const;
+        //- Drag coefficient
+        virtual tmp<volScalarField> CdRe() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace sharpInterfaceHeatTransferModels
+} // End namespace particleDragModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

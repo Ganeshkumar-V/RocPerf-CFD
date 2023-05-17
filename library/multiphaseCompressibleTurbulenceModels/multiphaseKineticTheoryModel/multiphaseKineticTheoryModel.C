@@ -527,7 +527,7 @@ void Foam::RASModels::multiphaseKineticTheoryModel::correct()
         Theta_ = sqr
         (
             (l1 + sqrt(l2 + l3))
-           /(2*max(alpha, residualAlpha_)*K4)
+           /(2*max(alpha*K4, residualAlpha_*dimensionedScalar("", K4.dimensions(), 1.0)))
         );
 
         kappa_ = conductivityModel_->kappa(alpha, Theta_, gs0_, rho, da, e_);

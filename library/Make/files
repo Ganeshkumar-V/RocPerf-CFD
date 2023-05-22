@@ -16,10 +16,12 @@ $(dragModel)/particleDragModel/particleDragModel.C
 $(dragModel)/SchillerNaumann/SchillerNaumann.C
 $(dragModel)/Ergun/Ergun.C
 $(dragModel)/WenYu/WenYu.C
+$(dragModel)/Loth/Loth.C
 
 HTModel = sharpInterfaceHeatTransferModels
 $(HTModel)/sharpInterfaceHeatTransferModel/sharpInterfaceHeatTransferModel.C
 $(HTModel)/RanzMarshall/RanzMarshall.C
+$(HTModel)/KavanauRanzMarshall/KavanauRanzMarshall.C
 
 multiphaseSystem/multiPhaseSystem.C
 multiphaseSystem/multiPhaseSystemNew.C

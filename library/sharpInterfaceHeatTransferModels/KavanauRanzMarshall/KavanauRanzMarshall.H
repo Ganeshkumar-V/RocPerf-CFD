@@ -24,20 +24,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::particleDragModels::Loth
+    Foam::sharpInterfaceHeatTransferModels::KavanauRanzMarshall
 
 Description
-    Schiller and Naumann drag model for dispersed bubbly flows.
+    Ranz-Marshall correlation for turbulent heat transfer from the surface of a
+    sphere to the surrounding fluid.
 
 SourceFiles
-    Loth.C
+    KavanauRanzMarshall.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Loth_H
-#define Loth_H
+#ifndef KavanauRanzMarshall_H
+#define KavanauRanzMarshall_H
 
-#include "particleDragModel.H"
+#include "sharpInterfaceHeatTransferModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,94 +47,48 @@ namespace Foam
 
 class phasePair;
 
-namespace particleDragModels
+namespace sharpInterfaceHeatTransferModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Loth Declaration
+                          Class KavanauRanzMarshall Declaration
 \*---------------------------------------------------------------------------*/
 
-class Loth
+class KavanauRanzMarshall
 :
-    public particleDragModel
+    public sharpInterfaceHeatTransferModel
 {
-    // Private data
-
-        //- Residual Reynolds Number
-        const dimensionedScalar residualRe_;
-
-    // typedefs
-    typedef DimensionedField<scalar, fvMesh> Internal;
-    typedef FieldField<fvPatchField, scalar> Boundary;
-
-
 public:
 
     //- Runtime type information
-    TypeName("Loth");
+    TypeName("KavanauRanzMarshall");
 
 
     // Constructors
 
-        //- Construct from a dictionary and a phase pair
-        Loth
+        //- Construct from components
+        KavanauRanzMarshall
         (
             const dictionary& dict,
-            const phasePair& pair,
-            const bool registerObject
+            const phasePair& pair
         );
 
 
     //- Destructor
-    virtual ~Loth();
+    virtual ~KavanauRanzMarshall();
 
-    dimensionedScalar R_;
-    scalar gamma_;
-
+    scalar cutoff;
+    dimensionedScalar gammaR;
     // Member Functions
 
-    // Mathematical Functions
-    tmp<volScalarField> erf(const volScalarField& gf) const;
-    tmp<volScalarField> tanh(const volScalarField& gf) const;
-
-    // Rarefied Flow Regime
-    tmp<volScalarField> CdKnRe(const volScalarField& Re, const volScalarField& Kn) const;
-    tmp<volScalarField> CdfmRe
-    (
-      const volScalarField& Re,
-      const volScalarField& Ma,
-      const volScalarField& S
-    ) const;
-    tmp<volScalarField> Cdfm(const volScalarField& S) const;
-    tmp<volScalarField> JM(const volScalarField& Ma) const;
-    tmp<volScalarField> fKn(const volScalarField& Kn) const;
-    tmp<volScalarField> CdRare
-    (
-      const volScalarField& Re,
-      const volScalarField& Ma,
-      const volScalarField& Kn,
-      const volScalarField& S
-    ) const;
-
-    // Compressibility Domainated Regime
-    tmp<volScalarField> CdComp
-    (
-      const volScalarField& Re,
-      const volScalarField& Ma
-    ) const;
-    tmp<volScalarField> CM(const volScalarField& Ma) const;
-    tmp<volScalarField> GM(const volScalarField& Ma) const;
-    tmp<volScalarField> HM(const volScalarField& Ma) const;
-
-
-        //- Drag coefficient
-        virtual tmp<volScalarField> CdRe() const;
+        //- The heat transfer function K used in the enthalpy equation
+        tmp<volScalarField> K(const scalar residualAlpha) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace particleDragModels
+} // End namespace sharpInterfaceHeatTransferModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

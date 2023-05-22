@@ -29,7 +29,7 @@ License
 #include "MomentumEnergyTransferPhaseSystem.H"
 
 #include "BlendedInterfacialModel.H"
-#include "dragModel.H"
+#include "particleDragModel.H"
 #include "virtualMassModel.H"
 #include "liftModel.H"
 #include "wallLubricationModel.H"
@@ -65,9 +65,9 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::Kd
     {
         return volScalarField::New
         (
-            dragModel::typeName + ":K",
+            particleDragModel::typeName + ":K",
             this->mesh_,
-            dimensionedScalar(dragModel::dimK)
+            dimensionedScalar(particleDragModel::dimK)
         );
     }
 }
@@ -88,9 +88,9 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::Kdf
     {
         return surfaceScalarField::New
         (
-            dragModel::typeName + ":K",
+            particleDragModel::typeName + ":K",
             this->mesh_,
-            dimensionedScalar(dragModel::dimK)
+            dimensionedScalar(particleDragModel::dimK)
         );
     }
 }

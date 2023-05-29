@@ -1,5 +1,7 @@
 fvPatchFields/propellantWall/propellantWallFvPatchVectorField.C
 fvPatchFields/particleFlowRateInletVelocity/particleFlowRateInletVelocityFvPatchVectorField.C
+fvPatchFields/massLoadingFraction/massLoadingFractionFvPatchScalarField.C
+fvPatchFields/sameAs/sameAsFvPatchFields.C
 phaseModel/phaseModel/phaseModels.C
 
 multiphaseTurbulence = multiphaseCompressibleTurbulenceModels

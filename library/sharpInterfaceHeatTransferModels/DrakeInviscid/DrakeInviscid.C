@@ -83,16 +83,20 @@ Foam::sharpInterfaceHeatTransferModels::DrakeInviscid::K(const scalar residualAl
 
     volScalarField Re(rho*magUr*d/mu);
 
-    volScalarField Nu(scalar(2) + 0.6*sqrt(Re)*cbrt(pair_.Pr()));
-
     const tmp<volScalarField> tCv(pair_.continuous().thermo().Cv());
     const volScalarField& Cv(tCv());
+
+    const tmp<volScalarField> tCp(pair_.continuous().thermo().Cp());
+    const volScalarField& Cp(tCp());
 
     const tmp<volScalarField> tR(pair_.continuous().thermo().p()/(rho*Tc));
     const volScalarField& R(tR());
 
     volScalarField kappa(mu*Cv*(1.32 + 1.77*R/Cv));
 
+    volScalarField Pr(mu*Cp/kappa);
+
+    volScalarField Nu(scalar(2) + 0.6*sqrt(Re)*cbrt(Pr));
     return
         6.0
        *pair_.dispersed()*pos(pair_.dispersed() - cutoff)

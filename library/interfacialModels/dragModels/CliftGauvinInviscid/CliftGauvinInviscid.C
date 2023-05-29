@@ -83,7 +83,7 @@ Foam::tmp<Foam::volScalarField> Foam::particleDragModels::CliftGauvinInviscid::C
 
     volScalarField Re(rho*magUr*d/mu);
 
-    return 24*(1 + 0.015*pow(Re, 0.687) + 0.0175*(1 + 42500*pow(Re, -1.16)));
+    return 24*(1 + 0.15*pow(Re, 0.687) + 0.0175*Re*(1 + 42500/max(pow(Re, 1.16), SMALL)));
 }
 
 

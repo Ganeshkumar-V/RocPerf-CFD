@@ -78,10 +78,11 @@ public:
     virtual ~DrakeInviscid();
 
     scalar cutoff;
-    
+
     //- Thermal conductivity from sutherland
     dimensionedScalar As_;
     dimensionedScalar Ts_;
+    volScalarField Pr_;
     // Member Functions
 
         //- The heat transfer function K used in the enthalpy equation

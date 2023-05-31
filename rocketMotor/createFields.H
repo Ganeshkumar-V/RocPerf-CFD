@@ -84,3 +84,17 @@ if (runTime.value() == 0)
   volScalarField::Internal V(mesh.V());
   V.write();
 }
+
+// calculate Mach Number
+volScalarField Mach
+(
+    IOobject
+    (
+      "Mach",
+      runTime.timeName(),
+      mesh,
+      IOobject::NO_READ,
+      IOobject::AUTO_WRITE
+    ),
+    mag(phases[0].U())/sqrt(phases[0].thermo().gamma()*p/phases[0].thermo().rho())
+);

@@ -52,7 +52,23 @@ Foam::sharpInterfaceHeatTransferModels::DrakeInviscid::DrakeInviscid
     sharpInterfaceHeatTransferModel(dict, pair),
     cutoff(dict.get<scalar>("cutoff")),
     As_(dimensionedScalar("As", dimPressure*dimTime/sqrt(dimTemperature), dict.get<scalar>("As"))),
-    Ts_(dimensionedScalar("Ts", dimTemperature, dict.get<scalar>("Ts")))
+    Ts_(dimensionedScalar("Ts", dimTemperature, dict.get<scalar>("Ts"))),
+    Pr_
+    (
+      volScalarField
+      (
+          IOobject
+          (
+              "Pr",
+              pair.phase1().mesh().time().timeName(),
+              pair.phase1().mesh(),
+              IOobject::NO_READ,
+              IOobject::NO_WRITE
+          ),
+          pair.phase1().mesh(),
+          dimensionedScalar(dimless, dict.get<scalar>("Pr"))
+      )
+    )
 {}
 
 
@@ -79,24 +95,16 @@ Foam::sharpInterfaceHeatTransferModels::DrakeInviscid::K(const scalar residualAl
     const tmp<volScalarField> tTc(pair_.continuous().thermo().T());
     const volScalarField& Tc(tTc());
 
-    volScalarField mu(As_*(sqrt(Tc)/(1 + Ts_/Tc)));
+    volScalarField mu(As_*(sqrt(Tc)/(1.0 + Ts_/Tc)));
 
     volScalarField Re(rho*magUr*d/mu);
 
-    const tmp<volScalarField> tCv(pair_.continuous().thermo().Cv());
-    const volScalarField& Cv(tCv());
-
-    const tmp<volScalarField> tCp(pair_.continuous().thermo().Cp());
+    const tmp<volScalarField> tCp(pair_.continuous().thermo().Cpv());
     const volScalarField& Cp(tCp());
 
-    const tmp<volScalarField> tR(pair_.continuous().thermo().p()/(rho*Tc));
-    const volScalarField& R(tR());
+    volScalarField kappa(mu*Cp/Pr_);
 
-    volScalarField kappa(mu*Cv*(1.32 + 1.77*R/Cv));
-
-    volScalarField Pr(mu*Cp/kappa);
-
-    volScalarField Nu(scalar(2) + 0.6*sqrt(Re)*cbrt(Pr));
+    volScalarField Nu(scalar(2) + 0.459*pow(Re, 0.55)*pow(Pr_, 0.33));
     return
         6.0
        *pair_.dispersed()*pos(pair_.dispersed() - cutoff)

@@ -167,6 +167,10 @@ int main(int argc, char *argv[])
             }
         }
 
+        // if (runTime.outputTime())
+        // {
+          Mach = mag(phases[0].U())/sqrt(phases[0].thermo().gamma()*p/phases[0].thermo().rho());
+        // }
         runTime.write();
 
         runTime.printExecutionTime(Info);

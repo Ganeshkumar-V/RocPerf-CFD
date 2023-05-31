@@ -92,6 +92,10 @@ public:
 
         //- Drag coefficient
         virtual tmp<volScalarField> CdRe() const;
+
+        //- Inviscid Functions
+        virtual bool isInviscid() const;
+        virtual tmp<volScalarField> mu() const;
 };
 
 

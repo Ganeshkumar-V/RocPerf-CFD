@@ -65,6 +65,19 @@ Foam::particleDragModels::CliftGauvinInviscid::~CliftGauvinInviscid()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::particleDragModels::CliftGauvinInviscid::isInviscid() const
+{
+  return true;
+}
+
+Foam::tmp<Foam::volScalarField> Foam::particleDragModels::CliftGauvinInviscid::mu() const
+{
+    const tmp<volScalarField> tTc(pair_.continuous().thermo().T());
+    const volScalarField& Tc(tTc());
+
+    return As_*(sqrt(Tc)/(1.0 + Ts_/Tc));
+}
+
 Foam::tmp<Foam::volScalarField> Foam::particleDragModels::CliftGauvinInviscid::CdRe() const
 {
     const tmp<volScalarField> tmagUr(pair_.magUr());
@@ -76,14 +89,9 @@ Foam::tmp<Foam::volScalarField> Foam::particleDragModels::CliftGauvinInviscid::C
     const tmp<volScalarField> td(pair_.dispersed().d());
     const volScalarField& d(td());
 
-    const tmp<volScalarField> tTc(pair_.continuous().thermo().T());
-    const volScalarField& Tc(tTc());
+    volScalarField Re(rho*magUr*d/this->mu());
 
-    volScalarField mu(As_*(sqrt(Tc)/(1 + Ts_/Tc)));
-
-    volScalarField Re(rho*magUr*d/mu);
-
-    return 24*(1 + 0.15*pow(Re, 0.687) + 0.0175*Re/(1 + 42500/max(pow(Re, 1.16), SMALL)));
+    return 24.0*(1.0 + 0.15*pow(Re, 0.687) + 0.0175*Re/(1.0 + 42500/max(pow(Re, 1.16), SMALL)));
 }
 
 

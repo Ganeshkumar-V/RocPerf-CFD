@@ -170,7 +170,8 @@ void Foam::interfaceTrackingModels::burningRate::correct()
 // find interface and stores interface in owner cell
 void Foam::interfaceTrackingModels::burningRate::regress
 (
-  volScalarField& alpha
+  volScalarField& alpha,
+  const volScalarField& alphaOld
 )
 {}
 

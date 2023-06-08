@@ -87,6 +87,9 @@ protected:
           scalar H2;
         } MW_;
 
+        // Active Aluminium content
+        scalar AAlC_;
+
         // Equivalence Ratio
         scalar eqR_;
 
@@ -168,6 +171,9 @@ public:
 
         //- Regress Propellant Surface
         virtual void solve();
+
+        //- Store old Times
+        virtual void store();
 
         //- Correct the mass transfer rates
         virtual void correct();

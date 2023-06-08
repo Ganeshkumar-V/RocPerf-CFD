@@ -43,13 +43,47 @@ InterphaseHeatTransferPhaseSystem
     const fvMesh& mesh
 )
 :
-    BasePhaseSystem(mesh)
+    BasePhaseSystem(mesh),
+    Tslip_
+    (
+      volScalarField
+      (
+          IOobject
+          (
+              "Tslip",
+              this->mesh().time().timeName(),
+              this->mesh(),
+              IOobject::NO_READ,
+              IOobject::AUTO_WRITE
+          ),
+          this->mesh(),
+          dimensionedScalar(dimTemperature, 0.0)
+      )
+    )
 {
     this->generatePairsAndSubModels
     (
         "sharpInterfaceHeatTransfer",
         sharpInterfaceHeatTransferModels_
     );
+
+    forAllConstIter
+    (
+        sharpInterfaceHeatTransferModelTable,
+        sharpInterfaceHeatTransferModels_,
+        sharpInterfaceHeatTransferModelIter
+    )
+    {
+      const phasePair& pair
+      (
+          this->phasePairs_[sharpInterfaceHeatTransferModelIter.key()]
+      );
+
+      const phaseModel& phase1 = pair.dispersed();
+      const phaseModel& phase2 = pair.continuous();
+
+      Tslip_ = phase1.thermo().T() - phase2.thermo().T();
+    }
 }
 
 
@@ -91,12 +125,6 @@ heatTransfer() const
       const tmp<volScalarField> tK(sharpInterfaceHeatTransferModelIter()->K());
       const volScalarField& K(tK());
 
-      const tmp<volScalarField> tKd(sharpInterfaceHeatTransferModelIter()->Kd());
-      const volScalarField& Kd(tKd());
-
-      const tmp<volScalarField> tKc(sharpInterfaceHeatTransferModelIter()->Kc());
-      const volScalarField& Kc(tKc());
-
       const tmp<volScalarField> tCp1(phase1.thermo().Cpv());
       const volScalarField& Cp1(tCp1());
 
@@ -106,33 +134,32 @@ heatTransfer() const
       const volScalarField& he1(phase1.thermo().he());
       const volScalarField& he2(phase2.thermo().he());
 
-      // Implicit  Source Treatment
-      *eqns[phase1.name()] -=
-            - K/Cp2*he2 + fvm::Sp(K/Cp1, he1);
-      *eqns[phase2.name()] +=
-            - fvm::Sp(K/Cp2, he2) + K/Cp1*he1;
+      // Explicit Source Treatment
+      const tmp<volScalarField> tT1(phase1.thermo().T());
+      const volScalarField& T1(tT1());
 
-      // // Correction for Reference Enthalpy
+      const tmp<volScalarField> tT2(phase2.thermo().T());
+      const volScalarField& T2(tT2());
+
+      // *eqns[phase1.name()] -= K*(T1 - T2);
+      // *eqns[phase2.name()] += K*(T1 - T2);
+
+      *eqns[phase1.name()] -= K*(T1 - T2) - fvm::Sp(K/Cp1, he1) + K/Cp1*he1;
+      *eqns[phase2.name()] += K*(T1 - T2) - fvm::Sp(K/Cp2, he2) + K/Cp2*he2;
+
+      // // Implicit Source Treatment
       // *eqns[phase1.name()] -=
-      //       - pos(alpha2-tol_)*K/phase1.thermo().Cpv()*(href)
-      //       + pos(alpha2-tol_)*K/phase2.thermo().Cpv()*(href);
+      //       - K/Cp2*he2 + fvm::Sp(K/Cp1, he1);
       // *eqns[phase2.name()] +=
-      //       - pos(alpha2-tol_)*K/phase1.thermo().Cpv()*(href)
-      //       + pos(alpha2-tol_)*K/phase2.thermo().Cpv()*(href);
+      //       - fvm::Sp(K/Cp2, he2) + K/Cp1*he1;
 
       // Addition Heat diffusion in particle phase
-      *eqns[phase1.name()] -=
-            - fvm::laplacian
-              (
-               fvc::interpolate(phase1*Kd/Cp1),
-               phase1.thermo().he()
-              );
-      *eqns[phase2.name()] -=
-            - fvm::laplacian
-              (
-                fvc::interpolate(phase2*Kc/Cp2),
-                phase2.thermo().he()
-              );
+      // *eqns[phase1.name()] -=
+      //       - fvm::laplacian
+      //         (
+      //          fvc::interpolate(phase1*Kd/Cp1),
+      //          he1
+      //         );
     }
 
     return eqnsPtr;
@@ -152,6 +179,28 @@ void Foam::InterphaseHeatTransferPhaseSystem<BasePhaseSystem>::
 correctInterfaceThermo()
 {}
 
+template<class BasePhaseSystem>
+void Foam::InterphaseHeatTransferPhaseSystem<BasePhaseSystem>::
+store()
+{
+  forAllConstIter
+  (
+      sharpInterfaceHeatTransferModelTable,
+      sharpInterfaceHeatTransferModels_,
+      sharpInterfaceHeatTransferModelIter
+  )
+  {
+    const phasePair& pair
+    (
+        this->phasePairs_[sharpInterfaceHeatTransferModelIter.key()]
+    );
+
+    const phaseModel& phase1 = pair.dispersed();
+    const phaseModel& phase2 = pair.continuous();
+
+    Tslip_ = phase1.thermo().T() - phase2.thermo().T();
+  }
+}
 
 template<class BasePhaseSystem>
 bool Foam::InterphaseHeatTransferPhaseSystem<BasePhaseSystem>::read()

@@ -33,6 +33,7 @@ License
 #include "PropellantRegressionPhaseSystem.H"
 #include "PropellantInterfacePhaseSystem.H"
 #include "InterphaseHeatTransferPhaseSystem.H"
+#include "PropellantCombustionPhaseSystem.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,6 +74,24 @@ namespace Foam
         interfaceRegressionMultiphaseSystem,
         dictionary,
         interfaceRegressionMultiphaseSystem
+    );
+
+    typedef
+        PropellantCombustionPhaseSystem
+        <
+            InterphaseHeatTransferPhaseSystem
+            <
+                MomentumEnergyTransferPhaseSystem<multiPhaseSystem>
+            >
+        >
+        interfaceCombustionMultiphaseSystem;
+
+    addNamedToRunTimeSelectionTable
+    (
+        multiPhaseSystem,
+        interfaceCombustionMultiphaseSystem,
+        dictionary,
+        interfaceCombustionMultiphaseSystem
     );
 
 }

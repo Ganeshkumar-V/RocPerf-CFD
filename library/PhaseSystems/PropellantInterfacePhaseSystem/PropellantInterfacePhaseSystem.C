@@ -90,6 +90,39 @@ Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::PropellantInterfacePhaseS
     rhoPropellant("rhoprop", dimDensity, this->template get<scalar>("propellantRho")),
     rhoParticle("rhopar", dimDensity, this->template get<scalar>("particleRho")),
     alphaRhoAl("alphaRhoAl", dimDensity, 0),
+    alphaOld
+    (
+      volScalarField
+      (
+        IOobject
+        (
+          "alphaOld",
+          mesh.time().timeName(),
+          mesh,
+          IOobject::NO_READ,
+          IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("", dimless,0)
+      )
+    ),
+    regressionAlpha
+    (
+      volScalarField
+      (
+        IOobject
+        (
+          "regressionAlpha",
+          mesh.time().timeName(),
+          mesh,
+          IOobject::NO_READ,
+          IOobject::AUTO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("", dimless,0)
+      )
+    ),
+    epsilon(this->template get<scalar>("trapingFactor")),
     Ug_
     (
       volVectorField
@@ -186,9 +219,25 @@ Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::PropellantInterfacePhaseS
     MW_.H2O = molecularWeights_.get<scalar>("H2O");
     MW_.H2 = molecularWeights_.get<scalar>("H2");
     AAlC_ = this->template get<scalar>("activeAlContent");
+    K_ = (MW_.Al/MW_.Al2O3)*(1/AAlC_ - 1);
+    MW_.Prop = MW_.Al + K_*MW_.Al2O3 + (1.5/eqR_)*MW_.H2O;
+    regress_ = this->template get<bool>("regression");
 
     R_.value() = 8314.5/MW_.H2;
     alphaRhoAl.value() = rhoPropellant.value()*eqR_/(1 + eqR_);
+
+    // Old Alpha
+    forAllIter
+    (
+      interfaceTrackingModelTable,
+      interfaceTrackingModels_,
+      interfaceTrackingModelIter
+    )
+    {
+      word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+      alphaOld = this->db().template lookupObject<volScalarField>(propellant);
+      regressionAlpha = alphaOld;
+    }
 
     // Coefficient of mass transfer
     forAllConstIter
@@ -203,8 +252,10 @@ Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::PropellantInterfacePhaseS
 
       if (eqR_ <= 1.0) // Lean or Stoichiometric Mixture
       {
-        pcoeff = AAlC_*MW_.Al2O3/(2*MW_.Al*(1 + 1/eqR_)) + (1 - AAlC_);
-        gcoeff = AAlC_*(1.0 - MW_.Al2O3/(2*MW_.Al*(1 + 1/eqR_)));
+        // pcoeff = AAlC_*MW_.Al2O3/(2*MW_.Al*(1 + 1/eqR_)) + (1 - AAlC_);
+        // gcoeff = AAlC_*(1.0 - MW_.Al2O3/(2*MW_.Al*(1 + 1/eqR_)));
+        pcoeff = epsilon*(K_ + 0.5)*MW_.Al2O3/MW_.Prop;
+        gcoeff = (1.5*MW_.H2 + ((1.5/eqR_) - 1.5)*MW_.H2O)/MW_.Prop;
       }
       else  // Rich mixture
       {
@@ -339,13 +390,12 @@ Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::massTransfer() const
 
         const PtrList<volScalarField>& Yi = phase.Y();
 
-        const dimensionedScalar fH2(dimless, 1.5*MW_.H2);
-        const dimensionedScalar xi(dimless, MW_.Al/(MW_.H2O*eqR_));
-        const dimensionedScalar fH2O((xi - 1.5)*MW_.H2O);
-        const volScalarField X(AAlC_*dmdt/(MW_.Al + xi*MW_.H2O));
+        const dimensionedScalar fH2(dimless, 1.5*MW_.H2/MW_.Prop);
+        const dimensionedScalar fH2O(dimless, (1.5/eqR_ - 1.5)*MW_.H2O/MW_.Prop);
 
-        if (min(X).value() < 0 || fH2.value() < 0 || fH2O.value() < 0)
+        if (min(dmdt).value() < 0)
         {
+          Info << "min(dmdt): " << min(dmdt).value() << endl;
           FatalErrorInFunction
               << "Mass Transfer(): dmdt or one of the factors are negative"
               << exit(FatalError);
@@ -353,8 +403,8 @@ Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::massTransfer() const
 
         if (eqns.size() != 0)
         {
-          *eqns[Yi[0].name()] += X*fH2;
-          *eqns[Yi[1].name()] += X*fH2O;
+          *eqns[Yi[0].name()] += dmdt*fH2;
+          *eqns[Yi[1].name()] += dmdt*fH2O;
         }
 
     }
@@ -436,6 +486,30 @@ Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::momentumTransfer()
 }
 
 template<class BasePhaseSystem>
+void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::solve()
+{
+  // Regress Propellant surface (Manipulate propellant volume fraction)
+  if (regress_)
+  {
+    forAllIter
+    (
+      interfaceTrackingModelTable,
+      interfaceTrackingModels_,
+      interfaceTrackingModelIter
+    )
+    {
+      word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+      volScalarField& alpha = this->db().template lookupObjectRef<volScalarField>(propellant);
+      interfaceTrackingModelIter()->regress(alpha, alphaOld);
+      alpha.clip(SMALL, 1-SMALL);
+    }
+  }
+
+  // Solve other phase volume fraction equations
+  BasePhaseSystem::solve();
+}
+
+template<class BasePhaseSystem>
 void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::correct()
 {
     BasePhaseSystem::correct();
@@ -448,7 +522,7 @@ void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::correct()
         interfaceTrackingModelIter
     )
     {
-        interfaceTrackingModelIter()->correct();
+        // interfaceTrackingModelIter()->correct();
         *rDmdt_[interfaceTrackingModelIter.key()]
                   = dimensionedScalar(dimDensity/dimTime);
     }
@@ -462,16 +536,29 @@ void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::correct()
     )
     {
         *rDmdt_[interfaceTrackingModelIter.key()]
-              = interfaceTrackingModelIter()->rb()
-                *interfaceTrackingModelIter()->As()*rhoPropellant;
-        rb_ = pos(interfaceTrackingModelIter()->As())
-                *interfaceTrackingModelIter()->rb();
+              = interfaceTrackingModelIter()->dmdt()*rhoPropellant;
+        rb_ = interfaceTrackingModelIter()->rb();
         *nHat_[interfaceTrackingModelIter.key()]
               = interfaceTrackingModelIter()->nHat();
     }
 
     // calculate velocity of the gas and particle source
     calculateVelocity();
+}
+
+template<class BasePhaseSystem>
+void Foam::PropellantInterfacePhaseSystem<BasePhaseSystem>::store()
+{
+  forAllIter
+  (
+    interfaceTrackingModelTable,
+    interfaceTrackingModels_,
+    interfaceTrackingModelIter
+  )
+  {
+    word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+    alphaOld = this->db().template lookupObject<volScalarField>(propellant);
+  }
 }
 
 template<class BasePhaseSystem>

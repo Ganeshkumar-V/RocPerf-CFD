@@ -49,7 +49,8 @@ Foam::sharpInterfaceHeatTransferModels::RanzMarshall::RanzMarshall
     const phasePair& pair
 )
 :
-    sharpInterfaceHeatTransferModel(dict, pair)
+    sharpInterfaceHeatTransferModel(dict, pair),
+    cutoff(dict.get<scalar>("cutoff"))
 {}
 
 
@@ -64,11 +65,19 @@ Foam::sharpInterfaceHeatTransferModels::RanzMarshall::~RanzMarshall()
 Foam::tmp<Foam::volScalarField>
 Foam::sharpInterfaceHeatTransferModels::RanzMarshall::K(const scalar residualAlpha) const
 {
+  // volScalarField Re(pair_.Re());
+  // forAll(Re, i)
+  // {
+  //   if (Re[i] < 0)
+  //   {
+  //     Info << "Cell: " << i << " Re[i]: " << Re[i] << endl;
+  //   }
+  // }
     volScalarField Nu(scalar(2) + 0.6*sqrt(pair_.Re())*cbrt(pair_.Pr()));
 
     return
         6.0
-       *pair_.dispersed()*pos(pair_.dispersed() - 1e-6)
+       *pair_.dispersed()*pos(pair_.dispersed() - cutoff)
        *pair_.continuous().kappa()
        *Nu
        /sqr(pair_.dispersed().d());

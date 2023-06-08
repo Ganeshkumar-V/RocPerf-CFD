@@ -77,6 +77,18 @@ Foam::interfaceTrackingModel::nHat() const
 {
   return nullptr;
 }
+
+Foam::tmp<Foam::volScalarField>
+Foam::interfaceTrackingModel::dmdt() const
+{
+  return nullptr;
+}
+
+Foam::tmp<Foam::volScalarField>
+Foam::interfaceTrackingModel::interface() const
+{
+  return nullptr;
+}
 // * * * * * * * * * * * * * * * * Selector  * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::interfaceTrackingModel>

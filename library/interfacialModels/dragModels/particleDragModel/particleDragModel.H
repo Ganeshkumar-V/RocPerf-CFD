@@ -144,6 +144,10 @@ public:
         //  used in the face-momentum equations
         virtual tmp<surfaceScalarField> Kf() const;
 
+        //- If Inviscid use this viscosity
+        virtual tmp<volScalarField> mu() const;
+        virtual bool isInviscid() const;
+
         //- Dummy write for regIOobject
         bool writeData(Ostream& os) const;
 };

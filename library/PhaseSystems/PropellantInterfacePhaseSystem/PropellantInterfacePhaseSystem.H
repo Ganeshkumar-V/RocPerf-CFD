@@ -88,10 +88,12 @@ protected:
           scalar Al2O3;
           scalar H2O;
           scalar H2;
+          scalar Prop;
         } MW_;
 
         // Active Aluminium content
         scalar AAlC_;
+        scalar K_;
 
         // Equivalence Ratio
         scalar eqR_;
@@ -112,6 +114,10 @@ protected:
         dimensionedScalar rhoPropellant;
         dimensionedScalar rhoParticle;
         dimensionedScalar alphaRhoAl;
+        bool regress_;
+        volScalarField alphaOld;
+        volScalarField regressionAlpha;
+        scalar epsilon;
 
         // Inlet velocity
         volVectorField Ug_;
@@ -175,6 +181,12 @@ public:
 
         //- Return the momentum transfer matrices
         virtual autoPtr<phaseSystem::momentumTransferTable> momentumTransfer();
+
+        //- Regress Propellant Surface
+        virtual void solve();
+
+        //- Store old Times
+        virtual void store();
 
         //- Correct the mass transfer rates
         virtual void correct();

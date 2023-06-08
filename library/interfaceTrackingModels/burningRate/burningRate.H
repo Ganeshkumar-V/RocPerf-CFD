@@ -103,7 +103,7 @@ public:
     // Member Functions
     virtual void correct();
 
-    virtual void regress(volScalarField& alpha);
+    virtual void regress(volScalarField& alpha, const volScalarField& alphaOld);
 
     virtual void findInterface(const volScalarField& alpha);
 

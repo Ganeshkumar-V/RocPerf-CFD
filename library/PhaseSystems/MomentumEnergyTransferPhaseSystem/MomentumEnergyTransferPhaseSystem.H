@@ -105,7 +105,7 @@ protected:
             autoPtr<particleDragModel>,
             phasePairKey,
             phasePairKey::hash
-        > particleDragModelTable;
+        > dragModelTable;
 
         typedef HashTable
         <
@@ -158,7 +158,7 @@ private:
         // Sub Models
 
             //- Drag models
-            particleDragModelTable particleDragModels_;
+            dragModelTable dragModels_;
 
             //- Virtual mass models
             virtualMassModelTable virtualMassModels_;
@@ -175,8 +175,6 @@ private:
 
     // Private member functions
 
-        //- Return the drag coefficient for the phase pair
-        virtual tmp<volScalarField> Kd(const phasePairKey& key) const;
 
         //- Return the face drag coefficient for the phase pair
         virtual tmp<surfaceScalarField> Kdf(const phasePairKey& key) const;
@@ -284,6 +282,9 @@ public:
 
         //- Return the heat transfer matrices
         virtual autoPtr<phaseSystem::heatTransferTable> heatTransfer() const;
+
+        //- Return the drag coefficient for the phase pair
+        virtual tmp<volScalarField> Kd(const phasePairKey& key) const;
 
         //- Read base phaseProperties dictionary
         virtual bool read();

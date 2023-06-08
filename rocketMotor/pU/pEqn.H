@@ -14,7 +14,6 @@ PtrList<volScalarField> rAUs(phases.size());
 forAll(fluid.movingPhases(), movingPhasei)
 {
     phaseModel& phase = fluid.movingPhases()[movingPhasei];
-    if (!phase.moving()) continue;
     const volScalarField& alpha = phase;
 
     rAUs.set
@@ -64,7 +63,6 @@ while (pimple.correct())
     forAll(fluid.movingPhases(), movingPhasei)
     {
         phaseModel& phase = fluid.movingPhases()[movingPhasei];
-        if (!phase.moving()) continue;
         MRF.correctBoundaryFlux(phase.U(), phase.phiRef());
     }
 
@@ -111,7 +109,6 @@ while (pimple.correct())
         forAll(fluid.movingPhases(), movingPhasei)
         {
             phaseModel& phase = fluid.movingPhases()[movingPhasei];
-            if(!phase.moving()) continue;
             const volScalarField& alpha = phase;
 
             HbyAs.set
@@ -171,6 +168,14 @@ while (pimple.correct())
         }
     }
 
+    // Correct phiHbyAs
+    forAll(phases, phasei)
+    {
+      if (propellantIndex == -1) continue;
+      correctFlux(phiHbyAs[phasei], phases[propellantIndex]);
+      correctU(HbyAs[phasei], phases[propellantIndex]);
+    }
+
     // Total predicted flux
     surfaceScalarField phiHbyA
     (
@@ -186,9 +191,9 @@ while (pimple.correct())
         dimensionedScalar("phiHbyA", dimArea*dimVelocity, 0)
     );
 
-    forAll(fluid.movingPhases(), phasei)
+    forAll(phases, phasei)
     {
-        if(!phases[phasei].moving()) continue;
+      phiHbyAs[phasei].setOriented();
         phiHbyA += alphafs[phasei]*phiHbyAs[phasei];
     }
 
@@ -374,11 +379,20 @@ while (pimple.correct())
                 }
             }
 
+            // Fixing Pressure + Impose Walls
+            // if (propellantIndex != -1)
+            // {
+            //   pEqn.setValues(purePropellantCells, setPressure);
+            // }
+
             solve
             (
                 pEqn,
                 mesh.solver(p_rgh.select(pimple.finalInnerIter()))
             );
+
+            // ImposeWall
+            // ImposeWall(p_rgh, phases[propellantIndex]);
         }
 
         // Correct fluxes and velocities on last non-orthogonal iteration
@@ -388,10 +402,17 @@ while (pimple.correct())
 
             surfaceScalarField mSfGradp("mSfGradp", pEqnIncomp.flux()/rAUf);
 
+            // correctFluxes
+            if (propellantIndex != -1)
+            {
+              correctFlux(phi, phases[propellantIndex]);
+              correctFlux(mSfGradp, phases[propellantIndex]);
+            }
+
             forAll(fluid.movingPhases(), movingPhasei)
             {
                 phaseModel& phase = fluid.movingPhases()[movingPhasei];
-                if (!phase.moving()) continue;
+
                 phase.phiRef() =
                     phiHbyAs[phase.index()]
                   + alpharAUfs[phase.index()]*mSfGradp;
@@ -408,10 +429,15 @@ while (pimple.correct())
 
             mSfGradp = pEqnIncomp.flux()/rAUf;
 
+            // correctFluxes
+            if (propellantIndex != -1)
+            {
+              correctFlux(mSfGradp, phases[propellantIndex]);
+            }
+
             forAll(fluid.movingPhases(), movingPhasei)
             {
                 phaseModel& phase = fluid.movingPhases()[movingPhasei];
-                if (!phase.moving()) continue;
 
                 phase.URef() =
                     HbyAs[phase.index()]
@@ -420,6 +446,12 @@ while (pimple.correct())
                         alpharAUfs[phase.index()]*mSfGradp
                       - phigFs[phase.index()]
                     );
+
+                // correct Fluxes
+                if (propellantIndex != -1)
+                {
+                correctU(phase.URef(), phases[propellantIndex]);
+                }
             }
 
             if (partialElimination)
@@ -430,35 +462,15 @@ while (pimple.correct())
             forAll(fluid.movingPhases(), movingPhasei)
             {
                 phaseModel& phase = fluid.movingPhases()[movingPhasei];
-                if (!phase.moving()) continue;
 
                 phase.URef().correctBoundaryConditions();
                 fvOptions.correct(phase.URef());
-
-                // Fix velocities for Propellant Cells
-                if (propellantIndex != -1)
-                {
-                  const volScalarField& propellant = phases[propellantIndex];
-
-                  // Fix velocities
-                  forAll(propellant, i)
-                  {
-                    if (propellant[i] == 1.0)
-                    {
-                      phase.URef()[i] = vector(0, 0, 0);
-                    }
-                  }
-                //
-                //   // Correct phi
-                //   phase.phiRef() = fvc::flux(phase.U());
-                }
-
             }
         }
     }
 
     // Update and limit the static pressure
-    // p = max(p_rgh + rho*gh, pMin);
+    p = max(p_rgh + rho*gh, pMin);
 
     // Limit p_rgh
     p_rgh = p - rho*gh;

@@ -15,14 +15,6 @@ for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
         const volScalarField& rho = phase.rho();
         const volVectorField& U = phase.U();
 
-        // Check for presence of phase
-        if (max(alpha).value() <= 1e-15)
-        {
-          Warning << phase.name() << " is not present"
-                  << " Max alpha: " << max(alpha).value() << endl;
-          continue;
-        }
-
         fvScalarMatrix EEqn
         (
             phase.heEqn()
@@ -36,16 +28,37 @@ for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
         fvOptions.constrain(EEqn);
 
         // set Propellant phase Values
-        EEqn.setValues
-        (
-          pureTPropellantCells,
-          phase.thermo().he(setTemp, setTemp, pureTPropellantCells)
-        );
+        if (propellantIndex != -1)
+        {
+          EEqn.setValues
+          (
+            purePropellantCells,
+            phase.thermo().he(setTemp, setTemp, purePropellantCells)
+          );
+        }
 
         EEqn.solve();
         fvOptions.correct(phase.thermoRef().he());
+
+        // Correct for Adiabatic Walls
+        if (propellantIndex != -1)
+        {
+          ImposeWall(phase.thermoRef().he(), phases[propellantIndex]);
+        }
     }
 
     fluid.correctThermo();
     fluid.correct();
+}
+
+
+forAll(phases, phasei)
+{
+    phaseModel& phase = phases[phasei];
+
+    Info<< phase.name() << " min/max T "
+        << min(phase.thermo().T()).value()
+        << " - "
+        << max(phase.thermo().T()).value()
+        << endl;
 }

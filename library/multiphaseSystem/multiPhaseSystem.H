@@ -180,6 +180,9 @@ public:
         //- Solve for the phase fractions
         virtual void solve();
 
+        //- Store old Times
+        virtual void store() = 0;
+
         //- Do finalizing Operations
         virtual void finalize();
 

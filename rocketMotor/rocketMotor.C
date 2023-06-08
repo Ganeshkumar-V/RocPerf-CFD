@@ -42,63 +42,12 @@ Description
 #include "pimpleControl.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
-#include "simpleMatrix.H"
+#include "phasePair.H"
+#include "GeometricField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-void displayMatrix(fvScalarMatrix TEqn, volScalarField T)
-{
-  // Usage:- displayMatrix(YiEqn, Y[i]);
 
-  label NC = T.mesh().nCells(); //Number of cells
-  simpleMatrix<scalar> A(NC); //Coeff.matrix
-  // Initialization of matrix
-  for(label i=0; i<NC; i++)
-  {
-    A.source()[i] = 0.0;
-    for(label j=0; j<NC; j++)
-    {
-      A[i][j] = 0.0;
-    }
-  }
-  // Assigning diagonal coefficients
-  for(label i=0; i<NC; i++)
-  {
-    A[i][i] = TEqn.diag()[i];
-    A.source()[i] += TEqn.source()[i];
-  }
-  // Assigning off-diagonal coefficients
-  for(label faceI=0; faceI<TEqn.lduAddr().lowerAddr().size(); faceI++)
-  {
-    label l = TEqn.lduAddr().lowerAddr()[faceI];
-    label u = TEqn.lduAddr().upperAddr()[faceI];
-    A[l][u] = TEqn.upper()[faceI];
-    A[u][l] = TEqn.upper()[faceI];
-  }
-  // Assigning contribution from BC
-  forAll(T.boundaryField(), patchI)
-  {
-    const fvPatch &pp =
-    T.boundaryField()[patchI].patch();
-    forAll(pp, faceI)
-    {
-      label cellI = pp.faceCells()[faceI];
-      A[cellI][cellI]
-      += TEqn.internalCoeffs()[patchI][faceI];
-      A.source()[cellI]
-      += TEqn.boundaryCoeffs()[patchI][faceI];
-    }
-  }
-  // Info << "====Coefficients of Matrix " << T.name() << " ====" << endl;
-  for(label i=0; i<NC; i++)
-  {
-    for(label j=0; j<NC; j++)
-    {
-      Info<< A[i][j] << " ";
-    }
-    Info<< A.source()[i] << endl;
-  }
-  // Info<< "\n==> Solution: " << A.solve() << endl;
-}
+#include "AdiabaticWall.H"
 
 int main(int argc, char *argv[])
 {
@@ -119,10 +68,6 @@ int main(int argc, char *argv[])
         #include "setInitialDeltaT.H"
     }
 
-    Switch faceMomentum
-    (
-        pimple.dict().getOrDefault<Switch>("faceMomentum", false)
-    );
     Switch partialElimination
     (
         pimple.dict().getOrDefault<Switch>("partialElimination", false)
@@ -131,6 +76,19 @@ int main(int argc, char *argv[])
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
+
+    // Correcting Phase Volume Fractions
+    forAll(fluid.phases(), phasei)
+    {
+      fluid.phases()[phasei].clip(SMALL, 1 - SMALL);
+    }
+
+    // Setting variables to initialize
+    labelList purePropellantCells(0);
+    scalarField setTemp(0, 0);
+    scalarField setPressure(0, 0);
+    vectorField setVelocity(0, vector(0, 0, 0));
+    label propellantIndex = fluid.get<label>("propellantIndex");
 
     while (runTime.run())
     {
@@ -141,87 +99,66 @@ int main(int argc, char *argv[])
             pimple.dict().getOrDefault<int>("nEnergyCorrectors", 1)
         );
 
-        if (LTS)
-        {
-            #include "setRDeltaT.H"
-        }
-        else
-        {
-            #include "CourantNo.H"
-            #include "setDeltaT.H"
-        }
+        #include "CourantNo.H"
+        #include "setDeltaTFactor.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        // Store Old Time
+        fluid.store();
+
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
-            fluid.solve();  // Just regress propellant surface
-
-            // #include "findPropellantCells.H"
-            label purePropellantSize = 0;
-            label pureTPropellantSize = 0;
-            if (propellantIndex != -1)
-            {
-              const volScalarField& propellant = phases[propellantIndex];
-
-              forAll(propellant, i)
-              {
-                if (propellant[i] == 1)
-                {
-                  purePropellantSize++;
-                }
-                if (propellant[i] >= 0.99)
-                {
-                  pureTPropellantSize++;
-                }
-              }
-            }
-            labelList purePropellantCells(purePropellantSize);
-            labelList pureTPropellantCells(pureTPropellantSize);
-            scalar Tad = fluid.get<scalar>("Tad");
-            scalarField setTemp(pureTPropellantSize, 300);
-            scalarField setAlpha(purePropellantSize, SMALL);
-            vectorField setVelocity(purePropellantSize, vector(0, 0, 0));
-            if (propellantIndex != -1)
-            {
-              const volScalarField& propellant = phases[propellantIndex];
-
-              label j = 0;
-              label k = 0;
-              forAll(propellant, i)
-              {
-                if (propellant[i] == 1)
-                {
-                  purePropellantCells[j] = i;
-                  j++;
-                }
-                if (propellant[i] >= 0.99)
-                {
-                  pureTPropellantCells[k] = i;
-                  k++;
-                }
-              }
-            }
-
-            #include "alphaEqn.H"
+            fluid.solve();
             fluid.correct();
+
+            //***********  Start Find Propellant size ***********//
+            if (propellantIndex != -1)
+            {
+              label purePropellantSize = 0;
+              scalar cutoff = 0.999; //(1.0 - SMALL);
+              {
+                const volScalarField& propellant = phases[propellantIndex];
+
+                forAll(propellant, i)
+                {
+                  if (propellant[i] >= cutoff)
+                  {
+                    purePropellantSize++;
+                  }
+                }
+              }
+              purePropellantCells = labelList(purePropellantSize);
+              setTemp = scalarField
+              (
+                purePropellantSize,
+                fluid.getOrDefault<scalar>("Tset", 2000)
+              );
+              setPressure = scalarField(purePropellantSize, 101325);
+              setVelocity = vectorField(purePropellantSize, vector(0, 0, 0));
+              {
+                const volScalarField& propellant = phases[propellantIndex];
+
+                label j = 0;
+                forAll(propellant, i)
+                {
+                  if (propellant[i] >= cutoff)
+                  {
+                    purePropellantCells[j] = i;
+                    j++;
+                  }
+                }
+              }
+            }
+            //***********  End Find Propellant size ***********//
 
             #include "YEqns.H"
 
-            if (faceMomentum)
-            {
-                #include "pUf/UEqns.H"
-                #include "EEqns.H"
-                #include "pUf/pEqn.H"
-            }
-            else
-            {
-                #include "pU/UEqns.H"
-                #include "EEqns.H"
-                #include "pU/pEqn.H"
-            }
+            #include "pU/UEqns.H"
+            #include "EEqns.H"
+            #include "pU/pEqn.H"
 
             fluid.correctKinematics();
 
@@ -231,19 +168,154 @@ int main(int argc, char *argv[])
             }
         }
 
-        forAll(phases, phasei)
-        {
-            phaseModel& phase = phases[phasei];
-            if (phase.index() == propellantIndex) continue;
-            Info<< phase.name() << " min/max T "
-                << min(phase.thermo().T()).value()
-                << " - "
-                << max(phase.thermo().T()).value()
-                << endl;
-        }
+
+        Mach = mag(phases[0].U())/sqrt(phases[0].thermo().gamma()*p/phases[0].thermo().rho());
+
         runTime.write();
 
         runTime.printExecutionTime(Info);
+
+        // Check Mass and Energy Conservation
+        // {
+        //   // 3 - Inlet , 4 - Outlet
+        //   const volScalarField& alphag(phases[0]);
+        //   const volScalarField& rhog(phases[0].thermo().rho());
+        //   const volScalarField& Tg(phases[0].thermo().T());
+        //   const scalarField& Cpg(phases[0].thermo().Cpv()().boundaryField()[3]);
+        //   const vectorField& Ugin(phases[0].U()().boundaryField()[3]);
+        //   const vectorField& Ugout(phases[0].U()().boundaryField()[4]);
+        //
+        //   const volScalarField& alphap(phases[1]);
+        //   const volScalarField& rhop(phases[1].thermo().rho());
+        //   const volScalarField& Tp(phases[1].thermo().T());
+        //   const scalarField& Cpp(phases[1].thermo().Cpv()().boundaryField()[3]);
+        //   const vectorField& Upin(phases[1].U()().boundaryField()[3]);
+        //   const vectorField& Upout(phases[1].U()().boundaryField()[4]);
+        //
+        //   const surfaceScalarField& magSf(mesh.magSf());
+        //
+        //   const Field<scalar> mgin
+        //   (
+        //     alphag.boundaryField()[3]*rhog.boundaryField()[3]*magSf.boundaryField()[3]*mag(Ugin)
+        //   );
+        //
+        //   const Field<scalar> mpin
+        //   (
+        //     alphap.boundaryField()[3]*rhop.boundaryField()[3]*magSf.boundaryField()[3]*mag(Upin)
+        //   );
+        //
+        //   const Field<scalar> mgout
+        //   (
+        //     alphag.boundaryField()[4]*rhog.boundaryField()[4]*magSf.boundaryField()[4]*mag(Ugout)
+        //   );
+        //
+        //   const Field<scalar> mpout
+        //   (
+        //     alphap.boundaryField()[4]*rhop.boundaryField()[4]*magSf.boundaryField()[4]*mag(Upout)
+        //   );
+        //   const Field<scalar> Egin
+        //
+        //   (
+        //     mgin*Cpg*Tg.boundaryField()[3] + 0.5*mgin*magSqr(Ugin)
+        //   );
+        //
+        //   const Field<scalar> Epin
+        //   (
+        //     mpin*Cpp*Tp.boundaryField()[3] + 0.5*mpin*magSqr(Upin)
+        //   );
+        //
+        //   const Field<scalar> Egout
+        //   (
+        //     mgout*Cpg*Tg.boundaryField()[4] + 0.5*mgout*magSqr(Ugout)
+        //   );
+        //
+        //   const Field<scalar> Epout
+        //   (
+        //     mpout*Cpp*Tp.boundaryField()[4] + 0.5*mpout*magSqr(Upout)
+        //   );
+        //
+        //   Info << "Mass Conservation Statistics: " << endl;
+        //   Info << "  mgin = " << sum(mgin) << "   mpin = " << sum(mpin) << "   massIn = " << sum(mgin + mpin) << endl;
+        //   Info << "  mgout = " << sum(mgout) << "   mpout = " << sum(mpout) << "   massOut = " << sum(mgout + mpout) << endl;
+        //   Info << "  Difference = " << sum(mgin + mpin) - sum(mgout + mpout) << endl;
+        //   Info << endl;
+        //   Info << "Energy Conservation Statistics: " << endl;
+        //   Info << "  Egin = " << sum(Egin) << "   Epin = " << sum(Epin) << "   EnergyIn = " << sum(Egin + Epin) << endl;
+        //   Info << "  Egout = " << sum(Egout) << "   Epout = " << sum(Epout) << "   EnergyOut = " << sum(Egout + Epout) << endl;
+        //   Info << "  Difference = " << sum(Egin + Epin) - sum(Egout + Epout) << endl;
+        //   Info << endl;
+        // }
+        // {
+        //   // 3 - Inlet , 4 - Outlet
+        //   const volScalarField& alphag(phases[0]);
+        //
+        //   const tmp<volScalarField> trhog(phases[0].thermo().rho());
+        //   const volScalarField& rhog(trhog());
+        //
+        //   const tmp<volScalarField> tTg(phases[0].thermo().T());
+        //   const volScalarField& Tg(tTg());
+        //
+        //   const tmp<volScalarField> tCpg(phases[0].thermo().Cpv());
+        //   const volScalarField& CpgF(tCpg());
+        //   const scalarField& Cpg(CpgF.boundaryField()[3]);
+        //
+        //   const tmp<volVectorField> tUg(phases[0].U());
+        //   const volVectorField& UgF(tUg());
+        //   const vectorField& Ugin(UgF.boundaryField()[3]);
+        //   const vectorField& Ugout(UgF.boundaryField()[4]);
+        //
+        //   const surfaceVectorField& Sf(mesh.Sf());
+        //
+        //   const Field<scalar> mgin
+        //   (
+        //     alphag.boundaryField()[3]*rhog.boundaryField()[3]*(Sf.boundaryField()[3]&Ugin)
+        //   );
+        //
+        //   const Field<scalar> mgout
+        //   (
+        //     alphag.boundaryField()[4]*rhog.boundaryField()[4]*(Sf.boundaryField()[4]&Ugout)
+        //   );
+        //
+        //   const Field<scalar> mgwall
+        //   (
+        //     alphag.boundaryField()[2]*rhog.boundaryField()[2]*(Sf.boundaryField()[2]&UgF.boundaryField()[2])
+        //   );
+        //
+        //   const Field<scalar> mgfront
+        //   (
+        //     alphag.boundaryField()[0]*rhog.boundaryField()[0]*(Sf.boundaryField()[0]&UgF.boundaryField()[0])
+        //   );
+        //
+        //   const Field<scalar> mgback
+        //   (
+        //     alphag.boundaryField()[1]*rhog.boundaryField()[1]*(Sf.boundaryField()[1]&UgF.boundaryField()[1])
+        //   );
+        //
+        //   const Field<scalar> Egin
+        //
+        //   (
+        //     mgin*Cpg*Tg.boundaryField()[3] + 0.5*mgin*magSqr(Ugin)
+        //   );
+        //
+        //   const Field<scalar> Egout
+        //   (
+        //     mgout*Cpg*Tg.boundaryField()[4] + 0.5*mgout*magSqr(Ugout)
+        //   );
+        //
+        //   Info << "Mass Conservation Statistics: " << endl;
+        //   Info << "  mgin = " << sum(mgin) <<  endl;
+        //   Info << "  mgout = " << sum(mgout) <<  endl;
+        //   Info << "  mgwall = " << sum(mgwall) <<  endl;
+        //   Info << "  mgfront = " << sum(mgfront) <<  endl;
+        //   Info << "  mgback = " << sum(mgback) <<  endl;
+        //   Info << "  Difference = " << sum(mgin) + sum(mgout) + + sum(mgwall) + sum(mgfront) + sum(mgback) << endl;
+        //   Info << endl;
+        //   Info << "Energy Conservation Statistics: " << endl;
+        //   Info << "  Egin = " << sum(Egin) << endl;
+        //   Info << "  Egout = " << sum(Egout) << endl;
+        //   Info << "  Difference = " << sum(Egin) + sum(Egout) << endl;
+        //   Info << endl;
+        // }
     }
 
     Info<< "End\n" << endl;

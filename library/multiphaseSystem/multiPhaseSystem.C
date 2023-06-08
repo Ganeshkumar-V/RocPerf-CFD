@@ -200,12 +200,13 @@ void Foam::multiPhaseSystem::solveAlphas()
     labelHashSet fixedAlphaPhiCorrs;
     forAll(stationaryPhases(), stationaryPhasei)
     {
-      Info << "Stationary Phase is found" << endl;
         fixedAlphaPhiCorrs.insert(stationaryPhases()[stationaryPhasei].index());
     }
     MULES::limitSum(alphafs, alphaPhiCorrs, fixedAlphaPhiCorrs);
 
     // Solve for the moving phase alphas
+    // volScalarField::Internal SpD(IOobject("spD", mesh_), mesh_, dimensionedScalar(dimless/dimTime, Zero));
+    // volScalarField::Internal SuD(IOobject("suD", mesh_), mesh_, dimensionedScalar(dimless/dimTime, Zero));
     forAll(movingPhases(), movingPhasei)
     {
         phaseModel& phase = movingPhases()[movingPhasei];
@@ -284,41 +285,19 @@ void Foam::multiPhaseSystem::solveAlphas()
             }
         }
 
-        if (phase.moving())
-        {
-          MULES::explicitSolve
-          (
-            geometricOneField(),
-            alpha,
-            alphaPhi,
-            Sp,
-            Su
-          );
+        MULES::explicitSolve
+        (
+          geometricOneField(),
+          alpha,
+          alphaPhi,
+          Sp,
+          Su
+        );
 
-          phase.alphaPhiRef() = alphaPhi;
-        }
-        else
-        {
-          if (isoAdvection_)
-          {
-            // Iso-Advection of Static Phase Model
-            advector->advect(Sp, Su);
-          }
-          else
-          {
-            // MULES
-            MULES::explicitSolve
-            (
-              geometricOneField(),
-              alpha,
-              phase.alphaPhi(),
-              Sp,
-              Su
-            );
-          }
-        }
-
-        phase.clip(SMALL, 1 - SMALL);
+        phase.alphaPhiRef() = alphaPhi;
+        // SpD = Sp;
+        // SuD = Su;
+        // phase.clip(SMALL, 1 - SMALL);
     }
 
     // Report the phase fractions and the phase fraction sum
@@ -326,11 +305,56 @@ void Foam::multiPhaseSystem::solveAlphas()
     {
         phaseModel& phase = phases()[phasei];
 
+        // Correct Volume Fraction
+        // label propellantIndex = this->template get<label>("propellantIndex");
+        // if (propellantIndex != -1 && propellantIndex != phasei)
+        // {
+        //   const volScalarField& alphaProp(phases()[propellantIndex]);
+        //   volScalarField& alpha = phase;
+        //   alpha = neg(alphaProp - (1 - SMALL))*alpha
+        //           + (1 - neg(alphaProp - (1 - SMALL)))*SMALL;
+        // }
+        //
+        // // Find Neg Phase value
+        // Info << "Negative Alpha Occurs: -> " << endl;
+        // scalarField psiIf = phase;
+        // psiIf = 0.0;
+        // surfaceScalarField alphaPhi = alphaPhiCorrs[phase.index()];
+        // fvc::surfaceIntegrate(psiIf, alphaPhi);
+        // const labelList& Owner(phase.mesh().owner());
+        // const labelList& Nei(phase.mesh().neighbour());
+        // forAll(phase.mesh().owner(), i)
+        // {
+        //   if (phase[Owner[i]] < 0)
+        //   {
+        //     Info << "Owner: " << Owner[i] << " neighbour: "
+        //     << Nei[i] << " Flux: " << alphaPhi[i] << " Sp: "
+        //     << SpD[Owner[i]] << " Su: " << SuD[Owner[i]]
+        //     << " SurfInt: " << psiIf[Owner[i]]
+        //     << " alpha: " << phase[Owner[i]] << endl;
+        //   }
+        //   if (phase[Nei[i]] < 0)
+        //   {
+        //     Info << "Owner: " << Owner[i] << " neighbour: "
+        //     << Nei[i] << " Flux: " << alphaPhi[i] << " Sp: "
+        //     << SpD[Nei[i]] << " Su: " << SuD[Nei[i]]
+        //     << " SurfInt: " << psiIf[Nei[i]]
+        //     << " alpha: " << phase[Nei[i]] << endl;
+        //   }
+        // }
+        // Info << " End" << endl;
+
         Info<< phase.name() << " fraction, min, max = "
             << phase.weightedAverage(mesh_.V()).value()
             << ' ' << min(phase).value()
             << ' ' << max(phase).value()
             << endl;
+
+        // if (phase.name() == "particles")
+        // {
+        //   // Info << "volFraction: " << phase << endl;
+        // }
+        phase.clip(SMALL, 1 - SMALL);
     }
 
     volScalarField sumAlphaMoving
@@ -359,10 +383,6 @@ void Foam::multiPhaseSystem::solveAlphas()
     forAll(movingPhases(), movingPhasei)
     {
         movingPhases()[movingPhasei] *= alphaVoid/sumAlphaMoving;
-
-        // cliping volume fraction for moving phases to avoid division by zero
-        phaseModel& phase = movingPhases()[movingPhasei];
-        phase.clip(SMALL, 1 - SMALL);
     }
 }
 
@@ -568,26 +588,6 @@ Foam::multiPhaseSystem::multiPhaseSystem
     {
         volScalarField& alphai = phases()[phasei];
         mesh_.setFluxRequired(alphai.name());
-
-        // Set IsoAdvection Phase
-        if(!phases()[phasei].moving())
-        {
-          if(advector == nullptr)
-          {
-            advector =
-                new isoAdvection
-                (
-                  alphai,
-                  phases()[phasei].phi(),
-                  phases()[phasei].U()
-                );
-          }
-          else
-          {
-            FatalErrorInFunction << "More than one static phase model " <<
-            "is currently not supported by this solver" << exit(FatalError);
-          }
-        }
     }
 }
 
@@ -733,7 +733,7 @@ void Foam::multiPhaseSystem::solve()
         {
             phaseModel& phase = phases()[phasei];
             if (phase.stationary()) continue;
-            if (!phase.moving()) continue;
+
             phase.alphaPhiRef() = alphaPhiSums[phasei]/nAlphaSubCycles;
         }
     }
@@ -745,12 +745,12 @@ void Foam::multiPhaseSystem::solve()
     forAll(phases(), phasei)
     {
         phaseModel& phase = phases()[phasei];
+        phase.clip(SMALL, 1 - SMALL);
+
         if (phase.stationary()) continue;
-        if (!phase.moving()) continue;
+
         phase.alphaRhoPhiRef() =
             fvc::interpolate(phase.rho())*phase.alphaPhi();
-
-        phase.clip(SMALL, 1 - SMALL);
     }
 
     calcAlphas();

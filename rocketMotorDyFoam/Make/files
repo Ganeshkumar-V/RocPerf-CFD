@@ -1,3 +1,0 @@
-rocketMotorDyFoam.C
-
-EXE = $(FOAM_APPBIN)/rocketMotorDyFoam

@@ -159,7 +159,7 @@ Foam::StaticPhaseModel<BasePhaseModel>::~StaticPhaseModel()
 template<class BasePhaseModel>
 bool Foam::StaticPhaseModel<BasePhaseModel>::stationary() const
 {
-    return false;
+    return true;
 }
 
 template<class BasePhaseModel>

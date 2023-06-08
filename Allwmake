@@ -3,12 +3,5 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments
 #------------------------------------------------------------------------------
 
-# echo "making ${PWD##*/}"
-
-wmake $targetType library 
-
-# wmake $targetType rocketMotor
-
-wmake $targetType rocketMotorEulerFoam
-
-# wmake $targetType rocketMotorDyFoam
+wmake $targetType library
+wmake $targetType rocketMotor

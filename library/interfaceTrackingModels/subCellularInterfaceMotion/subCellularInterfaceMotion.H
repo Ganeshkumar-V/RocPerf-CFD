@@ -62,6 +62,7 @@ public:
     TypeName("subCellularInterfaceMotion");
 
     scalar n;
+    scalar f;
     dimensionedScalar a;
 
     volScalarField interface_;
@@ -69,6 +70,8 @@ public:
     volScalarField rb_;
 
     volScalarField As_;
+
+    volScalarField dmdt_;
 
     dimensionedScalar crb_;
     // Constructors
@@ -87,15 +90,28 @@ public:
     // Member Functions
     virtual void correct();
 
-    virtual void regress(volScalarField& alpha);
+    virtual void regress(volScalarField& alpha, const volScalarField& alphaOld);
 
     virtual void findInterface(const volScalarField& alpha);
+
+    label findNeighbour(const volScalarField& alpha, scalar NEI);
+
+    scalar rb(scalar P);
 
     //- The burning rate
     virtual tmp<volScalarField> rb() const;
 
     //- Interface Area / Volume
     virtual tmp<volScalarField> As() const;
+
+    //- Interface normal
+    virtual tmp<volVectorField> nHat() const;
+
+    //- Mass Transfer Rate
+    virtual tmp<volScalarField> dmdt() const;
+
+    //- Return Interface
+    virtual tmp<volScalarField> interface() const;
 };
 
 

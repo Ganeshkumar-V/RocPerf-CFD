@@ -1,4 +1,14 @@
+fvPatchFields/propellantWall/propellantWallFvPatchVectorField.C
+fvPatchFields/particleFlowRateInletVelocity/particleFlowRateInletVelocityFvPatchVectorField.C
+fvPatchFields/massLoadingFraction/massLoadingFractionFvPatchScalarField.C
+fvPatchFields/sameAs/sameAsFvPatchFields.C
 phaseModel/phaseModel/phaseModels.C
+
+multiphaseTurbulence = multiphaseCompressibleTurbulenceModels
+$(multiphaseTurbulence)/multiphaseCompressibleTurbulenceModels.C
+$(multiphaseTurbulence)/multiphaseKineticTheoryModel/multiphaseKineticTheoryModel.C
+$(multiphaseTurbulence)/BoundaryConditions/JohnsonJacksonTheta/JohnsonJacksonTheta.C
+$(multiphaseTurbulence)/BoundaryConditions/JohnsonJacksonSlip/JohnsonJacksonSlip.C
 
 iTModel = interfaceTrackingModels
 $(iTModel)/interfaceTrackingModel/interfaceTrackingModel.C
@@ -6,13 +16,21 @@ $(iTModel)/subCellularInterfaceMotion/subCellularInterfaceMotion.C
 $(iTModel)/burningRate/burningRate.C
 $(iTModel)/burningRateDy/burningRateDy.C
 
-iFModel = interfacialModels
-$(iFModel)/dragModels/particleDragModel/particleDragModel.C
-$(iFModel)/dragModels/SchillerNaumann/SchillerNaumann.C
+dragModel = interfacialModels/dragModels
+$(dragModel)/particleDragModel/particleDragModel.C
+$(dragModel)/SchillerNaumann/SchillerNaumann.C
+$(dragModel)/CliftGauvin/CliftGauvin.C
+$(dragModel)/CliftGauvinInviscid/CliftGauvinInviscid.C
+$(dragModel)/Ergun/Ergun.C
+$(dragModel)/WenYu/WenYu.C
+$(dragModel)/Loth/Loth.C
+$(dragModel)/Henderson/Henderson.C
 
 HTModel = sharpInterfaceHeatTransferModels
 $(HTModel)/sharpInterfaceHeatTransferModel/sharpInterfaceHeatTransferModel.C
 $(HTModel)/RanzMarshall/RanzMarshall.C
+$(HTModel)/DrakeInviscid/DrakeInviscid.C
+$(HTModel)/KavanauRanzMarshall/KavanauRanzMarshall.C
 
 multiphaseSystem/multiPhaseSystem.C
 multiphaseSystem/multiPhaseSystemNew.C

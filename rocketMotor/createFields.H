@@ -48,19 +48,68 @@ setRefCell
 );
 mesh.setFluxRequired(p_rgh.name());
 
-word particlePhase = fluid.get<word>("particlePhase");
-word gasPhase = fluid.get<word>("gasPhase");
-
-label particleIndex = -1;
-label gasIndex = -1;
-label propellantIndex = -1;
-forAll(fluid.phases(), phasei)
+if (runTime.value() == 0)
 {
-  phaseModel& phase = fluid.phases()[phasei];
-  if(phase.name() == gasPhase)
-      gasIndex = phasei;
-  else if (phase.name() == particlePhase)
-      particleIndex = phasei;
-  else
-      propellantIndex = phasei;
+  // Write Surface Area of all faces
+  surfaceVectorField Sf
+  (
+      IOobject
+      (
+          "Sf",
+          runTime.timeName(),
+          mesh,
+          IOobject::NO_READ,
+          IOobject::AUTO_WRITE
+      ),
+      mesh.Sf()
+  );
+  Sf.write();
+
+  // Write Magnitude of surface Areas
+  surfaceScalarField magSf
+  (
+      IOobject
+      (
+          "magSf",
+          runTime.timeName(),
+          mesh,
+          IOobject::NO_READ,
+          IOobject::AUTO_WRITE
+      ),
+      mesh.magSf()
+  );
+  magSf.write();
+
+  // Write Control Volumes
+  volScalarField::Internal V(mesh.V());
+  V.write();
+
+  // Write face centers
+  surfaceVectorField Cf
+  (
+      IOobject
+      (
+          "Cf",
+          runTime.timeName(),
+          mesh,
+          IOobject::NO_READ,
+          IOobject::AUTO_WRITE
+      ),
+      mesh.Cf()
+  );
+  Cf.write();
 }
+
+// calculate Mach Number
+volScalarField Mach
+(
+    IOobject
+    (
+      "Mach",
+      runTime.timeName(),
+      mesh,
+      IOobject::NO_READ,
+      IOobject::AUTO_WRITE
+    ),
+    mag(phases[0].U())/sqrt(phases[0].thermo().gamma()*p/phases[0].thermo().rho())
+);

@@ -57,9 +57,9 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::Kd
     const phasePairKey& key
 ) const
 {
-    if (particleDragModels_.found(key))
+    if (dragModels_.found(key))
     {
-        return particleDragModels_[key]->K();
+        return dragModels_[key]->K();
     }
     else
     {
@@ -80,9 +80,9 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::Kdf
     const phasePairKey& key
 ) const
 {
-    if (particleDragModels_.found(key))
+    if (dragModels_.found(key))
     {
-        return particleDragModels_[key]->Kf();
+        return dragModels_[key]->Kf();
     }
     else
     {
@@ -177,7 +177,7 @@ MomentumEnergyTransferPhaseSystem
     this->generatePairsAndSubModels
     (
         "drag",
-        particleDragModels_
+        dragModels_
     );
 
     this->generatePairsAndSubModels
@@ -206,12 +206,12 @@ MomentumEnergyTransferPhaseSystem
 
     forAllConstIter
     (
-        particleDragModelTable,
-        particleDragModels_,
-        particleDragModelIter
+        dragModelTable,
+        dragModels_,
+        dragModelIter
     )
     {
-        const phasePair& pair(this->phasePairs_[particleDragModelIter.key()]);
+        const phasePair& pair(this->phasePairs_[dragModelIter.key()]);
 
         Kds_.set
         (
@@ -219,7 +219,7 @@ MomentumEnergyTransferPhaseSystem
             new volScalarField
             (
                 IOobject::groupName("Kd", pair.name()),
-                particleDragModelIter()->K()
+                dragModelIter()->K()
             )
         );
 
@@ -229,7 +229,7 @@ MomentumEnergyTransferPhaseSystem
             new surfaceScalarField
             (
                 IOobject::groupName("Kdf", pair.name()),
-                particleDragModelIter()->Kf()
+                dragModelIter()->Kf()
             )
         );
     }
@@ -302,13 +302,13 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::momentumTransfer()
     // Update the drag coefficients
     forAllConstIter
     (
-        particleDragModelTable,
-        particleDragModels_,
-        particleDragModelIter
+        dragModelTable,
+        dragModels_,
+        dragModelIter
     )
     {
-        *Kds_[particleDragModelIter.key()] = particleDragModelIter()->K();
-        *Kdfs_[particleDragModelIter.key()] = particleDragModelIter()->Kf();
+        *Kds_[dragModelIter.key()] = dragModelIter()->K();
+        *Kdfs_[dragModelIter.key()] = dragModelIter()->Kf();
     }
 
     // Add the implicit part of the drag force
@@ -372,7 +372,7 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::momentumTransfer()
     }
 
     // Add the source term due to mass transfer
-    addMassTransferMomentumTransfer(eqns);
+    // addMassTransferMomentumTransfer(eqns);
 
     return eqnsPtr;
 }

@@ -77,7 +77,7 @@ public:
     //- Destructor
     virtual ~RanzMarshall();
 
-
+    scalar cutoff;
     // Member Functions
 
         //- The heat transfer function K used in the enthalpy equation

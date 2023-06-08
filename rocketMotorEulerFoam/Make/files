@@ -1,3 +1,0 @@
-rocketMotorEulerFoam.C
-
-EXE = $(FOAM_APPBIN)/rocketMotorEulerFoam

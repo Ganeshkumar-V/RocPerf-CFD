@@ -122,7 +122,7 @@ public:
 
     // Member Functions
     virtual void correct() = 0;
-    virtual void regress(volScalarField& alpha) = 0;
+    virtual void regress(volScalarField& alpha, const volScalarField& alphaOld) = 0;
 
     virtual void findInterface(const volScalarField& alpha) = 0;
 
@@ -137,6 +137,12 @@ public:
 
     //- Propellant Density
     virtual tmp<volScalarField> rhop() const;
+
+    //- Mass Transfer Rate
+    virtual tmp<volScalarField> dmdt() const;
+
+    //- Interface Cell Field
+    virtual tmp<volScalarField> interface() const;
 };
 
 

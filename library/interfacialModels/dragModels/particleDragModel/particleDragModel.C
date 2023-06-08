@@ -129,10 +129,18 @@ Foam::particleDragModel::~particleDragModel()
 
 Foam::tmp<Foam::volScalarField> Foam::particleDragModel::Ki() const
 {
+    const tmp<volScalarField> tmu(pair_.continuous().nu()*pair_.continuous().rho());
+    volScalarField muc(tmu());
+
+    if (isInviscid())
+    {
+      const tmp<volScalarField> tmc(mu());
+      muc = tmc();
+    }
     return
         0.75
        *CdRe()
-       *dimensionedScalar("", dimForce*dimTime/dimArea, 2.0713e-05)
+       *muc
        /sqr(pair_.dispersed().d());
 }
 
@@ -153,6 +161,15 @@ Foam::tmp<Foam::surfaceScalarField> Foam::particleDragModel::Kf() const
         )*fvc::interpolate(Ki());
 }
 
+Foam::tmp<Foam::volScalarField> Foam::particleDragModel::mu() const
+{
+    return nullptr;
+}
+
+bool Foam::particleDragModel::isInviscid() const
+{
+    return false;
+}
 
 bool Foam::particleDragModel::writeData(Ostream& os) const
 {

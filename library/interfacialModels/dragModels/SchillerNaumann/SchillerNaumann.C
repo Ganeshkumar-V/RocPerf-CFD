@@ -65,12 +65,8 @@ Foam::particleDragModels::SchillerNaumann::~SchillerNaumann()
 
 Foam::tmp<Foam::volScalarField> Foam::particleDragModels::SchillerNaumann::CdRe() const
 {
-    volScalarField Re
-    (
-      pair_.magUr()
-      *pair_.dispersed().d()*pair_.dispersed().rho()
-      /dimensionedScalar("", dimForce*dimTime/dimArea, 2.0713e-05)
-    );
+    const tmp<volScalarField> tRe(pair_.Re());
+    const volScalarField& Re(tRe());
 
     return
         neg(Re - 1000)*24*(1.0 + 0.15*pow(Re, 0.687))

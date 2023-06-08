@@ -143,6 +143,7 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::PropellantRegressionPhas
     MW_.Al2O3 = molecularWeights_.get<scalar>("Al2O3");
     MW_.H2O = molecularWeights_.get<scalar>("H2O");
     MW_.H2 = molecularWeights_.get<scalar>("H2");
+    AAlC_ = this->template get<scalar>("activeAlContent");
 
     R_.value() = 8314.5/MW_.H2;
     alphaRhoAl.value() = rhoPropellant.value()*eqR_/(1 + eqR_);
@@ -251,6 +252,59 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::massTransfer() const
     (
         new phaseSystem::massTransferTable()
     );
+
+    phaseSystem::massTransferTable& eqns = eqnsPtr();
+
+    forAll(this->phaseModels_, phasei)
+    {
+        const phaseModel& phase = this->phaseModels_[phasei];
+
+        const PtrList<volScalarField>& Yi = phase.Y();
+
+        forAll(Yi, i)
+        {
+            eqns.set
+            (
+                Yi[i].name(),
+                new fvScalarMatrix(Yi[i], dimMass/dimTime)
+            );
+        }
+    }
+
+    forAllConstIter
+    (
+      interfaceTrackingModelTable,
+      interfaceTrackingModels_,
+      interfaceTrackingModelIter
+    )
+    {
+        const phasePair& pair(this->phasePairs_[interfaceTrackingModelIter.key()]);
+
+        const phaseModel& phase = pair.continuous();
+        const volScalarField dmdt(this->rDmdt(pair));
+        const dimensionedScalar coeff(dimless, coeff_[interfaceTrackingModelIter.key()]);
+
+        const PtrList<volScalarField>& Yi = phase.Y();
+
+        const dimensionedScalar fH2(dimless, 1.5*MW_.H2);
+        const dimensionedScalar xi(dimless, MW_.Al/(MW_.H2O*eqR_));
+        const dimensionedScalar fH2O((xi - 1.5)*MW_.H2O);
+        const volScalarField X(AAlC_*dmdt/(MW_.Al + xi*MW_.H2O));
+
+        if (min(X).value() < 0 || fH2.value() < 0 || fH2O.value() < 0)
+        {
+          FatalErrorInFunction
+              << "Mass Transfer(): dmdt or one of the factors are negative"
+              << exit(FatalError);
+        }
+
+        if (eqns.size() != 0)
+        {
+          *eqns[Yi[0].name()] += X*fH2;
+          *eqns[Yi[1].name()] += X*fH2O;
+        }
+
+    }
     // (No Species Present)
     return eqnsPtr;
 }
@@ -362,7 +416,7 @@ void Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::solve()
   {
     word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
     volScalarField& alpha = this->db().template lookupObjectRef<volScalarField>(propellant);
-    interfaceTrackingModelIter()->regress(alpha);
+    interfaceTrackingModelIter()->regress(alpha, alpha);
   }
 
   // Solve other phase volume fraction equations
@@ -405,6 +459,10 @@ void Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::correct()
     calculateVelocity();
 
 }
+
+template<class BasePhaseSystem>
+void Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::store()
+{}
 
 template<class BasePhaseSystem>
 void Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::calculateVelocity()

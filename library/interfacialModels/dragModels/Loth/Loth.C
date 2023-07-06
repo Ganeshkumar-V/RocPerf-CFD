@@ -234,12 +234,25 @@ Foam::tmp<Foam::volScalarField> Foam::particleDragModels::Loth::CdRe() const
     const tmp<volScalarField> tT(pair_.continuous().thermo().T());
     const volScalarField& T(tT());
 
-    volScalarField M(max(pair_.magUr()/sqrt(gamma_*R_*T), SMALL));
-    volScalarField Re(max(pair_.Re(), SMALL));
-    volScalarField S(sqrt(gamma_/2)*M);
-    volScalarField Kn(sqrt(constant::mathematical::pi)*S/Re);
+    // volScalarField M(max(pair_.magUr()/sqrt(gamma_*R_*T), SMALL));
+    // volScalarField Re(max(pair_.Re(), SMALL));
+    // volScalarField S(sqrt(gamma_/2)*M);
+    // volScalarField Kn(sqrt(constant::mathematical::pi)*S/Re);
 
-    volScalarField CdRe
+    // Implementation - 2
+    const tmp<volScalarField> tM(max(pair_.magUr()/sqrt(gamma_*R_*T), SMALL));
+    const volScalarField& M(tM());
+
+    const tmp<volScalarField> tRe(max(pair_.Re(), SMALL));
+    const volScalarField& Re(tRe());
+
+    const tmp<volScalarField> tS(sqrt(gamma_/2)*M);
+    const volScalarField& S(tS());
+
+    const tmp<volScalarField> tKn(sqrt(constant::mathematical::pi)*S/Re);
+    const volScalarField& Kn(tKn());
+
+    volScalarField CdRe_
     (
       IOobject
       (
@@ -252,15 +265,15 @@ Foam::tmp<Foam::volScalarField> Foam::particleDragModels::Loth::CdRe() const
 
     forAll(Re, i)
     {
-        CdRe[i] =
+        CdRe_[i] =
         (
           Re[i] <= 45 ? CdRare(Re[i], M[i], Kn[i], S[i])
           : CdComp(Re[i], M[i])
         );
     }
-    CdRe.correctBoundaryConditions();
+    CdRe_.correctBoundaryConditions();
 
-    return Foam::tmp<Foam::volScalarField>(new volScalarField ("tCdRe", CdRe));
+    return Foam::tmp<Foam::volScalarField>(new volScalarField ("tCdRe", CdRe_));
 }
 
 // ************************************************************************* //

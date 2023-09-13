@@ -467,9 +467,11 @@ void Foam::interfaceTrackingModels::subCellularInterfaceMotion::regress
           UIPstream recvFromOwner(patch.neighbProcNo(), pBufnB);
           recvFromOwner >> transferCellReceive;
           const labelList& faceCells(patch.faceCells());
+          const scalarField alpha0NF(alpha0.boundaryField()[patchi].patchNeighbourField());
           forAll(faceCells, i)
           {
-            alpha[faceCells[i]] = transferCellReceive[i];
+              if (alpha0NF[i] != transferCellReceive[i])
+              alpha[faceCells[i]] = transferCellReceive[i];
           }
         }
       }

@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     std::remove(fileName.c_str()); // delete if already present
     std::ofstream file;
     file.open(fileName, std::ios_base::app);
-    file << "t, " << "mdotG, " << "mdotP, " << "Fg, " << "Fp, " << "Fpressure\n";
+    file << "t, " << "mdotG, " << "mdotP, " << "Fg, " << "Fp, " << "Fpressure, " << "Pc\n";
     file.close();
     std::stringstream output;
 
@@ -178,7 +178,8 @@ int main(int argc, char *argv[])
                    << tmdotparticles << ", "
                    << tFgas << ", "
                    << tFparticles << ", "
-                   << tFpressure << ", " << "\n";
+                   << tFparticles << ", "
+                   << p[0] << ", " << "\n";
             }
             file.close();
         }
@@ -189,7 +190,8 @@ int main(int argc, char *argv[])
                    << tmdotparticles << ", "
                    << tFgas << ", "
                    << tFparticles << ", "
-                   << tFpressure << ", " << "\n";
+                   << tFpressure << ", "
+                   << p[0] << ", " << "\n";
         }
 
     }

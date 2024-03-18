@@ -117,7 +117,7 @@ Foam::ThermalEnergyPhaseModel<BasePhaseModel>::heEqn()
     const volScalarField& DpDt(tDpDt());
 
     volTensorField gradU(fvc::grad(U));
-    const volScalarField& mu(rho*this->nu());
+    const volScalarField mu(rho*this->nu());
 
     volScalarField& he = this->thermo_->he();
 
@@ -133,13 +133,12 @@ Foam::ThermalEnergyPhaseModel<BasePhaseModel>::heEqn()
            *fvc::interpolate(this->alphaEff()),
             he
         )
+      - alpha*(mu*(gradU + dev2(T(gradU))) && gradU)   // Viscous Disscipation
      ==
         alpha*DpDt
-        + alpha*(mu*(gradU + dev2(T(gradU))) && gradU)   // Viscous Disscipation
     );
 
     return tEEqn;
 }
-
 
 // ************************************************************************* //

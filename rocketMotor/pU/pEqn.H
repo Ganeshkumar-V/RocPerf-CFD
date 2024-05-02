@@ -392,7 +392,10 @@ while (pimple.correct())
             );
 
             // ImposeWall
-            ImposeWall(p_rgh, phases[propellantIndex]);
+            if (propellantIndex != -1)
+            {
+              ImposeWall(p_rgh, phases[propellantIndex]);
+            }
         }
 
         // Correct fluxes and velocities on last non-orthogonal iteration

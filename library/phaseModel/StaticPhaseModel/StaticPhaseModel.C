@@ -320,6 +320,13 @@ Foam::StaticPhaseModel<BasePhaseModel>::K() const
     return zeroVolField<scalar>("K", sqr(dimVelocity));
 }
 
+template<class BasePhaseModel>
+Foam::tmp<Foam::volSymmTensorField>
+Foam::StaticPhaseModel<BasePhaseModel>::devRhoReff() const
+{
+    Info << "devRhoReff() NotImplemented for stationary phase !" << exit(FatalError);
+    return tmp<volSymmTensorField>();
+}
 
 template<class BasePhaseModel>
 Foam::tmp<Foam::volScalarField>

@@ -183,6 +183,9 @@ public:
             //- Return the phase kinetic energy
             virtual tmp<volScalarField> K() const;
 
+            //- Return shear stress tensor
+            virtual tmp<volSymmTensorField> devRhoReff() const;
+
 
         // Compressibility (variable density)
 

@@ -158,3 +158,16 @@ if (phases.size() > 2)
 {
     rhoPropellant = phases[2].thermo().rho();
 }
+
+//- Pointer to reconstruction scheme for propellant surface
+autoPtr<reconstructionSchemes> surf_
+(
+    reconstructionSchemes::New
+    (
+        phases[2],
+        phases[2].phi(),
+        phases[2].U(),
+        mesh.solverDict(phases[2].name())
+    )
+);
+reconstructionSchemes& surf(surf_());

@@ -122,6 +122,9 @@ int main(int argc, char *argv[])
             fluid.solve();
             fluid.correct();
 
+            // Reconstruct Propellant surface
+            surf.reconstruct();
+
             //***********  Start Find Propellant size ***********//
             if (propellantIndex != -1)
             {

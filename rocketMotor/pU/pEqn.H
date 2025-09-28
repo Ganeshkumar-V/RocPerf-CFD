@@ -379,12 +379,6 @@ while (pimple.correct())
                 }
             }
 
-            // Fixing Pressure + Impose Walls
-            // if (propellantIndex != -1)
-            // {
-            //   pEqn.setValues(purePropellantCells, setPressure);
-            // }
-
             solve
             (
                 pEqn,

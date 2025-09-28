@@ -86,7 +86,6 @@ int main(int argc, char *argv[])
     // Initialization of some important correction fields
     labelList purePropellantCells(0);
     scalarField setTemp(0, 0);
-    scalarField setPressure(0, 0);
     vectorField setVelocity(0, vector(0, 0, 0));
     label propellantIndex = fluid.get<label>("propellantIndex");
     Switch arrestSwirlingFlow = fluid.getOrDefault<Switch>("arrestSwirlingFlow", false);
@@ -115,67 +114,11 @@ int main(int argc, char *argv[])
             fluid.solve();
             fluid.correct();
 
-            //***********  Start Find Propellant size ***********//
-            if (propellantIndex != -1)
-            {
-              label purePropellantSize = 0;
-              scalar cutoff = 0.999; // (1.0 - SMALL) is another alternative;
-              {
-                const volScalarField& propellant = phases[propellantIndex];
+            // Find pure propellant cells
+            #include "propellantCells.H"
 
-                forAll(propellant, i)
-                {
-                  if (propellant[i] >= cutoff)
-                  {
-                    purePropellantSize++;
-                  }
-                }
-              }
-              purePropellantCells = labelList(purePropellantSize);
-              setTemp = scalarField
-              (
-                purePropellantSize,
-                fluid.getOrDefault<scalar>("Tset", 2000)
-              );
-              setPressure = scalarField(purePropellantSize, 101325);
-              setVelocity = vectorField(purePropellantSize, vector(0, 0, 0));
-              {
-                const volScalarField& propellant = phases[propellantIndex];
-
-                label j = 0;
-                forAll(propellant, i)
-                {
-                  if (propellant[i] >= cutoff)
-                  {
-                    purePropellantCells[j] = i;
-                    j++;
-                  }
-                }
-              }
-            }
-            //***********  End Find Propellant size ***********//
-
-            //*********** Start Find Particle Free Cells ******//
-            label particleFreeCellSize = 0;
-            {
-              const volScalarField alphaP(phases[1]);
-              forAll(alphaP, i)
-              {
-                if(alphaP[i] < 1e-10) { particleFreeCellSize++; }
-              } 
-            }
-            labelList particleFreeCells(particleFreeCellSize);
-	          const volScalarField& gasTemp(gasPhase.thermo().T());
-            scalarField setParticleTemp(particleFreeCellSize, 300);
-            {
-              const volScalarField alphaP(phases[1]);
-              label j = 0;
-              forAll(alphaP, i)
-              {
-                if(alphaP[i] < 1e-10) { particleFreeCells[j] = i; setParticleTemp[j] = gasTemp[i]; j++; }
-              }
-            }
-            //*********** End Find Particle Free Cells *******//
+            // Find particle free cells
+            #include "particleFreeCells.H"
 
             #include "pU/UEqns.H"
             #include "EEqns.H"

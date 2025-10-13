@@ -62,7 +62,20 @@ Foam::particleDragModel::particleDragModel
         )
     ),
     pair_(pair),
-    factor_("", dimless, 1.0)
+    factor_("", dimless, 1.0),
+    Ur_
+    (
+      IOobject
+      (
+        IOobject::groupName("Ur", pair.name()),
+        pair.phase1().mesh(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+      ),
+      pair.phase1().mesh(),
+      dimensionedVector("Ur", dimVelocity, vector::zero)
+    ),
+    activeDrifting_(false)
 {}
 
 
@@ -86,7 +99,19 @@ Foam::particleDragModel::particleDragModel
         )
     ),
     pair_(pair),
-    factor_("", dimless, dict.getOrDefault<scalar>("factor", 1.0))
+    factor_("", dimless, dict.getOrDefault<scalar>("factor", 1.0)),
+    Ur_
+    (
+      IOobject
+      (
+        IOobject::groupName("Ur", pair.name()),
+        pair.phase1().mesh(),
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+      ),
+      pair.Ur()
+    ),
+    activeDrifting_(dict.lookupOrDefault<bool>("drifting", false))
 {}
 
 
@@ -172,6 +197,15 @@ Foam::tmp<Foam::volScalarField> Foam::particleDragModel::mu() const
 bool Foam::particleDragModel::isInviscid() const
 {
     return false;
+}
+
+Foam::tmp<Foam::volVectorField> Foam::particleDragModel::Ur() const
+{
+    //- If drifting, return the relative velocity = Up - Ug - Ud
+    //  - - - Appropriate turbulent particle drag model would replace this function
+    
+    //- If not drifting, return the default relative velocity
+    return pair_.Ur();
 }
 
 bool Foam::particleDragModel::writeData(Ostream& os) const

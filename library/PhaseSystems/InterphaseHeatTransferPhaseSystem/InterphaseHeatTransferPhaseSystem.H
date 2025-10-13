@@ -83,6 +83,8 @@ protected:
 
         // data
         volScalarField Tslip_;
+        volScalarField Nu_;
+        volScalarField K_;
 
 public:
 

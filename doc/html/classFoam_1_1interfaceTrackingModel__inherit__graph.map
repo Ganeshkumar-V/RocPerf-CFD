@@ -1,0 +1,7 @@
+<map id="Foam::interfaceTrackingModel" name="Foam::interfaceTrackingModel">
+<area shape="rect" id="node1" title=" " alt="" coords="5,111,224,138"/>
+<area shape="rect" id="node2" href="$classFoam_1_1interfaceTrackingModels_1_1burningRate.html" title=" " alt="" coords="272,5,497,47"/>
+<area shape="rect" id="node3" href="$classFoam_1_1interfaceTrackingModels_1_1burningRateDy.html" title=" " alt="" coords="272,71,497,112"/>
+<area shape="rect" id="node4" href="$classFoam_1_1interfaceTrackingModels_1_1entrainedInterfaceMotion.html" title=" " alt="" coords="272,136,497,177"/>
+<area shape="rect" id="node5" href="$classFoam_1_1interfaceTrackingModels_1_1subCellularInterfaceMotion.html" title=" " alt="" coords="272,201,497,243"/>
+</map>

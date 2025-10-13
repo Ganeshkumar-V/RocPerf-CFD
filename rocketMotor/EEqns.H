@@ -36,6 +36,14 @@ for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
             phase.thermo().he(setTemp, setTemp, purePropellantCells)
           );
         }
+        if (phase.name() == "particles")
+        {
+          EEqn.setValues
+          (
+            particleFreeCells,
+            phase.thermo().he(setParticleTemp, setParticleTemp, particleFreeCells)
+          );
+        }
 
         EEqn.solve();
         fvOptions.correct(phase.thermoRef().he());
@@ -45,6 +53,17 @@ for (int Ecorr=0; Ecorr<nEnergyCorrectors; Ecorr++)
         {
           ImposeWall(phase.thermoRef().he(), phases[propellantIndex]);
         }
+
+        // Limit Temperature
+        if (limitTemperature)
+	{
+          labelList cells(1);
+          scalarField Tmax(cells.size(), 3000);
+          scalarField Tmin(cells.size(), 300);
+          scalarField heMax(phase.thermo().he(Tmax, Tmax, cells));
+          scalarField heMin(phase.thermo().he(Tmin, Tmin, cells));
+          limitT(phase.thermoRef().he(), heMax, heMin);
+	}
     }
 
     fluid.correctThermo();
@@ -56,9 +75,35 @@ forAll(phases, phasei)
 {
     phaseModel& phase = phases[phasei];
 
+    // // Limit Temperature
+    // labelList cells(1);
+    // scalarField Tmax(cells.size(), 2740);
+    // scalarField Tmin(cells.size(), 500);
+    // scalarField heMax(phase.thermo().he(Tmax, Tmax, cells));
+    // scalarField heMin(phase.thermo().he(Tmin, Tmin, cells));
+    // limitT(phase.thermoRef().he(), heMax, heMin);
+
+    // fluid.correctThermo();
+    // fluid.correct();
+
     Info<< phase.name() << " min/max T "
         << min(phase.thermo().T()).value()
         << " - "
         << max(phase.thermo().T()).value()
         << endl;
+    /***
+    scalar minT = max(phase.thermo().T()).value();
+    if (true)
+    {
+    const volScalarField& T(phase.thermo().T());
+    forAll(T, i)
+    {
+	    if (T[i] == minT)
+	    {
+		Pout << "minT at: " << i << " , ";
+	    }
+    }
+    Pout << endl;
+    }
+    ***/
 }

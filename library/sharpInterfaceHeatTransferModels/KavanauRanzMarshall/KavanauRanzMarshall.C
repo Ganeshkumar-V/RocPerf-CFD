@@ -68,6 +68,17 @@ Foam::sharpInterfaceHeatTransferModels::KavanauRanzMarshall::~KavanauRanzMarshal
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
+Foam::sharpInterfaceHeatTransferModels::KavanauRanzMarshall::Nu() const
+{
+    volScalarField Ma(pair_.magUr()/sqrt(gammaR*pair_.continuous().thermo().T()));
+    volScalarField Re(pair_.Re());
+    volScalarField Pr(pair_.Pr());
+    volScalarField Nu0(scalar(2) + 0.6*sqrt(Re)*cbrt(Pr));
+
+    return Nu0/(1 + 3.42*Nu0*Ma/max(Re*Pr, SMALL));
+}
+
+Foam::tmp<Foam::volScalarField>
 Foam::sharpInterfaceHeatTransferModels::KavanauRanzMarshall::K(const scalar residualAlpha) const
 {
     volScalarField Ma(pair_.magUr()/sqrt(gammaR*pair_.continuous().thermo().T()));

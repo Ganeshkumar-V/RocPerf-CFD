@@ -8,6 +8,11 @@ fvPatchFields/totalTimeVaryingPressure/totalTimeVaryingPressureFvPatchScalarFiel
 fvPatchFields/pressureOutletNSCBC/pressureOutletNSCBCFvPatchFields.C
 fvPatchFields/waveTransmissiveVelocity/waveTransmissiveVelocityFvPatchFields.C
 fvPatchFields/transonicLocal/transonicLocalFvPatchField.C
+fvPatchFields/pressureDirectedOutletInletVelocity/pressureDirectedOutletInletVelocityFvPatchVectorField.C
+fvPatchFields/pressureDirectedOutletInletUniformVelocity/pressureDirectedOutletInletUniformVelocityFvPatchVectorField.C
+fvPatchFields/gasFlowRateInletVelocity/gasFlowRateInletVelocityFvPatchVectorField.C
+fvPatchFields/gasBurningRateInletVelocity/gasBurningRateInletVelocityFvPatchVectorField.C
+fvPatchFields/burningRateInletVelocity/burningRateInletVelocityFvPatchVectorField.C
 phaseModel/phaseModel/phaseModels.C
 
 multiphaseTurbulence = multiphaseCompressibleTurbulenceModels
@@ -33,6 +38,7 @@ $(dragModel)/CliftGauvinInviscid/CliftGauvinInviscid.C
 $(dragModel)/Ergun/Ergun.C
 $(dragModel)/WenYu/WenYu.C
 $(dragModel)/Loth/Loth.C
+$(dragModel)/TurbulentLoth/TurbulentLoth.C
 $(dragModel)/Henderson/Henderson.C
 $(dragModel)/HaiderLevenspiel/HaiderLevenspiel.C
 $(dragModel)/HolzerSommerfeld/HolzerSommerfeld.C

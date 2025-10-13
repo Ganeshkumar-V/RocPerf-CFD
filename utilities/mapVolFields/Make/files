@@ -1,0 +1,3 @@
+mapVolFields.C
+
+EXE = $(FOAM_APPBIN)/mapVolFields

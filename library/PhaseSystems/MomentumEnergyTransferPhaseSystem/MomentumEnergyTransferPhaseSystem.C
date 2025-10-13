@@ -1288,7 +1288,7 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
         const tmp<volVectorField> tUg(pair.phase2().U());
         const volVectorField& Ug(tUg());
 
-        *eqns[pair.phase1().name()] += (Up - Ug)&(K*(Up - Ug));
+        *eqns[pair.phase2().name()] += (Up - Ug)&(K*(Up - Ug));
         // if (totalEnergyGas)
         // {
         //   Info << "Workdone due to drag is getting added!" << endl;

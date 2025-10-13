@@ -122,3 +122,94 @@ inline void correctU(volVectorField& U, const volScalarField& propellant)
   }
   // U = neg(propellant - (1 - SMALL))*U;
 }
+
+void findYplus(const phaseModel& phase)
+{
+    const volVectorField& U(phase.U());
+    const volVectorField::Boundary& UBf(U.boundaryField());
+
+    const tmp<volScalarField> tnut(phase.nut());
+    const volScalarField& nut(tnut());
+    const volScalarField::Boundary& nutBf(nut.boundaryField());
+
+    const tmp<volScalarField> tnuEff(phase.nuEff());
+    const volScalarField& nuEff(tnuEff());
+    const volScalarField::Boundary& nuEffBf(nuEff.boundaryField());
+
+    const fvMesh& mesh(U.mesh());
+
+    const fvPatchList& patches = mesh.boundary();
+    const nearWallDist nwd(mesh);
+    const volScalarField::Boundary& d = nwd.y();
+
+    forAll(patches, i)
+    {
+        const fvPatch& patch = patches[i];
+        if
+        (
+            isA<nutWallFunctionFvPatchScalarField>(nutBf[i])
+        )
+        {
+            const nutWallFunctionFvPatchScalarField& nutPf =
+                dynamic_cast<const nutWallFunctionFvPatchScalarField&>
+                (
+                    nutBf[i]
+                );
+
+            scalarField yPlus(nutPf.yPlus());
+            Info << "yPlus in patch: " << patch.name() << " -> min/max: " << min(yPlus) << " - " << max(yPlus) << endl;
+        }
+        // else if (isA<wallFvPatch>(patch))
+        if (isA<wallFvPatch>(patch))
+        {
+            Info  << "Not using nut wall functions! " << endl;
+            scalarField yPlus(d[i]*sqrt((nuEffBf[i]*mag(UBf[i].snGrad()))())/(nuEffBf[i] - nutBf[i]));
+            Info << "yPlus in patch: " << patch.name() << " -> min/max: " << min(yPlus) << " - " << max(yPlus) << endl;
+            Info << "nu:  min/max: " << min((nuEffBf[i] - nutBf[i])()) << " - " << max((nuEffBf[i] - nutBf[i])()) << endl;
+            Info << "nutBf:  min/max: " << min(nutBf[i]) << " - " << max(nutBf[i]) << endl;
+            Info << "d:  min/max: " << min(d[i]) << " - " << max(d[i]) << endl;
+            Info << "du/dn:  min/max: " << min(mag(UBf[i].snGrad())) << " - " << max(mag(UBf[i].snGrad())) << endl;
+        }
+    }
+    Info << exit(FatalError);
+}
+
+inline void correctUY(volVectorField& U)
+{
+  forAll(U, i)
+  {
+    U[i].y() = 0;
+  }
+}
+
+inline void limitT(volScalarField& he, const scalarField heMax, const scalarField heMin)
+{
+  forAll(he, i)
+  {
+    if (he[i] > heMax[0])
+    {
+      he[i] = heMax[0];
+    }
+    if (he[i] < heMin[0])
+    {
+      he[i] = heMin[0];
+    }
+  }
+  // Info << "Limit Temperature Internal cells" << endl;
+
+  // forAll(T.boundaryField(), patchi)
+  // {
+  //   const scalarField& Tpatch(T.boundaryField()[patchi]);
+  //   scalarField& hepatch(he.boundaryFieldRef()[patchi]);
+  //   const scalarField& heMaxpatch(heMax.boundaryField()[patchi]);
+  //   Info << "Limit Temperature boundary cells" << patchi <<  endl;
+
+  //   forAll(Tpatch, i)
+  //   {
+  //     if (Tpatch[i] > 2740)
+  //     {
+  //       hepatch[i] = heMaxpatch[i];
+  //     }
+  //   }
+  // }
+}

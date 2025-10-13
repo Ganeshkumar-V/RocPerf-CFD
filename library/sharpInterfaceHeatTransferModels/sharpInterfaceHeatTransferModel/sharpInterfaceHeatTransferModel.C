@@ -112,6 +112,12 @@ Foam::sharpInterfaceHeatTransferModel::K() const
     return K(residualAlpha_.value());
 }
 
+Foam::tmp<Foam::volScalarField>
+Foam::sharpInterfaceHeatTransferModel::Nu() const
+{
+    return K(residualAlpha_.value());
+}
+
 const Foam::tmp<Foam::volScalarField>
 Foam::sharpInterfaceHeatTransferModel::Kd() const
 {

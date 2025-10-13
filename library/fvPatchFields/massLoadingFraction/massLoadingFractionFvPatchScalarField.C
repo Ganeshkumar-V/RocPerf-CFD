@@ -156,6 +156,13 @@ void Foam::massLoadingFractionFvPatchScalarField::updateCoeffs
             IOobject::groupName("thermo:rho", gas_)
         )
     );
+    const fvsPatchScalarField& phig
+    (
+        patch().lookupPatchField<surfaceScalarField, scalar>
+        (
+            IOobject::groupName("phi", gas_)
+        )
+    );
 
     // particle phase density
     const fvPatchScalarField& rhop
@@ -165,19 +172,23 @@ void Foam::massLoadingFractionFvPatchScalarField::updateCoeffs
             IOobject::groupName("thermo:rho", particle_)
         )
     );
-
-    if (Name_ == gas_)
-    {
-        operator==(1/(1 + (phi_/(1 - phi_))*rhog/rhop));
-    }
+    const fvsPatchScalarField& phip
+    (
+        patch().lookupPatchField<surfaceScalarField, scalar>
+        (
+            IOobject::groupName("phi", particle_)
+        )
+    );
+	// Info << "rhopphip: " << rhop*phip << endl;
+	// Info << "rhogphig: " << rhog*phig << endl;
+	// Info << "sumphig: " << sum(phig) << endl;
+	// Info << "sumphip: " << sum(phip) << endl;
+	//Info << "phi_: " << phi_ << endl;
+	//Info << "Ratio: " << rhop*phip/(rhog*phig) << exit(FatalError);
+    if (sum(phig) != 0)
+        operator==(1/(1 + ((1 - phi_)/max(phi_, 1e-15))*rhop*phip/(rhog*phig)));
     else
-    {
-      // scalarField sF
-      // (
-      //   rhog.size(), sum(1/(1 + ((1 - phi_)/max(phi_, 1e-15))*rhop/rhog))/rhog.size()
-      // );
-        operator==(1/(1 + ((1 - phi_)/max(phi_, 1e-15))*rhop/rhog));
-    }
+        operator==(this->patchInternalField());
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }

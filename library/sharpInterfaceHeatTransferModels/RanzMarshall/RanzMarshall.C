@@ -43,6 +43,15 @@ namespace sharpInterfaceHeatTransferModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::tmp<Foam::volScalarField>
+Foam::sharpInterfaceHeatTransferModels::RanzMarshall::Nu() const
+{
+    volScalarField Re(pair_.Re());
+    volScalarField Pr(pair_.Pr());
+
+    return scalar(2) + 0.6*sqrt(Re)*cbrt(Pr);
+}
+
 Foam::sharpInterfaceHeatTransferModels::RanzMarshall::RanzMarshall
 (
     const dictionary& dict,

@@ -67,6 +67,12 @@ protected:
         //- Drag Factor
         dimensionedScalar factor_;
 
+        //- Relative velocity
+        volVectorField Ur_;
+
+        //- Check for active drifting
+        bool activeDrifting_;
+
 public:
 
     //- Runtime type information
@@ -150,6 +156,9 @@ public:
         //- If Inviscid use this viscosity
         virtual tmp<volScalarField> mu() const;
         virtual bool isInviscid() const;
+
+        //- Return the relative velocity (up - ug - ud)
+        virtual tmp<volVectorField> Ur() const;
 
         //- Dummy write for regIOobject
         bool writeData(Ostream& os) const;

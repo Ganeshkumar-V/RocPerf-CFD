@@ -134,6 +134,7 @@ public:
 
         const tmp<volScalarField> Kd() const;
         const tmp<volScalarField> Kc() const;
+        virtual tmp<volScalarField> Nu() const;
 };
 
 

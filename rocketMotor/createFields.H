@@ -11,6 +11,11 @@ autoPtr<multiPhaseSystem> fluidPtr
 multiPhaseSystem& fluid = fluidPtr();
 multiPhaseSystem::phaseModelList& phases = fluid.phases();
 
+// Phases
+phaseModel& gasPhase(phases[0]);  // Gas phase model
+phaseModel& particlePhase(phases[1]);  // Particle phase model
+// phaseModel& propellantPhase(phases[2]);  // Propellant phase model
+
 dimensionedScalar pMin
 (
     "pMin",
@@ -153,21 +158,20 @@ volScalarField rhoPropellant
     ),
     phases[0].thermo().rho()
 );
-
 if (phases.size() > 2)
 {
     rhoPropellant = phases[2].thermo().rho();
 }
 
 //- Pointer to reconstruction scheme for propellant surface
-autoPtr<reconstructionSchemes> surf_
-(
-    reconstructionSchemes::New
-    (
-        phases[2],
-        phases[2].phi(),
-        phases[2].U(),
-        mesh.solverDict(phases[2].name())
-    )
-);
-reconstructionSchemes& surf(surf_());
+// autoPtr<reconstructionSchemes> surf_
+// (
+//     reconstructionSchemes::New
+//     (
+//         propellantPhase,
+//         propellantPhase.phi(),
+//         propellantPhase.U(),
+//         mesh.solverDict(propellantPhase.name())
+//     )
+// );
+// reconstructionSchemes& surf(surf_());

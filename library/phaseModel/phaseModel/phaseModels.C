@@ -72,6 +72,30 @@ namespace Foam
     );
 
     typedef
+        NoEnergyChangePhaseModel
+        <
+            PurePhaseModel
+            <
+                InertPhaseModel
+                <
+                    MovingPhaseModel
+                    <
+                        ThermoPhaseModel<phaseModel, rhoThermo>
+                    >
+                >
+            >
+        >
+        pureIsothermalParticlePhaseModel;
+
+    addNamedToRunTimeSelectionTable
+    (
+        phaseModel,
+        pureIsothermalParticlePhaseModel,
+        phaseSystem,
+        pureIsothermalParticlePhaseModel
+    );
+
+    typedef
         ThermalEnergyPhaseModel
         <
             PurePhaseModel

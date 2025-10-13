@@ -89,6 +89,7 @@ public:
 
     // Find neighbour cell for cell transition
     label findNeighbour(const volScalarField& alpha, scalar NEI);
+    scalar findNeighbourSurfaceArea(const volScalarField& alpha, scalar Owner, scalar Neighbour);
 
     // Find interface and correct interface, As and nHat Fields
     void findInterface();

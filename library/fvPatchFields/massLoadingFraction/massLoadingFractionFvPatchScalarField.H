@@ -30,51 +30,15 @@ Group
     grpInletBoundaryConditions grpOutletBoundaryConditions
 
 Description
-    This boundary condition provides a total pressure condition.  Four
-    variants are possible:
-
-    1. incompressible subsonic:
+    This boundary condition provides a condition of 
+    volume fraction of phase based on the specified mass fraction:
         \f[
-            p_p = p_0 - 0.5 |U|^2
+            \alpha_1 = 1/(1 + ((1 - \phi)/\phi)*(\rho_1 u_1 \dot S_f)/(\rho_2 u_2 \dot S_f))
         \f]
         where
         \vartable
-            p_p     | incompressible pressure at patch [m2/s2]
-            p_0     | incompressible total pressure [m2/s2]
-            U       | velocity
-        \endvartable
-
-    2. compressible subsonic:
-        \f[
-            p_p = p_0 - 0.5 \rho |U|^2
-        \f]
-        where
-        \vartable
-            p_p     | pressure at patch [Pa]
-            p_0     | total pressure [Pa]
-            \rho    | density [kg/m3]
-            U       | velocity
-        \endvartable
-
-    3. compressible transonic (\f$\gamma = 1\f$):
-        \f[
-            p_p = \frac{p_0}{1 + 0.5 \psi |U|^2}
-        \f]
-        where
-        \vartable
-            p_p     | pressure at patch [Pa]
-            p_0     | total pressure [Pa]
-            G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$
-        \endvartable
-
-    4. compressible supersonic (\f$\gamma > 1\f$):
-        \f[
-            p_p = \frac{p_0}{(1 + 0.5 \psi G |U|^2)^{\frac{1}{G}}}
-        \f]
-        where
-        \vartable
-            p_p     | pressure at patch [Pa]
-            p_0     | total pressure [Pa]
+            \alpha_1     | volume fraction of the phase 1
+            \phi         | mass fraction of phase 1
             \gamma  | ratio of specific heats (Cp/Cv)
             \psi    | compressibility [m2/s2]
             G       | coefficient given by \f$\frac{\gamma}{1-\gamma}\f$

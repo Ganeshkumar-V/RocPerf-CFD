@@ -24,6 +24,7 @@ const scalarField& hgasF(hgas.boundaryField()[inIndex]);
 
 const volScalarField W(phases[0].thermo().W());
 const scalarField rhoGas(pF*W.boundaryField()[inIndex]/(8314*TgasF));
+// const scalarField rhoGas(phases[0].thermo().rho()().boundaryField()[inIndex]);
 const scalarField rhoParticles(phases[1].thermo().rho()().boundaryField()[inIndex]);
 
 // const vectorField& Sf(mesh.boundary()[inIndex].Sf());

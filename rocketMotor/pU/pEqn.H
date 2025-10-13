@@ -451,9 +451,10 @@ while (pimple.correct())
                     );
 
                 // correct Fluxes
+                correctUY(phase.URef());
                 if (propellantIndex != -1)
                 {
-                correctU(phase.URef(), phases[propellantIndex]);
+                    correctU(phase.URef(), phases[propellantIndex]);
                 }
             }
 

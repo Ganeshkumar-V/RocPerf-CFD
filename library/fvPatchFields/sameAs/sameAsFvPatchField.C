@@ -54,13 +54,20 @@ Foam::sameAsFvPatchField<Type>::sameAsFvPatchField
     fixedValueFvPatchField<Type>(p, iF, dict, false),
     Name_(dict.get<word>("field"))
 {
-    const fvPatchField<Type>& pF =
-        this->patch().template lookupPatchField
-        <
-        GeometricField<Type, fvPatchField, volMesh>, Type
-        >(Name_);
+    if (this->db().template foundObject<GeometricField<Type, fvPatchField, volMesh>>(Name_))
+    {
+        const fvPatchField<Type>& pF =
+            this->patch().template lookupPatchField
+            <
+            GeometricField<Type, fvPatchField, volMesh>, Type
+            >(Name_);
 
-    fvPatchField<Type>::operator=(pF);
+        fvPatchField<Type>::operator=(pF);
+    }
+    else
+    {
+        Warning << "Field " << Name_ << " does not exist. Skipping access." << endl;
+    }
 }
 
 
@@ -132,14 +139,21 @@ void Foam::sameAsFvPatchField<Type>::updateCoeffs()
         return;
     }
 
+    if (this->db().template foundObject<GeometricField<Type, fvPatchField, volMesh>>(Name_))
+    {
     const fvPatchField<Type>& pF =
         this->patch().template lookupPatchField
         <
         GeometricField<Type, fvPatchField, volMesh>, Type
         >(Name_);
 
-    // Note: setting this field value using = operator (not ==)
-    fvPatchField<Type>::operator=(pF);
+        // Note: setting this field value using = operator (not ==)
+        fvPatchField<Type>::operator=(pF);
+    }
+    else
+    {
+        Warning << "Field " << Name_ << " does not exist. Skipping access." << endl;
+    }
 
     fixedValueFvPatchField<Type>::updateCoeffs();
 }

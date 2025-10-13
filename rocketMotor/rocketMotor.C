@@ -45,6 +45,8 @@ Description
 #include "phasePair.H"
 #include "GeometricField.H"
 #include "processorFvPatch.H"
+#include "nutWallFunctionFvPatchScalarField.H"
+#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,6 +99,7 @@ int main(int argc, char *argv[])
     scalarField setPressure(0, 0);
     vectorField setVelocity(0, vector(0, 0, 0));
     label propellantIndex = fluid.get<label>("propellantIndex");
+    bool limitTemperature = fluid.getOrDefault<bool>("limitTemperature", false);
 
     while (runTime.run())
     {
@@ -122,8 +125,8 @@ int main(int argc, char *argv[])
             fluid.solve();
             fluid.correct();
 
-            // Reconstruct Propellant surface
-            surf.reconstruct();
+            // // Reconstruct Propellant surface
+            // surf.reconstruct();
 
             //***********  Start Find Propellant size ***********//
             if (propellantIndex != -1)
@@ -165,6 +168,28 @@ int main(int argc, char *argv[])
             }
             //***********  End Find Propellant size ***********//
 
+            //*********** Start Find Particle Free Cells ******//
+            label particleFreeCellSize = 0;
+            {
+              const volScalarField alphaP(phases[1]);
+              forAll(alphaP, i)
+              {
+                if(alphaP[i] < 1e-10) { particleFreeCellSize++; }
+              } 
+            }
+            labelList particleFreeCells(particleFreeCellSize);
+	          const volScalarField& gasTemp(phases[0].thermo().T());
+            scalarField setParticleTemp(particleFreeCellSize, 300);
+            {
+              const volScalarField alphaP(phases[1]);
+              label j = 0;
+              forAll(alphaP, i)
+              {
+                if(alphaP[i] < 1e-10) { particleFreeCells[j] = i; setParticleTemp[j] = gasTemp[i]; j++; }
+              }
+            }
+            //*********** End Find Particle Free Cells *******//
+
             // #include "YEqns.H"
 
             #include "pU/UEqns.H"
@@ -173,10 +198,10 @@ int main(int argc, char *argv[])
 
             fluid.correctKinematics();
 
-            if (pimple.turbCorr())
-            {
+            // if (pimple.turbCorr())
+            // {
                 fluid.correctTurbulence();
-            }
+            // }
         }
 
         if (runTime.write())
@@ -204,7 +229,7 @@ int main(int argc, char *argv[])
 
         runTime.printExecutionTime(Info);
     }
-
+    findYplus(phases[0]);
     Info<< "End\n" << endl;
 
     return 0;

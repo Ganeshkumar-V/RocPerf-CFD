@@ -54,7 +54,6 @@ Description
 #include "scalarIOField.H"
 #include "processorFvPatch.H"
 #include <stdio.h>
-#include <omp.h>
 #include <sstream>
 
 using namespace Foam;
@@ -128,7 +127,6 @@ int main(int argc, char *argv[])
     std::stringstream forceString;
 
     Info << "timeDirs: " << timeDirs.size() << endl;
-    #pragma omp parallel for ordered
     for (label timei = 0; timei < timeDirs.size(); ++timei)
     {
 
@@ -151,6 +149,33 @@ int main(int argc, char *argv[])
         #include "findOutletData.H"
         #include "findInletData.H"
         #include "findTotalForce.H"
+
+        // print mass conservation
+        forAll(mesh.boundary(), bFi)
+        {
+            Info << mesh.boundary()[bFi].name();
+            const scalarField& pF(p.boundaryField()[bFi]);
+            const scalarField& alphaParticlesF(alphaParticles.boundaryField()[bFi]);
+            const scalarField& phiParticlesF(phiParticles.boundaryField()[bFi]);
+            vectorField UparticlesF(Uparticles.boundaryField()[bFi]);
+            const scalarField& hparticlesF(hparticles.boundaryField()[bFi]);
+
+            const scalarField alphaGasF(1.0 - alphaParticlesF);
+            const scalarField& TgasF(Tgas.boundaryField()[bFi]);
+            const scalarField& phiGasF(phiGas.boundaryField()[bFi]);
+            const vectorField& UgasF(Ugas.boundaryField()[bFi]);
+            const scalarField& hgasF(hgas.boundaryField()[bFi]);
+
+            const volScalarField W(phases[0].thermo().W());
+            const scalarField rhoGas(pF*W.boundaryField()[bFi]/(8314*TgasF));
+            const scalarField rhoParticles(phases[1].thermo().rho()().boundaryField()[bFi]);
+            const scalarField mdotGas(alphaGasF*rhoGas*phiGasF);
+            const scalarField mdotparticles(alphaParticlesF*rhoParticles*phiParticlesF);
+
+            scalar tmdotGas(sum(mdotGas));
+            scalar tmdotparticles(sum(mdotparticles));
+            Info << "Gas: " << tmdotGas << " Particles: " << tmdotparticles << " Total: " << tmdotGas+tmdotparticles << endl;
+        }
     }
 
     // store remaining outlet data

@@ -693,12 +693,12 @@ void Foam::RASModels::multiphaseKineticTheoryModel::correct()
         // nut_ += nuFric_;
     }
 
-    // if (debug)
-    // {
+    if (debug)
+    {
         Info<< typeName << ':' << nl
             << "    max(Theta) = " << max(Theta_).value() << nl
             << "    max(nut) = " << max(nut_).value() << endl;
-    // }
+    }
 }
 
 

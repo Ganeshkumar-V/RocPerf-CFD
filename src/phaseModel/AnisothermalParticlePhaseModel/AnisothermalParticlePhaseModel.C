@@ -28,6 +28,8 @@ License
 
 #include "AnisothermalParticlePhaseModel.H"
 #include "phaseSystem.H"
+#include "phaseCompressibleTurbulenceModel.H"
+
 
 // * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
 
@@ -117,7 +119,18 @@ Foam::AnisothermalParticlePhaseModel<BasePhaseModel>::heEqn()
     const volScalarField& DpDt(tDpDt());
 
     volTensorField gradU(fvc::grad(U));
-    const volScalarField mu(rho*this->nu());
+    const volScalarField mut(rho*this->nut());
+
+    // bulk viscosity
+    volScalarField eta(this->nut());
+    if (U.mesh().foundObject<volScalarField>("lambda"+this->name()))
+    {
+        const volScalarField lambda(U.mesh().lookupObject<volScalarField>("lambda"+this->name()));
+        eta += lambda;
+    }
+
+    // Particle phase shear stress (KTGF models)
+    volSymmTensorField tau(mut*(symm(gradU)) + rho*eta*fvc::div(this->phi())*symmTensor::I);
 
     volScalarField& he = this->thermo_->he();
 
@@ -126,7 +139,7 @@ Foam::AnisothermalParticlePhaseModel<BasePhaseModel>::heEqn()
         fvm::ddt(alpha, rho, he)
       + fvm::div(alphaRhoPhi, he)
       - fvm::Sp(contErr, he)
-    //   - alpha*(mu*(gradU + dev2(T(gradU))) && gradU)   // Viscous Disscipation
+      - alpha*(tau && gradU)   // Viscous Disscipation
       ==
          alpha*DpDt
     );

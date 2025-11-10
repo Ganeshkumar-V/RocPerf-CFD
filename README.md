@@ -1,12 +1,6 @@
 # Propellant Regression Framework
 
-<video controls preload="metadata" loop style="max-width:100%; height:auto; object-fit: cover;">
-    <source src="./media.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-</video>
-
-[Download / open media.mp4](./media.mp4)
-
+![Simulation GIF](media.gif)
 
 An OpenFOAM-based collection of applications, solvers, utilities, and functionObjects for modelling propellant regression, particle-laden flows, and rocket motor-related post-processing. This repository bundles example applications (e.g., the `rocketMotor` application), a set of custom `functionObjects`, `fvPatchFields`, interfacial models, and utilities commonly used for propellant combustion/regression studies.
 

@@ -1,0 +1,7 @@
+<map id="Foam::kineticTheoryModels::viscosityModel" name="Foam::kineticTheoryModels::viscosityModel">
+<area shape="rect" id="node1" title=" " alt="" coords="5,104,208,145"/>
+<area shape="rect" id="node2" href="$classFoam_1_1kineticTheoryModels_1_1noneViscosity.html" title=" " alt="" coords="274,5,477,47"/>
+<area shape="rect" id="node3" href="$classFoam_1_1kineticTheoryModels_1_1viscosityModels_1_1Gidaspow.html" title=" " alt="" coords="272,71,479,112"/>
+<area shape="rect" id="node4" href="$classFoam_1_1kineticTheoryModels_1_1viscosityModels_1_1HrenyaSinclair.html" title=" " alt="" coords="256,136,495,177"/>
+<area shape="rect" id="node5" href="$classFoam_1_1kineticTheoryModels_1_1viscosityModels_1_1Syamlal.html" title=" " alt="" coords="274,201,477,243"/>
+</map>

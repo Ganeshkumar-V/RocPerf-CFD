@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RocFlow - A Rocket Motor Simulation Suite</title>
+    <!-- Imports Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Adds smooth scrolling when you click an internal #link */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* Sets a clean, modern font for the entire page */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* A fallback font import in case Tailwind doesn't load it */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    </style>
+</head>
+<body class="bg-white text-gray-800">
+
+    <!-- 
+      Navigation Bar 
+      - Fixed to the top, full-width, with a dark background.
+      - 'flex' and 'justify-between' create the "logo left, links right" layout.
+    -->
+    <nav class="bg-gray-800 text-white fixed top-0 left-0 right-0 z-10 shadow-md">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo / Brand Name -->
+                <a href="index.html" class="text-2xl font-bold text-white hover:text-blue-300 transition-colors">RocFlow</a>
+                
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center space-x-6">
+                    
+                    <!-- Home Dropdown -->
+                    <div class="relative group">
+                        <!-- The trigger link (Home) -->
+                        <a href="index.html" class="px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white flex items-center">
+                            <span>Home</span>
+                            <!-- Dropdown arrow -->
+                            <svg class="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        
+                        <!-- Dropdown Menu -->
+                        <!-- 
+                          - 'absolute' positions it relative to the 'group' div
+                          - 'top-full' places it just below the nav link
+                          - 'hidden group-hover:block' shows it only on hover
+                          - REMOVED 'mt-2' to fix the hover gap
+                        -->
+                        <div class="absolute left-0 top-full w-56 bg-white rounded-md shadow-lg py-1 hidden group-hover:block z-20">
+                            <a href="#about" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">What is RocFlow?</a>
+                            <a href="#features" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Features</a>
+                            <a href="#license" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">License</a>
+                            <a href="#acknowledgement" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Acknowledgement</a>
+                        </div>
+                    </div>
+
+                    <!-- Other Nav Links -->
+                    <a href="equations.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors">Governing Equations and Models</a>
+                    <a href="features.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors">Features</a>
+                    <a href="tutorials.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors">Tutorials</a>
+                    <a href="documentation.html" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700 transition-colors">Documentation</a>
+                </div>
+
+                <!-- Mobile Menu Button (optional, but good practice) -->
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-white hover:text-blue-300 p-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 
+          Mobile Menu
+          - Hidden by default, toggled by the button.
+        -->
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium bg-blue-600 text-white">Home</a>
+                <!-- Page Section Links -->
+                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white ml-4">What is RocFlow?</a>
+                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white ml-4">Features</a>
+                <a href="#license" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white ml-4">License</a>
+                <a href="#acknowledgement" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white ml-4">Acknowledgement</a>
+                
+                <!-- Other Page Links -->
+                <a href="equations.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Governing Equations</a>
+                <a href="features.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Features</a>
+                <a href="tutorials.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Tutorials</a>
+                <a href="documentation.html" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Documentation</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 
+      Hero Section (Jumbotron)
+      - A large, eye-catching section to introduce the project.
+      - 'pt-32' and 'pb-24' add padding to account for the fixed navbar (h-16) and create space.
+    -->
+    <header id="home" class="bg-gray-100 pt-32 pb-24 text-center">
+        <div class="max-w-4xl mx-auto px-6">
+            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-4">Welcome to RocFlow</h1>
+            <p class="text-lg md:text-xl text-gray-700 mb-8">
+                An OpenFOAM-based collection of applications, libraries, and utilities 
+                for simulating rocket motor firing.
+            </p>
+            <a href="#download" class="inline-block bg-blue-600 text-white font-bold text-lg py-3 px-8 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105">
+                Download v1.0
+            </a>
+        </div>
+    </header>
+
+    <!-- 
+      Main Content Area
+      - 'max-w-4xl' and 'mx-auto' center the content in a readable width.
+    -->
+    <main class="max-w-4xl mx-auto p-6 md:p-10">
+
+        <!-- Section: What is RocFlow? -->
+        <section id="about" class="mb-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 border-b pb-2">What is RocFlow?</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                This repository provides an OpenFOAM-based collection of applications, libraries, and utilities for simulating rocket motor firing, specializing in propellant regression and particle-laden flows. The framework's core is the <code>rocketMotor</code> application, which handles propellant surface regression (for center-perforated and end-burning configurations) and various models for gas-particle interactions. The suite also supports CD nozzle simulations (both single-phase gas and two-phase gas-particle flows).
+            </p>
+            <p class="text-gray-700 leading-relaxed">
+                To accelerate research, this project includes a set of tutorial and validation cases, specialized boundary conditions for propulsion, and utilities for performance-parameter extraction and to setup initial-conditions.
+            </p>
+        </section>
+
+        <!-- Section: Features -->
+        <section id="features" class="mb-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 border-b pb-2">Features</h2>
+            <ul class="list-disc list-inside text-gray-700 leading-relaxed space-y-2 pl-4">
+                <li><strong>High Performance:</strong> Optimized for speed and efficiency.</li>
+                <li><strong>Cross-Platform:</strong> Runs on Windows, macOS, and Linux.</li>
+                <li><strong>Modular Design:</strong> Easily extensible with plugins and custom modules.</li>
+                <li><strong>Open Source:</strong> Free to use and modify under the MIT License.</li>
+                <li><strong>Community Supported:</strong> Actively developed and supported by a growing community.</li>
+            </ul>
+        </section>
+
+        <!-- Section: License -->
+        <section id="license" class="mb-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 border-b pb-2">License</h2>
+            <p class="text-gray-700 leading-relaxed">
+                MyProject is released under the <a href="#" class="text-blue-600 hover:underline">MIT License</a>. 
+                This means it is completely free for personal and commercial use. You can modify it, distribute it, 
+                and use it in your own projects without any restrictions.
+            </p>
+        </section>
+
+        <!-- Section: Acknowledgement -->
+        <section id="acknowledgement" class="mb-12 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 border-b pb-2">Acknowledgement</h2>
+            <p class="text-gray-700 leading-relaxed">
+                This project is supported by the Awesome Foundation and contributions from the open-source community. 
+                We are grateful for all the support.
+            </p>
+        </section>
+
+    </main>
+
+    <!-- 
+      Footer
+      - A simple, centered footer with copyright information.
+    -->
+    <footer class="bg-gray-800 text-gray-400 py-8">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p>&copy; 2025 RocFlow. All rights reserved.</p>
+            <p class="text-sm">Built with HTML & Tailwind CSS</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript to toggle the mobile menu -->
+    <script>
+        const menuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        menuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu if a link is clicked
+        mobileMenu.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -56,6 +56,9 @@ header nav > div > a:active,
 header nav > div > button:hover,
 header nav > div > button:focus,
 header nav > div > button:active,
+header nav > div > .group > a:hover,
+header nav > div > .group > a:focus,
+header nav > div > .group > a:active,
 .nav-active,
 .nav-active a {
     font-weight: bold !important; /* ensure it remains bold */

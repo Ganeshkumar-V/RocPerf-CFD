@@ -34,16 +34,18 @@
                 </svg>
             </button>
 
+            <!-- Desktop Navigation Links -->
             <div class="hidden md:flex items-center space-x-6">
-
                 <div class="relative group">
-                    <button class="text-white  transition-colors font-bold">
+                    <a href="index.html" class="text-white transition-colors font-bold">
                         Home
                         <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
+                    </a>
+                    
                     <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
                         <a href="index.html#about" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About RocIBCFD</a>
-                        <a href="index.html#getting-started" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Getting Started</a>
+                        <a href="index.html#install" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Quick Installation</a>
+                        <a href="index.html#publications" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Publications</a>
                         <a href="index.html#contact" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Contact</a>
                     </div>
                 </div>
@@ -166,8 +168,25 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 RocIBCFD. All rights reserved.</p>
-        <p>Designed by Ganeshkumar V.</p>
+        <p class="mb-4 text-gray-500">
+            Distributed under the GNU General Public License v3 (GPL-3.0). See the 
+            <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/blob/main/LICENSE" 
+               target="_blank" rel="noopener noreferrer" 
+               class="text-gray-300 hover:text-white hover:underline">
+               LICENSE
+            </a> 
+            file for the full text.
+        </p>
+
+        <p class="mb-6 text-gray-500 max-w-2xl mx-auto">
+            This software is an independent project and is not affiliated with, endorsed by, or 
+            associated with OpenCFD Ltd or the OpenFOAM® project. OpenFOAM® is a 
+            registered trademark of OpenCFD Ltd.
+        </p>
+
+        <p>
+            © 2025 Ganeshkumar V. All rights reserved.
+        </p>
     </footer>
 
     <script src="https://cdn.tailwindcss.com"></script>

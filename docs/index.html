@@ -36,12 +36,23 @@
                     <!-- Dropdown Menu -->
                     <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
                         <a href="#about" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">About RocIBCFD</a>
-                        <a href="#getting-started" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Getting Started</a>
+                        <a href="#install" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Quick Installation</a>
+                        <a href="#publications" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Publications</a>
                         <a href="#contact" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Contact</a>
                     </div>
                 </div>
 
-                <a href="equations.html" class="text-white hover:text-red-500 transition-colors">Computational Framework</a>
+                <div class="relative group">
+                    <a href="equations.html" class="text-white transition-colors font-bold">
+                        Computational Framework
+                        <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </a>
+                    <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="#governing-equations" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Governing Equations</a>
+                        <a href="#numerical-methods" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Numerical Methods</a>
+                        <a href="#boundary-conditions" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Boundary Conditions</a>
+                    </div>
+                </div>
                 <a href="features.html" class="text-white hover:text-red-500 transition-colors">Features</a>
                 <a href="tutorials.html" class="text-white hover:text-red-500 transition-colors">Tutorials</a>
                 <a href="documentation.html" class="text-white hover:text-red-500 transition-colors">Documentation</a>
@@ -52,7 +63,8 @@
         <div id="mobile-menu" class="hidden md:hidden px-2 pt-2 pb-3 space-y-1">
             <a href="index.html" class="block px-3 py-2 rounded-md text-base font-bold text-white bg-blue-600" aria-current="page">Home</a>
             <a href="#about" class="block px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-200">...About RocIBCFD</a>
-            <a href="#getting-started" class="block px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-200">...Getting Started</a>
+            <a href="#install" class="block px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-200">...Quick Installation</a>
+            <a href="#publications" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">...Publications</a>
             <a href="#contact" class="block px-3 py-2 rounded-md text-base font-bold text-white hover:bg-gray-200">...Contact</a>
             
             <hr class="border-gray-300">
@@ -94,41 +106,293 @@
                         </figure>
                     </div>
 
-                    <h2 class="text-3xl font-bold text-gray-900 mb-6">What is RocIBCFD?</h2>
-                    <p class="text-lg text-gray-700 leading-relaxed text-left md:text-center">
-                        This repository provides an OpenFOAM-based collection of applications, libraries, and utilities for simulating rocket motor firing, specializing in propellant regression and particle-laden flows. The framework's core is the <code>rocketMotor</code> application, which handles propellant surface regression (for center-perforated and end-burning configurations) and various models for gas-particle interactions. The suite also supports CD nozzle simulations (both single-phase gas and two-phase gas-particle flows). To accelerate research, this project includes a set of tutorial and validation cases, specialized boundary conditions for propulsion, and utilities for performance-parameter extraction and to setup initial-conditions.
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">
+                        Advanced Multiphase Flow Simulation for Rocket Propulsion
+                    </h2>
+                    
+                    <p class="text-lg text-gray-700 text-justify">
+                        <strong class="text-gray-900">RocIBCFD</strong> is a comprehensive, 
+                        OpenFOAM-based framework for simulating high-speed, gas-particle 
+                        multiphase flows, specifically tailored for solid rocket motor (SRM) applications.
                     </p>
+                      
+                    <p class="mt-4 text-lg text-gray-700 leading-relaxed text-justify">
+                        It's a powerful tool for researchers and engineers to study complex 
+                        internal ballistics, model propellant regression, and accurately 
+                        evaluate key performance metrics like thrust, C*, and Isp.
+                    </p>
+
+                    <h3 class="text-2xl font-bold text-gray-900 text-left mt-12 mb-6">
+                        🚀 Core Simulation Capabilities
+                      </h3>
+                    
+                      <p class="text-lg text-gray-700 leading-relaxed text-left mb-6">
+                        The framework's core is a robust <strong class="text-gray-900">Euler-Euler multiphase flow solver</strong> 
+                        that solves separate mass, momentum, and energy equations for both the 
+                        gas and particle phases. This approach allows for the high-fidelity 
+                        resolution of complex physics inside the rocket motor, including:
+                      </p>
+                    
+                      <ul class="list-disc list-outside pl-5 space-y-4 text-lg text-left text-gray-700">
+                        
+                        <li>
+                            <strong class="text-gray-900">High Speed Flows:</strong> 
+                            Capable of simulating two-phase (gas-particle) and single-phase 
+                            flows through convergent-divergent (CD) nozzles (for flows with Mach number < 3.5).
+                          </li>
+
+                        <li>
+                          <strong class="text-gray-900">Propellant Regression:</strong> 
+                          Accurately models the regressing propellant surface for common 
+                          grain geometries such as center-perforated and end-burning configurations 
+                          (future releases will handle arbitrary grain geometries).
+                        </li>
+                    
+                        <li>
+                            <strong class="text-gray-800">Interphase Interactions:</strong> 
+                            Momentum and energy exchange (drag and heat transfer) between 
+                            the gas and particle phases for all flow regimes that includes inertial, compressible 
+                            and rarefield flow regimes.
+                          </li>
+                          <li>
+                            <strong class="text-gray-800">Interparticle Interactions:</strong> 
+                            Models collisions and interactions between particles. 
+                          </li>
+                    
+                        
+                      </ul>
+                    
+                      <h3 class="text-2xl font-bold text-gray-900 text-left mt-12 mb-6">
+                        🔧 A Complete Toolkit for Propulsion Analysis
+                      </h3>
+                    
+                      <p class="text-lg text-gray-700 leading-relaxed text-left mb-6">
+                        To accelerate your research, this suite is more than just a solver. 
+                        It also includes:
+                      </p>
+                    
+                      <ul class="list-disc list-outside pl-5 space-y-4 text-lg text-left text-gray-700">
+                        
+                        <li>
+                          <strong class="text-gray-900">Specialized Boundary Conditions:</strong> 
+                          A library of boundary conditions specifically developed for 
+                          high-speed propulsion simulations.
+                        </li>
+                    
+                        <li>
+                          <strong class="text-gray-900">Performance Utilities:</strong> 
+                          Handy tools to help set up initial conditions and post-process 
+                          results to extract key performance parameters.
+                        </li>
+                    
+                        <li>
+                            <strong class="text-gray-900">Tutorial and Validation Cases:</strong> 
+                            A set of 
+                            <a href="tutorials.html" 
+                               class="text-blue-600 underline underline-dashed hover:text-blue-800 hover:underline-solid">
+                              tutorial and validation cases&nbsp;↗
+                            </a> 
+                            to demonstrate the software's capabilities and help new users get started quickly.
+                          </li>
+                      </ul>
                 </div>
             </div>
         </section>
 
-        <!-- Section 2: Getting Started -->
-        <section id="getting-started" class="py-20 bg-gray-50">
+        <!-- Section 2: Installation -->
+        <section id="install" class="py-15 bg-gray-50">
             <div class="container mx-auto px-6">
-                <!-- CHANGED: Reduced max-w-4xl to max-w-3xl to make the pane narrower -->
+        
                 <div class="max-w-3xl mx-auto text-center">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Getting Started</h2>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-8">
-                        Getting started with RocIBCFD is straightforward. The primary way to get the code is by cloning the repository from GitHub. Our "Quick Start" guide has all the steps you need to compile and run your first simulation.
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Quick Installation</h2>
+                    <p class="text-lg text-gray-700 leading-relaxed mb-12">
+                        Get started by cloning the repository and running the compile script. 
+                        Requires a working OpenFOAM installation (e.g., v2112).
                     </p>
-                    <a href="tutorials.html" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg">
-                        View Tutorials
+                </div>
+        
+                <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+                    
+                    <ol class="divide-y divide-gray-200 text-left">
+        
+                        <li class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                                1. Ensure OpenFOAM-v2112 is sourced
+                            </h3>
+                            <p class="text-gray-700">
+                                Ensure your OpenFOAM installation (e.g., v2112) is installed and sourced in your terminal. 
+                                If you need to install it, you can follow the 
+                                <a href="https://develop.openfoam.com/Development/openfoam/-/blob/OpenFOAM-v2112/doc/Build.md" 
+                                   target="_blank" rel="noopener noreferrer"
+                                   class="text-blue-600 underline underline-dashed hover:text-blue-800 hover:underline-solid">
+                                   official OpenFOAM-v2112 build instructions&nbsp;↗
+                                </a>
+                            </p>
+                        </li>
+        
+                        <li class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                2. Clone the repository and enter the directory
+                            </h3>
+                            <div class="relative bg-gray-900 text-gray-300 font-mono text-sm rounded-lg p-4 overflow-x-auto">
+                                <pre><span class="text-green-400">$</span> git clone https://github.com/Ganeshkumar-V/Propellant-Regression-Framework.git</pre>
+                                <pre><span class="text-green-400">$</span> cd Propellant-Regression-Framework</pre>
+                                <button class="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold py-1 px-2 rounded"
+                                        onclick="copyToClipboard(this)"
+                                        data-copy-text="git clone https://github.com/Ganeshkumar-V/Propellant-Regression-Framework.git&#10;cd Propellant-Regression-Framework">
+                                    Copy
+                                </button>
+                            </div>
+                        </li>
+        
+                        <li class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                3. Source the project 'bashrc'
+                            </h3>
+                            <div class="relative bg-gray-900 text-gray-300 font-mono text-sm rounded-lg p-4">
+                                <pre><span class="text-green-400">$</span> source bashrc</pre>
+                                <button class="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold py-1 px-2 rounded"
+                                        onclick="copyToClipboard(this)"
+                                        data-copy-text="source bashrc">
+                                    Copy
+                                </button>
+                            </div>
+                        </li>
+        
+                        <li class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                4. Compile the project
+                            </h3>
+                            <div class="relative bg-gray-900 text-gray-300 font-mono text-sm rounded-lg p-4">
+                                <pre><span class="text-green-400">$</span> ./Allwmake</pre>
+                                <button class="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold py-1 px-2 rounded"
+                                        onclick="copyToClipboard(this)"
+                                        data-copy-text="./Allwmake">
+                                    Copy
+                                </button>
+                            </div>
+                            <p class="text-gray-600 text-sm mt-3">
+                                (Optional: run <code class="bg-gray-200 text-gray-800 px-1 py-0.5 rounded">./Allwclean</code> first to clean the project.)
+                            </p>
+                        </li>
+        
+                    </ol>
+                </div>
+                
+                <div class="text-center mt-12">
+                    <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework" 
+                       target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg">
+                        
+                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 16 16" version="1.1" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                        </svg>
+                        
+                        <span>View on GitHub</span>
                     </a>
+                </div>
+        
+            </div>
+        </section>
+
+        <!-- Section 3: Publications & Citations  -->
+        <section id="publications" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-left">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+                        Publications & Citation
+                    </h2>
+                    
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">
+                        How to Cite
+                    </h3>
+                    <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                        If you use this software in published work, please cite the associated paper:
+                    </p>
+                    
+                    <div class="bg-gray-100 p-6 rounded-lg text-gray-800 text-base shadow-inner border border-gray-200">
+                        <p>
+                            Venukumar, Ganeshkumar, and Sundaram, Dilip Srinivas, "Computational Study of Propulsive Performance of Frozen Nano-Aluminum and Water (ALICE) Mixtures," 
+                            <em class="italic">Journal of Propulsion and Power</em>, Vol. 41, No. 3, pp. 330–346, 2025.
+                        </p>
+                        <a href="https://doi.org/10.2514/1.B39541" 
+                           target="_blank" rel="noopener noreferrer" 
+                           class="text-blue-600 hover:underline font-medium">
+                           https://doi.org/10.2514/1.B39541
+                        </a>
+                    </div>
+        
+                    <h3 class="text-2xl font-semibold text-gray-800 mt-12 mb-4">
+                        Suggested BibTeX
+                    </h3>
+                    <div class="relative bg-gray-900 text-gray-300 font-mono text-sm rounded-lg p-4 overflow-x-auto">
+                        <pre>@article{doi:10.2514/1.B39541,</pre>
+                        <pre>  author = {Venukumar, Ganeshkumar and Sundaram, Dilip Srinivas},</pre>
+                        <pre>  title = {Computational Study of Propulsive Performance of Frozen Nano-Aluminum and Water (ALICE) Mixtures},</pre>
+                        <pre>  journal = {Journal of Propulsion and Power},</pre>
+                        <pre>  volume = {41},</pre>
+                        <pre>  number = {3},</pre>
+                        <pre>  pages = {330-346},</pre>
+                        <pre>  year = {2025},</pre>
+                        <pre>  doi = {10.2514/1.B39541}</pre>
+                        <pre>}</pre>
+                        
+                        <button class="absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs font-bold py-1 px-2 rounded"
+                                onclick="copyToClipboard(this)"
+                                data-copy-text="@article{doi:10.2514/1.B39541,&#10;  author = {Venukumar, Ganeshkumar and Sundaram, Dilip Srinivas},&#10;  title = {Computational Study of Propulsive Performance of Frozen Nano-Aluminum and Water (ALICE) Mixtures},&#10;  journal = {Journal of Propulsion and Power},&#10;  volume = {41},&#10;  number = {3},&#10;  pages = {330-346},&#10;  year = {2025},&#10;  doi = {10.2514/1.B39541}&#10;}">
+                            Copy
+                        </button>
+                    </div>
+                    
+                    <h3 class="text-2xl font-semibold text-gray-800 mt-12 mb-4">
+                        Authors & Acknowledgements
+                    </h3>
+                    <ul class="list-disc list-outside pl-5 text-lg text-gray-700 space-y-3">
+                        <li>
+                            <strong>Original author:</strong> Ganeshkumar V
+                        </li>
+                        <li>
+                            <strong>Developed under the supervision of:</strong> Prof. Dilip Srinivas Sundaram
+                        </li>
+                    </ul>
+        
                 </div>
             </div>
         </section>
 
-        <!-- Section 3: Contact/Contribute -->
-        <section id="contact" class="py-20 bg-white">
+        <!-- Section 4: Contact/Contribute -->
+        <section id="contact" class="py-20 bg-gray-50">
             <div class="container mx-auto px-6">
-                <div class="max-w-4xl mx-auto text-center">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Contact & Contribute</h2>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-8">
-                        RocIBCFD is an open-source project. We welcome contributions, bug reports, and feature requests. Please see the GitHub repository for information on how to contribute or get in touch with the developers.
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">
+                        Contact & Contribute
+                    </h2>
+                    <p class="text-lg text-gray-700 leading-relaxed mb-10">
+                        RocIBCFD is an open-source project. We welcome bug reports, 
+                        feature requests, and contributions from the community.
                     </p>
-                    <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework" target="_blank" rel="noopener noreferrer" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg">
-                        View on GitHub
-                    </a>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        
+                        <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework" 
+                           target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg">
+                            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 16 16" version="1.1" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                            </svg>
+                            <span>View on GitHub</span>
+                        </a>
+                        
+                        <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/issues" 
+                           target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center justify-center bg-white hover:bg-gray-100 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg border border-gray-300">
+                            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Report an Issue</span>
+                        </a>
+        
+                    </div>
                 </div>
             </div>
         </section>
@@ -136,8 +400,25 @@
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 RocIBCFD. All rights reserved.</p>
-        <p>Designed by Ganeshkumar V.</p>
+        <p class="mb-4 text-gray-500">
+            Distributed under the GNU General Public License v3 (GPL-3.0). See the 
+            <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/blob/main/LICENSE" 
+               target="_blank" rel="noopener noreferrer" 
+               class="text-gray-300 hover:text-white hover:underline">
+               LICENSE
+            </a> 
+            file for the full text.
+        </p>
+
+        <p class="mb-6 text-gray-500 max-w-2xl mx-auto">
+            This software is an independent project and is not affiliated with, endorsed by, or 
+            associated with OpenCFD Ltd or the OpenFOAM® project. OpenFOAM® is a 
+            registered trademark of OpenCFD Ltd.
+        </p>
+
+        <p>
+            © 2025 Ganeshkumar V. All rights reserved.
+        </p>
     </footer>
 
     <!-- 
@@ -268,6 +549,36 @@ $ cd Propellant-Regression-Framework</code></pre>
             });
         });
     </script>
-
+    <script>
+        function copyToClipboard(button) {
+            // Get the text from the 'data-copy-text' attribute
+            const textToCopy = button.getAttribute('data-copy-text');
+    
+            // Use the modern Clipboard API
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // --- Success feedback ---
+                // 1. Save the original text
+                const originalText = button.innerHTML;
+                
+                // 2. Change the button text
+                button.innerHTML = 'Copied!';
+                button.classList.add('bg-green-600'); // Optional: make it green
+                
+                // 3. Change it back after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-600'); // Optional: remove green
+                }, 2000);
+    
+            }).catch(err => {
+                // Handle errors
+                console.error('Failed to copy: ', err);
+                button.innerHTML = 'Error';
+                setTimeout(() => {
+                    button.innerHTML = 'Copy';
+                }, 2000);
+            });
+        }
+    </script>
 </body>
 </html>

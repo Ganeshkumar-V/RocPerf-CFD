@@ -19,14 +19,32 @@
             ]
         });"></script>
     <style>
-        .flowchart-wrapper {
-          display: flex;
-          justify-content: center; /* This centers your flowchart */
-        }
-        .flowchart-wrapper .mermaid {
-          min-width: 600px;  /* Adjust this value as needed */
-          max-width: 100%; /* Allows it to be responsive */
-        }
+                .flowchart-wrapper {
+                    display: flex;
+                    justify-content: center; /* This centers your flowchart */
+                }
+                .flowchart-wrapper .mermaid {
+                    min-width: 600px;  /* Adjust this value as needed */
+                    max-width: 100%; /* Allows it to be responsive */
+                }
+                /* Make Mermaid-rendered SVGs fill the mermaid container */
+                .mermaid svg {
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-width: none !important;
+                    display: block;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+
+                /* Trial dimensions: adjust these values (height / max-width) as needed */
+                .mermaid {
+                    width: 100%;            /* use most of the page width */
+                    max-width: 1800px;    /* cap width to avoid overly wide diagrams */
+                    height: 50vh;         /* try 60vh, 70vh, 80vh or px values like 700px */
+                    margin: 0 auto 2rem auto;
+                    overflow: visible;    /* allow svg to be visible if larger */
+                }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -90,11 +108,149 @@
 
     <!-- Main Content -->
     <main>
-        <section id="governing-equations" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="max-w-4xl mx-auto">
-                    
-                </div>
+        <section id="repository-structure" class="bg-white">
+            <div class="mermaid">
+                flowchart TD
+                %% External Dependency
+                OpenFOAMEnv["OpenFOAM Environment\n(libOpenFOAM, libfiniteVolume, MPI)"]:::external
+
+                %% Build System
+                subgraph "Build System" 
+                    direction TB
+                    Allwmake["Allwmake"]:::build
+                    Allwclean["Allwclean"]:::build
+                    Bashrc["bashrc"]:::build
+                    subgraph "Per-module Make Configs"
+                        direction TB
+                        MakeSrc["src/Make"]:::build
+                        MakeSrcFiles["src/Make/files"]:::build
+                        MakeSrcOptions["src/Make/options"]:::build
+                        MakeApp["applications/rocketMotor/Make"]:::build
+                        MakeAppFiles["applications/rocketMotor/Make/files"]:::build
+                        MakeAppOpts["applications/rocketMotor/Make/options"]:::build
+                        MakeUtil1["utilities/ReynoldsNumber/Make"]:::build
+                        MakeUtil2["utilities/mapVolFields/Make"]:::build
+                        MakeUtil3["utilities/postProcessRocket/Make"]:::build
+                    end
+                end
+
+                %% Core Libraries
+                subgraph "Core Libraries" 
+                    direction TB
+                    subgraph "Physics Models"
+                        PhaseSystems["PhaseSystems"]:::core
+                        Interfacial["interfacialModels"]:::core
+                        Turbulence["multiphaseCompressibleTurbulenceModels"]:::core
+                        PhaseModel["phaseModel"]:::core
+                        InterfaceTrack["interfaceTrackingModels"]:::core
+                        SharpHeat["sharpInterfaceHeatTransferModels"]:::core
+                    end
+                    subgraph "Boundary Conditions"
+                        fvPatchFields["fvPatchFields"]:::core
+                    end
+                    FunctionObjs["functionObjects"]:::core
+                    MultiPhaseSys["multiphaseSystem"]:::core
+                end
+
+                %% Applications
+                subgraph "Applications"
+                    rocketMotor["rocketMotor (solver)"]:::app
+                end
+
+                %% Utilities
+                subgraph "Utilities"
+                    direction TB
+                    UtilRe["ReynoldsNumber"]:::util
+                    UtilMap["mapVolFields"]:::util
+                    UtilPost["postProcessRocket"]:::util
+                    UtilCons["rocketConservation"]:::util
+                    UtilSetAlpha["setMultipleAlphaField"]:::util
+                    UtilInit["setRocketInitField"]:::util
+                    UtilStream["streamFunction"]:::util
+                end
+
+                %% Data: Case Definitions & Outputs
+                subgraph "Data"
+                    direction TB
+                    CaseDefs["Case Definitions\n(tutorials/)"]:::data
+                    SimOutputs["Simulation Outputs\n(time directories)"]:::data
+                end
+
+                %% Build-time Flow
+                OpenFOAMEnv -->|"setup env"| Allwmake
+                Allwmake -->|"invoke wmake"| MakeSrc
+                Allwmake --> MakeApp
+                Allwmake --> MakeUtil1
+                MakeSrc --> PhaseSystems
+                MakeSrc --> Interfacial
+                MakeSrc --> Turbulence
+                MakeSrc --> PhaseModel
+                MakeSrc --> InterfaceTrack
+                MakeSrc --> SharpHeat
+                MakeSrc --> fvPatchFields
+                MakeSrc --> FunctionObjs
+                MakeSrc --> MultiPhaseSys
+                MakeApp --> rocketMotor
+                MakeUtil1 --> UtilRe
+                MakeUtil2 --> UtilMap
+                MakeUtil3 --> UtilPost
+
+                %% Runtime Flow
+                CaseDefs -->|"read case files"| rocketMotor
+                rocketMotor -->|"link & invoke core libs"| PhaseSystems
+                rocketMotor --> Interfacial
+                rocketMotor --> Turbulence
+                rocketMotor --> PhaseModel
+                rocketMotor --> fvPatchFields
+                rocketMotor --> MultiPhaseSys
+                rocketMotor -->|"write fields"| SimOutputs
+                SimOutputs -->|"post-process"| UtilRe
+                SimOutputs --> UtilMap
+                SimOutputs --> UtilPost
+                SimOutputs --> UtilCons
+                SimOutputs --> UtilSetAlpha
+                SimOutputs --> UtilInit
+                SimOutputs --> UtilStream
+
+                %% Click Events
+                click Allwmake "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/./Allwmake"
+                click Allwclean "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/./Allwclean"
+                click Bashrc "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/./bashrc"
+                click MakeSrc "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/Make"
+                click MakeSrcFiles "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/Make/files"
+                click MakeSrcOptions "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/Make/options"
+                click MakeApp "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor/Make"
+                click MakeAppFiles "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor/Make/files"
+                click MakeAppOpts "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor/Make/options"
+                click MakeUtil1 "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/ReynoldsNumber/Make"
+                click MakeUtil2 "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/mapVolFields/Make"
+                click MakeUtil3 "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/postProcessRocket/Make"
+                click rocketMotor "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor"
+                click PhaseSystems "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/PhaseSystems"
+                click Interfacial "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/interfacialModels"
+                click Turbulence "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/multiphaseCompressibleTurbulenceModels"
+                click PhaseModel "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/phaseModel"
+                click InterfaceTrack "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/interfaceTrackingModels"
+                click SharpHeat "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/sharpInterfaceHeatTransferModels"
+                click fvPatchFields "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/fvPatchFields"
+                click FunctionObjs "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/functionObjects"
+                click MultiPhaseSys "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/multiphaseSystem"
+                click UtilRe "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/ReynoldsNumber"
+                click UtilMap "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/mapVolFields"
+                click UtilPost "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/postProcessRocket"
+                click UtilCons "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/rocketConservation"
+                click UtilSetAlpha "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/setMultipleAlphaField"
+                click UtilInit "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/setRocketInitField"
+                click UtilStream "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/streamFunction"
+
+                %% Styles
+                classDef external fill:#CCCCCC,stroke:#333,stroke-width:1px
+                classDef build fill:#ADD8E6,stroke:#000,stroke-width:1px
+                classDef core fill:#90EE90,stroke:#000,stroke-width:1px
+                classDef app fill:#FFA500,stroke:#000,stroke-width:1px
+                classDef util fill:#D8BFD8,stroke:#000,stroke-width:1px
+                classDef data fill:#FFFFE0,stroke:#000,stroke-width:1px
+            </div>
         </section>
     </main>
 
@@ -116,6 +272,156 @@
             © 2025 Ganeshkumar V. All rights reserved.
         </p>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        /* Initialize mermaid with responsive layout option */
+        mermaid.initialize({ startOnLoad: true, flowchart: { useMaxWidth: true } });
+
+        /*
+         After mermaid renders the diagram(s) it inserts an <svg> with width/height attributes.
+         To ensure the diagram scales when the page is zoomed, convert width/height to a viewBox
+         and make the SVG responsive. We run once on DOMContentLoaded and also watch for changes
+         because mermaid may render asynchronously.
+        */
+        document.addEventListener('DOMContentLoaded', function () {
+            function makeSvgResponsive() {
+                document.querySelectorAll('.mermaid svg').forEach(svg => {
+                    try {
+                        // If there's already a viewBox, assume it's responsive enough
+                        if (!svg.getAttribute('viewBox')) {
+                            const width = svg.getAttribute('width');
+                            const height = svg.getAttribute('height');
+                            if (width && height) {
+                                svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+                                svg.removeAttribute('width');
+                                svg.removeAttribute('height');
+                                svg.style.width = '100%';
+                                svg.style.height = 'auto';
+                            }
+                        }
+                    } catch (e) {
+                        // ignore any invalid SVGs
+                    }
+                });
+            }
+
+            // Initial attempt (mermaid may have already rendered)
+            makeSvgResponsive();
+
+            // Retry shortly after in case mermaid renders after DOMContentLoaded
+            setTimeout(makeSvgResponsive, 500);
+
+            // Observe DOM changes to the mermaid container and adjust newly added SVGs
+            const mermaidContainers = document.querySelectorAll('.mermaid');
+            mermaidContainers.forEach(container => {
+                const observer = new MutationObserver(() => makeSvgResponsive());
+                observer.observe(container, { childList: true, subtree: true });
+            });
+        });
+    </script>
+    
+    <!-- svg-pan-zoom: enable interactive pan/zoom for rendered SVG diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <script>
+        // Initialize svg-pan-zoom on every mermaid SVG once it's available
+        function initPanZoomForMermaid(svg) {
+            try {
+                // If svg-pan-zoom instance already attached, return
+                if (svg._svgPanZoom) return;
+
+                // create an instance with reasonable defaults
+                const instance = svgPanZoom(svg, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: false,
+                    fit: true,
+                    center: true,
+                    minZoom: 0.25,
+                    maxZoom: 10,
+                    dblClickZoomEnabled: true,
+                    mouseWheelZoomEnabled: true
+                });
+
+                // store reference so we don't re-init
+                svg._svgPanZoom = instance;
+
+                // Adjust initial zoom so the diagram fills the container width
+                function adjustInitialZoom() {
+                    try {
+                        instance.resize();
+
+                        // Prefer computing scale from SVG viewBox to fill parent width
+                        let vb = null;
+                        try { vb = svg.viewBox && svg.viewBox.baseVal ? svg.viewBox.baseVal : null; } catch(e) { vb = null; }
+
+                        const container = svg.parentElement || svg;
+                        const containerWidth = container.clientWidth || container.getBoundingClientRect().width || 0;
+
+                        if (vb && vb.width && containerWidth > 0) {
+                            // target scale to fill width
+                            const rawScale = containerWidth / vb.width;
+                            const min = 0.25, max = 10;
+                            const target = Math.min(max, Math.max(min, rawScale));
+
+                            // apply target zoom and center
+                            try { instance.zoom(target); } catch (e) { /* ignore */ }
+                            try { instance.center(); } catch (e) { /* ignore */ }
+                        } else {
+                            // fallback to fit/center
+                            try { instance.fit(); instance.center(); } catch (e) { /* ignore */ }
+                        }
+                    } catch (e) {
+                        // retry once after a short delay
+                        setTimeout(() => {
+                            try { adjustInitialZoom(); } catch (e) {}
+                        }, 120);
+                    }
+                }
+
+                // run adjustment now
+                adjustInitialZoom();
+            } catch (e) {
+                // fail silently
+                console.warn('svg-pan-zoom init failed', e);
+            }
+        }
+
+        // Watch for mermaid SVGs (handles async render)
+        function watchMermaidSvgs() {
+            document.querySelectorAll('.mermaid svg').forEach(svg => {
+                // ensure viewBox exists (makes svg responsive)
+                if (!svg.getAttribute('viewBox')) {
+                    const w = svg.getAttribute('width');
+                    const h = svg.getAttribute('height');
+                    if (w && h) {
+                        svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+                        svg.removeAttribute('width');
+                        svg.removeAttribute('height');
+                    }
+                }
+                initPanZoomForMermaid(svg);
+            });
+
+            // Observe for newly injected SVGs
+            document.querySelectorAll('.mermaid').forEach(container => {
+                if (container._mermaidObserver) return;
+                const mo = new MutationObserver(() => {
+                    // delay slightly to let mermaid finish writing SVG
+                    setTimeout(() => watchMermaidSvgs(), 50);
+                });
+                mo.observe(container, { childList: true, subtree: true });
+                container._mermaidObserver = mo;
+            });
+        }
+
+        // Run after DOM is ready and after mermaid initializations
+        document.addEventListener('DOMContentLoaded', () => {
+            // small delay for mermaid to render
+            setTimeout(() => watchMermaidSvgs(), 250);
+            // retry once later
+            setTimeout(() => watchMermaidSvgs(), 1000);
+        });
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
 

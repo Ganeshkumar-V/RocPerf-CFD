@@ -18,6 +18,34 @@
                 {left: '$', right: '$', display: false}
             ]
         });"></script>
+    <style>
+                .flowchart-wrapper {
+                    display: flex;
+                    justify-content: center; /* This centers your flowchart */
+                }
+                .flowchart-wrapper .mermaid {
+                    min-width: 600px;  /* Adjust this value as needed */
+                    max-width: 100%; /* Allows it to be responsive */
+                }
+                /* Make Mermaid-rendered SVGs fill the mermaid container */
+                .mermaid svg {
+                    width: 100% !important;
+                    height: 100% !important;
+                    max-width: none !important;
+                    display: block;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+
+                /* Trial dimensions: adjust these values (height / max-width) as needed */
+                .mermaid {
+                    width: 100%;            /* use most of the page width */
+                    max-width: 1800px;    /* cap width to avoid overly wide diagrams */
+                    height: 50vh;         /* try 60vh, 70vh, 80vh or px values like 700px */
+                    margin: 0 auto 2rem auto;
+                    overflow: visible;    /* allow svg to be visible if larger */
+                }
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
@@ -51,19 +79,42 @@
                 </div>
             
                 <div class="relative group">
-                    <button class="text-white bg-blue-600 px-3 py-2 rounded-md text-sm font-bold" aria-current="page">
+                    <a href="equations.html" class="text-white transition-colors font-bold">
                         Theory
                         <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
+                    </a>
                     <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                        <a href="#governing-equations" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Governing Equations</a>
-                        <a href="#numerical-methods" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Numerical Methods</a>
-                        <a href="#boundary-conditions" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Boundary Conditions</a>
+                        <a href="equations.html#governing-equations" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Equations</a>
+                        <a href="equations.html#closure-models" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Closure Models</a>
+                        <a href="equations.html#solution-algo" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Solution Algorithm</a>
                     </div>
                 </div>
             
-                <a href="program.html" class="text-white hover:text-red-500 transition-colors">Program</a>
-                <a href="tutorials.html" class="text-white hover:text-red-500 transition-colors">Tutorials</a>
+                <div class="relative group">
+                    <a href="program.html" class="text-white transition-colors font-bold">
+                        Program
+                        <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </a>
+                    <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="program.html#repository-structure" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Repo-structure</a>
+                        <a href="program.html#solver" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">CFD Solver</a>
+                        <a href="program.html#library" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Libraries</a>
+                        <a href="program.html#utilities" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Utilities</a>
+                    </div>
+                </div>
+                
+                <div class="relative group">
+                    <button class="text-white bg-blue-600 px-3 py-2 rounded-md text-sm font-bold" aria-current="page">
+                        Tutorials
+                        <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="#gas-nozzle" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">CD Nozzle - Gas</a>
+                        <a href="#two-phase-nozzle" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Two phase CD Nozzle</a>
+                        <a href="#steady-SRM" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Steady SRM</a>
+                        <a href="#regression-SRM" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Transient SRM</a>
+                    </div>
+                </div>
                 <a href="html/index.html" class="text-white hover:text-red-500 transition-colors" target="_blank">API Documentation</a>
             </div>
         </nav>
@@ -80,106 +131,21 @@
 
     <!-- Main Content -->
     <main>
-        <section id="governing-equations" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <div class="max-w-4xl mx-auto">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Theoretical Framework</h2>
-                    <img src="Framework.png" alt="A representative rocket motor simulation domain and the closure models included to simulate the multiphase flow" class="mx-auto my-6 mb-6">
-                    <figcaption class="text-center text-gray-700 text-sm font-bold mt-2 mb-4">A representative rocket motor simulation domain and the closure models included to simulate the multiphase flow</figcaption>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-4">
-                        A multiphase Eulerian-Eulerian approach has been adopted in this study, in which both particles and fluid are modeled as continuous phases. 
-                        The particle size is assumed to be constant. The propellant is modeled as an additional phase, and the propellant regression is governed by the burning rate law. 
-                        The gas phase mixture is compressible and its thermodynamic state is governed by the ideal gas equation of state, and the particle phase is treated as an incompressible phase with constant density. 
-                        The combustion process is modeled as a single-step process producing only major gas-phase product species and particles, which enter the combustion chamber. 
-                        The species diffusion processes in the rocket motor are neglected, considering high velocities in the rocket motor.  
-                        Viscous effects in the fluid flow are considered and the no-slip condition is enforced along the walls of the rocket motor. 
-                        The gas is assumed to be chemically frozen during expansion and species diffusion is ignored, thus, the species mass conservation equations for gas-phase species are not solved. 
-                    </p>
-                    <p class="text-lg font-bold text-gray-900 mb-4">Governing Equations:</p>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-4">The mass conservation equations of gas and particle phases are given by:</p>
-                    <p>
-                        $$
-                        \frac{\partial}{\partial t}(\alpha_k \rho_k) + \nabla \cdot (\alpha_k \rho_k \boldsymbol{u}_k) = \dot{m}'''_{prop \rightarrow k} \tag{1}
-                        $$
-                    </p>
+        <section id="gas-nozzle" class="bg-white">
 
-                    <p class="text-lg text-gray-700 leading-relaxed mb-4">
-                        where $\alpha_k$, $\rho_k$, and $\boldsymbol{u}_k$ are the volume fraction, density, and velocity of the $k^{\text{th}}$ phase, respectively. The source term due to mass transfer from propellant to $k^{\text{th}}$ phase is denoted as $\dot{m}'''_{prop \rightarrow k}$. The momentum conservation equations for the gas phase and particle phase are given by:
-                    </p>
-
-                    <p>
-                        $$
-                        \frac{\partial}{\partial t}(\alpha_g \rho_g \boldsymbol{u}_g) + \nabla \cdot (\alpha_g \rho_g \boldsymbol{u}_g \boldsymbol{u}_g) = -\alpha_g \nabla P + \nabla \cdot (\alpha_g \boldsymbol{\tau}_g) 
-                        + \boldsymbol{M}_{prop \rightarrow g} + \boldsymbol{f}_{D,g}
-                        \tag{2}
-                        $$
-                    </p>
-
-                    <p>
-                        $$
-                        \frac{\partial}{\partial t}(\alpha_p \rho_p \boldsymbol{u}_p) + \nabla \cdot (\alpha_p \rho_p \boldsymbol{u}_p \boldsymbol{u}_p) = -\alpha_p \nabla P + \boldsymbol{M}_{prop \rightarrow p} + \boldsymbol{f}_{D,p} \tag{3}
-                        $$
-                    </p>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-4">
-                        where $P$ is the common pressure experienced by all the phases, $\tau_k$ is the shear stress in the $k^{\text{th}}$ phase, and $f_{D,k}$ is the drag force experienced by the $k^{\text{th}}$ phase. The subscripts $g$ and $p$ refer to gas and particle phases, respectively. Note that the particle–particle interaction terms are not included in the above equations. The justification for this omission as well as the effect of particle–particle interactions on propulsive performance are discussed in Sec. V. Here $\boldsymbol{M}_{prop \rightarrow g}$ and $\boldsymbol{M}_{prop \rightarrow p}$ represent momentum source terms for the gas phase and particle phase, respectively, due to regression. The shear stress in the gas phase is modeled as follows:
-                    </p>
-
-                    <p>
-                        $$
-                        \tau_g = \mu_g (\nabla \boldsymbol{u}_g + \nabla \boldsymbol{u}_g^T) - \frac{2}{3} \mu_g (\nabla \cdot \boldsymbol{u}_g) \boldsymbol{I} \tag{4}
-                        $$
-                    </p>
-
-                    <p class="text-lg text-gray-700 leading-relaxed mb-4">
-                        The energy conservation equations for the gas phase and particle phase considered are:
-                    </p>
-
-                    <p>
-                        $$
-                        \begin{aligned}
-                        \frac{\partial}{\partial t}(\alpha_g \rho_g h_g) + \nabla \cdot (\alpha_g \rho_g \boldsymbol{u}_g h_g) = \nabla \cdot \left( \frac{\alpha_g \lambda_g}{C_{p,g}} \nabla h_g \right) + \alpha_g \frac{DP}{Dt} 
-                         & + \alpha_g \boldsymbol{\tau}_g : \nabla \boldsymbol{u}_g + \dot{q}'''_{p \rightarrow g} \\
-                         & + f_{D,g} \cdot (\boldsymbol{u}_p - \boldsymbol{u}_g) + H_{prop \rightarrow g} 
-                        \tag{5}
-                        \end{aligned}
-                        $$
-                    </p>
-
-                    <p>
-                        $$
-                        \frac{\partial}{\partial t}(\alpha_p \rho_p h_p) + \nabla \cdot (\alpha_p \rho_p \boldsymbol{u}_p h_p) = \alpha_p \frac{DP}{Dt} + H_{prop \rightarrow p} + \dot{q}'''_{g \rightarrow p} \tag{6}
-                        $$
-                    </p>
-                    <p class="text-lg text-gray-700 leading-relaxed mb-4">
-                        where $h$ is the enthalpy, $\lambda$ is the thermal conductivity, $C_p$ is the specific heat, 
-                        $H_{\text{prop}\to k}$ is the enthalpy source term for the $k$th phase due to regression, and 
-                        $q'''_{i\to j}$ is the rate of heat transfer from the $i$th phase to the $j$th phase. 
-                        Note that the source terms due to propellant regression are only relevant to the computational cells adjacent to the surface of the propellant bed. 
-                        For the remaining computational cells inside the rocket motor, only the source terms arising from particle–gas interactions are relevant.
-                    </p>
-
-                    <hr class="my-12">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-6">References</h3>
-
-                    <div id="bibliography" class="text-lg text-gray-700 leading-relaxed space-y-4"></div>
-            </div>
         </section>
     </main>
 
     <!-- Footer -->
     <footer>
-        <p class="mb-4 text-gray-500">
+        <p class="mb-4 text-gray-500 max-w-6xl mx-auto">
             Distributed under the GNU General Public License v3 (GPL-3.0). See the 
-            <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/blob/main/LICENSE" 
+            <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/main/LICENSE" 
                target="_blank" rel="noopener noreferrer" 
-               class="text-gray-300 hover:text-white hover:underline">
+               class="text-gray-500 hover:text-gray-500 hover:underline">
                LICENSE
             </a> 
-            file for the full text.
-        </p>
-
-        <p class="mb-6 text-gray-500 max-w-2xl mx-auto">
-            This software is an independent project and is not affiliated with, endorsed by, or 
+            file for the full text. This software is an independent project and is neither endorsed by, nor 
             associated with OpenCFD Ltd or the OpenFOAM® project. OpenFOAM® is a 
             registered trademark of OpenCFD Ltd.
         </p>

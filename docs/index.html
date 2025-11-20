@@ -53,8 +53,32 @@
                         <a href="equations.html#solution-algo" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Solution Algorithm</a>
                     </div>
                 </div>
-                <a href="program.html" class="text-white hover:text-red-500 transition-colors">Program</a>
-                <a href="tutorials.html" class="text-white hover:text-red-500 transition-colors">Tutorials</a>
+
+                <div class="relative group">
+                    <a href="program.html" class="text-white transition-colors font-bold">
+                        Program
+                        <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </a>
+                    <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="program.html#repository-structure" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Repo-structure</a>
+                        <a href="program.html#solver" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">CFD Solver</a>
+                        <a href="program.html#library" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Libraries</a>
+                        <a href="program.html#utilities" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Utilities</a>
+                    </div>
+                </div>
+
+                <div class="relative group">
+                    <a href="tutorials.html" class="text-white transition-colors font-bold">
+                        Tutorials
+                        <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </a>
+                    <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                        <a href="tutorials.html#gas-nozzle" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">CD Nozzle - Gas</a>
+                        <a href="tutorials.html#two-phase-nozzle" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Two phase CD Nozzle</a>
+                        <a href="tutorials.html#steady-SRM" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Steady SRM</a>
+                        <a href="tutorials.html#regression-SRM" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Transient SRM</a>
+                    </div>
+                </div>
                 <a href="html/index.html" class="text-white hover:text-red-500 transition-colors" target="_blank">API Documentation</a>
             </div>
         </nav>
@@ -400,18 +424,14 @@
 
     <!-- Footer -->
     <footer>
-        <p class="mb-4 text-gray-500">
+        <p class="mb-4 text-gray-500 max-w-6xl mx-auto">
             Distributed under the GNU General Public License v3 (GPL-3.0). See the 
-            <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/blob/main/LICENSE" 
+            <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/main/LICENSE" 
                target="_blank" rel="noopener noreferrer" 
                class="text-gray-500 hover:text-gray-500 hover:underline">
                LICENSE
             </a> 
-            file for the full text.
-        </p>
-
-        <p class="mb-6 text-gray-500 max-w-2xl mx-auto">
-            This software is an independent project and is not affiliated with, endorsed by, or 
+            file for the full text. This software is an independent project and is neither endorsed by, nor 
             associated with OpenCFD Ltd or the OpenFOAM® project. OpenFOAM® is a 
             registered trademark of OpenCFD Ltd.
         </p>

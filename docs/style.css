@@ -211,3 +211,139 @@ footer {
 footer p {
     margin: 0.5rem 0;
 }
+/* --- Compact Code Narrative Styles --- */
+
+.cn-wrapper {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    font-family: 'Inter', system-ui, sans-serif;
+    /* FIX 1: Add margin so it doesn't overlap the diagram above */
+    margin-top: 60px; 
+    padding: 40px 0;
+    position: relative;
+    z-index: 1; /* Ensure it sits on its own layer */
+}
+
+/* 1. Make the main container wider so everything fits comfortably */
+.cn-container {
+    display: flex;
+    max-width: 1300px; /* <-- INCREASED from 1000px */
+    margin: 0 auto;
+    gap: 60px; /* Increased gap for better separation */
+    align-items: flex-start;
+}
+
+/* 2. Give the code window more share of the screen */
+.cn-sticky-col {
+    width: 60%; /* <-- INCREASED from 50% */
+    height: auto; 
+    position: sticky; 
+    top: 100px; 
+}
+
+/* 3. Reduce the text column slightly to balance it out */
+.cn-scroll-col {
+    width: 35%; /* <-- DECREASED from 45% */
+    padding-top: 0; 
+}
+
+.cn-code-window {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    width: 100%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    
+    /* --- CHANGE THIS --- */
+    max-height: 80vh; 
+    overflow-y: auto; /* Allows scrolling if code is too long */
+    overflow-x: hidden;
+    
+    /* Optional: Smooth scrolling for the container */
+    scroll-behavior: smooth; 
+}
+
+/* Hide the scrollbar for a cleaner look (works on Chrome/Safari/Edge) */
+.cn-code-window::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
+
+.cn-window-header {
+    background: #0d1117;
+    padding: 8px 12px;
+    border-bottom: 1px solid #30363d;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cn-dot { width: 8px; height: 8px; border-radius: 50%; }
+.red { background: #ff5f56; }
+.yellow { background: #ffbd2e; }
+.green { background: #27c93f; }
+.cn-filename { margin-left: 8px; font-size: 11px; color: #8b949e; font-family: monospace; }
+
+.cn-code-window pre {
+    margin: 0;
+    padding: 15px;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px; /* Slightly smaller font */
+    line-height: 0.5;
+    overflow-x: auto;
+}
+
+/* Animation Logic */
+.cn-line {
+    display: block;
+    opacity: 0.4; 
+    transition: all 0.3s ease;
+    padding: 0 4px;
+    border-radius: 2px;
+    /* FIX 5: Removed blur filter which can look messy on some screens */
+}
+
+.cn-line.active {
+    opacity: 1;
+    background: rgba(56, 139, 253, 0.1);
+    border-left: 2px solid #58a6ff;
+    font-weight: 600;
+}
+
+/* Syntax Colors */
+.kwd { color: #ff7b72; }
+.fun { color: #d2a8ff; }
+.str { color: #a5d6ff; }
+.typ { color: #79c0ff; }
+.com { color: #8b949e; font-style: italic; }
+
+.cn-step {
+    /* FIX 6: Reduce scroll distance between steps */
+    min-height: 40vh; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    opacity: 0.2;
+    transition: opacity 0.3s;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 1px solid transparent; /* Guide line */
+}
+
+.cn-step.active {
+    opacity: 1;
+    border-left: 1px solid #58a6ff; /* Visual cue for active text */
+}
+
+.cn-step h3 { color: #58a6ff; margin: 0 0 8px 0; font-size: 1.1rem; }
+.cn-step p { line-height: 1.5; color: #c9d1d9; margin: 0; font-size: 0.95rem; }
+
+.cn-spacer { height: 10vh; }
+
+/* Mobile Fix */
+@media (max-width: 768px) {
+    .cn-container { flex-direction: column-reverse; }
+    .cn-sticky-col { position: relative; top: 0; width: 100%; margin-bottom: 20px; }
+    .cn-scroll-col { width: 100%; }
+    .cn-step { min-height: auto; margin-bottom: 30px; opacity: 1; border: none;}
+}

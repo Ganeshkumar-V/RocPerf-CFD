@@ -46,6 +46,10 @@
                     overflow: visible;    /* allow svg to be visible if larger */
                 }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+    
 </head>
 <body class="bg-gray-100 text-gray-800">
 
@@ -132,147 +136,160 @@
     <!-- Main Content -->
     <main>
         <section id="repository-structure" class="bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-7xl mx-auto">
+                    <p class="text-2xl font-bold text-gray-900 mb-4">Libraries and Solver</p>
+                    <p class="text-lg text-gray-700 leading-relaxed mb-4">The main application is <strong>rocketMotor</strong>
+                        which depends on several libraries including the base libraries of OpenFOAM-v2112. The solver is developed
+                        based on the native OpenFOAM v2112 solver "reactingMultiphaseEulerFoam". This framework has an additional
+                        library that includes the relavant closure models for propellant surface regression and interphase 
+                        interactions (drag and heat transfer models). 
+                    </p>
+                </div>
+            </div>
             <div class="mermaid">
-                flowchart TD
-                %% External Dependency
-                OpenFOAMEnv["OpenFOAM Environment\n(libOpenFOAM, libfiniteVolume, MPI)"]:::external
-
-                %% Build System
-                subgraph "Build System" 
-                    direction TB
-                    Allwmake["Allwmake"]:::build
-                    Allwclean["Allwclean"]:::build
-                    Bashrc["bashrc"]:::build
-                    subgraph "Per-module Make Configs"
-                        direction TB
-                        MakeSrc["src/Make"]:::build
-                        MakeSrcFiles["src/Make/files"]:::build
-                        MakeSrcOptions["src/Make/options"]:::build
-                        MakeApp["applications/rocketMotor/Make"]:::build
-                        MakeAppFiles["applications/rocketMotor/Make/files"]:::build
-                        MakeAppOpts["applications/rocketMotor/Make/options"]:::build
-                        MakeUtil1["utilities/ReynoldsNumber/Make"]:::build
-                        MakeUtil2["utilities/mapVolFields/Make"]:::build
-                        MakeUtil3["utilities/postProcessRocket/Make"]:::build
-                    end
+                %%{ init: { 
+                    'theme': 'neutral', 
+                    'fontFamily': 'Exo 2', 
+                    'flowchart': { 'curve': 'stepAfter' }, 
+                    'themeVariables': { 
+                      'primaryColor': '#ffffff',
+                      'edgeLabelBackground': '#ffffff', 
+                      'tertiaryColor': '#ffffff', 
+                      'lineColor': '#000000'
+                    } 
+                  } }%%
+                flowchart LR
+                subgraph OpenFOAM_Base_Group [<strong>OpenFOAM v2112 Base Libraries</strong>]
+                    List["libfiniteVolume.so <br/> libOpenFOAM.so <br/> libfluidThermophysicalModels.so <br/> libreactionThermophysicalModels.so <br/> libcompressibleTransportModels.so <br/> libspecie.so <br/> libcompressibleTurbulenceModels.so <br/> libturbulenceModels.so <br/> libthermophysicalProperties.so <br/> libcombustionModels.so <br/> libmeshTools.so <br/> libsurfMesh.so <br/> libdynamicMesh.so"]
+                    style List text-align:left
                 end
 
-                %% Core Libraries
-                subgraph "Core Libraries" 
-                    direction TB
-                    subgraph "Physics Models"
-                        PhaseSystems["PhaseSystems"]:::core
-                        Interfacial["interfacialModels"]:::core
-                        Turbulence["multiphaseCompressibleTurbulenceModels"]:::core
-                        PhaseModel["phaseModel"]:::core
-                        InterfaceTrack["interfaceTrackingModels"]:::core
-                        SharpHeat["sharpInterfaceHeatTransferModels"]:::core
-                    end
-                    subgraph "Boundary Conditions"
-                        fvPatchFields["fvPatchFields"]:::core
-                    end
-                    FunctionObjs["functionObjects"]:::core
-                    MultiPhaseSys["multiphaseSystem"]:::core
+                subgraph OpenFOAM_Multiphase_Group [<strong>OpenFOAM v2112 Multiphase Library</strong>]
+                    B["libreactingMultiphaseSystem.so"]
                 end
+                C["<strong>RocIBCFD Framework source</strong> <br/> (libpropellantRegressionPhaseSystem.so)"]
+                D["<div style='padding: 30px 50px'><span style='font-size:30px; font-weight:bold'>rocketMotor</span> <br/> (Main Application)</div>"]
 
-                %% Applications
-                subgraph "Applications"
-                    rocketMotor["rocketMotor (solver)"]:::app
-                end
+                List -->|Mesh, Thermophysical and <br/> Transport properties| C
+                B -->|Phase Models, Phase System <br/> and Phase Pair| C
+                C -->|Multiphase Systems <br/> Interphase Models| D
 
-                %% Utilities
-                subgraph "Utilities"
-                    direction TB
-                    UtilRe["ReynoldsNumber"]:::util
-                    UtilMap["mapVolFields"]:::util
-                    UtilPost["postProcessRocket"]:::util
-                    UtilCons["rocketConservation"]:::util
-                    UtilSetAlpha["setMultipleAlphaField"]:::util
-                    UtilInit["setRocketInitField"]:::util
-                    UtilStream["streamFunction"]:::util
-                end
-
-                %% Data: Case Definitions & Outputs
-                subgraph "Data"
-                    direction TB
-                    CaseDefs["Case Definitions\n(tutorials/)"]:::data
-                    SimOutputs["Simulation Outputs\n(time directories)"]:::data
-                end
-
-                %% Build-time Flow
-                OpenFOAMEnv -->|"setup env"| Allwmake
-                Allwmake -->|"invoke wmake"| MakeSrc
-                Allwmake --> MakeApp
-                Allwmake --> MakeUtil1
-                MakeSrc --> PhaseSystems
-                MakeSrc --> Interfacial
-                MakeSrc --> Turbulence
-                MakeSrc --> PhaseModel
-                MakeSrc --> InterfaceTrack
-                MakeSrc --> SharpHeat
-                MakeSrc --> fvPatchFields
-                MakeSrc --> FunctionObjs
-                MakeSrc --> MultiPhaseSys
-                MakeApp --> rocketMotor
-                MakeUtil1 --> UtilRe
-                MakeUtil2 --> UtilMap
-                MakeUtil3 --> UtilPost
-
-                %% Runtime Flow
-                CaseDefs -->|"read case files"| rocketMotor
-                rocketMotor -->|"link & invoke core libs"| PhaseSystems
-                rocketMotor --> Interfacial
-                rocketMotor --> Turbulence
-                rocketMotor --> PhaseModel
-                rocketMotor --> fvPatchFields
-                rocketMotor --> MultiPhaseSys
-                rocketMotor -->|"write fields"| SimOutputs
-                SimOutputs -->|"post-process"| UtilRe
-                SimOutputs --> UtilMap
-                SimOutputs --> UtilPost
-                SimOutputs --> UtilCons
-                SimOutputs --> UtilSetAlpha
-                SimOutputs --> UtilInit
-                SimOutputs --> UtilStream
-
-                %% Click Events
-                click Allwmake "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/./Allwmake"
-                click Allwclean "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/./Allwclean"
-                click Bashrc "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/./bashrc"
-                click MakeSrc "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/Make"
-                click MakeSrcFiles "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/Make/files"
-                click MakeSrcOptions "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/Make/options"
-                click MakeApp "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor/Make"
-                click MakeAppFiles "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor/Make/files"
-                click MakeAppOpts "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor/Make/options"
-                click MakeUtil1 "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/ReynoldsNumber/Make"
-                click MakeUtil2 "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/mapVolFields/Make"
-                click MakeUtil3 "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/postProcessRocket/Make"
-                click rocketMotor "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/applications/rocketMotor"
-                click PhaseSystems "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/PhaseSystems"
-                click Interfacial "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/interfacialModels"
-                click Turbulence "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/multiphaseCompressibleTurbulenceModels"
-                click PhaseModel "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/phaseModel"
-                click InterfaceTrack "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/interfaceTrackingModels"
-                click SharpHeat "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/sharpInterfaceHeatTransferModels"
-                click fvPatchFields "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/fvPatchFields"
-                click FunctionObjs "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/functionObjects"
-                click MultiPhaseSys "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/src/multiphaseSystem"
-                click UtilRe "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/ReynoldsNumber"
-                click UtilMap "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/mapVolFields"
-                click UtilPost "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/postProcessRocket"
-                click UtilCons "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/rocketConservation"
-                click UtilSetAlpha "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/setMultipleAlphaField"
-                click UtilInit "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/setRocketInitField"
-                click UtilStream "https://github.com/ganeshkumar-v/propellant-regression-framework/tree/master/utilities/streamFunction"
-
-                %% Styles
-                classDef external fill:#CCCCCC,stroke:#333,stroke-width:1px
-                classDef build fill:#ADD8E6,stroke:#000,stroke-width:1px
-                classDef core fill:#90EE90,stroke:#000,stroke-width:1px
-                classDef app fill:#FFA500,stroke:#000,stroke-width:1px
-                classDef util fill:#D8BFD8,stroke:#000,stroke-width:1px
-                classDef data fill:#FFFFE0,stroke:#000,stroke-width:1px
+                %% Subgraphs (Outer Boxes)
+                style OpenFOAM_Base_Group fill:#fff8e1,stroke:#ffa000,stroke-width:2px;
+                style OpenFOAM_Multiphase_Group fill:#fff8e1,stroke:#ffa000,stroke-width:2px;
+                        
+                %% Nodes (Inner Boxes)
+                style List fill:#ffe0b2,stroke:#ffa000,stroke-width:1px;
+                style B fill:#ffe0b2,stroke:#ffa000,stroke-width:1px;
+                style C fill:#eceff1,stroke:#78909c,stroke-width:2px;
+                style D fill:#c5e1a5,stroke:#7cb342,stroke-width:4px;
+                        
+                %% Link Styling 
+                linkStyle 0,1,2 stroke:#000000,stroke-width:2px,fill:none,color:#000000
+            </div>
+        </section>
+        <section class="cn-wrapper">
+            <div class="cn-container">
+                
+                <div class="cn-sticky-col">
+                    <div class="cn-code-window">
+                        <div class="cn-window-header">
+                            <span class="cn-dot red"></span>
+                            <span class="cn-dot yellow"></span>
+                            <span class="cn-dot green"></span>
+                            <span class="cn-filename">rocketMotor/main.C</span>
+                        </div>
+                        <pre>
+        <span class="cn-line" id="L1"><span class="kwd">#include</span> "fvCFD.H"</span>
+        <span class="cn-line" id="L2"><span class="kwd">#include</span> "multiPhaseSystem.H"</span>
+        <span class="cn-line" id="L3"><span class="kwd">#include</span> "pimpleControl.H"</span>
+        <span class="cn-line" id="L4"><span class="com">// ... standard OpenFOAM includes ...</span></span>
+        <span class="cn-line" id="L5"></span>
+        <span class="cn-line" id="L6"><span class="kwd">int</span> <span class="fun">main</span>(<span class="kwd">int</span> argc, <span class="kwd">char</span> *argv[])</span>
+        <span class="cn-line" id="L7">{</span>
+        <span class="cn-line" id="L8">    <span class="kwd">#include</span> "postProcess.H"</span>
+        <span class="cn-line" id="L9">    <span class="kwd">#include</span> "setRootCase.H"</span>
+        <span class="cn-line" id="L10">    <span class="kwd">#include</span> "createTime.H"</span>
+        <span class="cn-line" id="L11">    <span class="kwd">#include</span> "createMesh.H"</span>
+        <span class="cn-line" id="L12">    <span class="kwd">#include</span> "createFields.H"</span>
+        <span class="cn-line" id="L13"></span>
+        <span class="cn-line" id="L14">    <span class="com">// Correcting Phase Volume Fractions</span></span>
+        <span class="cn-line" id="L15">    <span class="kwd">forAll</span>(fluid.phases(), phasei) {</span>
+        <span class="cn-line" id="L16">        fluid.phases()[phasei].<span class="fun">clip</span>(SMALL, 1 - SMALL);</span>
+        <span class="cn-line" id="L17">    }</span>
+        <span class="cn-line" id="L18"></span>
+        <span class="cn-line" id="L19">    <span class="typ">label</span> propellantIndex = fluid.<span class="fun">get</span>&lt;<span class="typ">label</span>&gt;(<span class="str">"propellantIndex"</span>);</span>
+        <span class="cn-line" id="L20"></span>
+        <span class="cn-line" id="L21">    <span class="kwd">while</span> (runTime.<span class="fun">run</span>())</span>
+        <span class="cn-line" id="L22">    {</span>
+        <span class="cn-line" id="L23">        <span class="kwd">#include</span> "readTimeControls.H"</span>
+        <span class="cn-line" id="L24">        <span class="kwd">#include</span> "CourantNo.H"</span>
+        <span class="cn-line" id="L25"></span>
+        <span class="cn-line" id="L26">        runTime++;</span>
+        <span class="cn-line" id="L27">        Info&lt;&lt; <span class="str">"Time = "</span> &lt;&lt; runTime.<span class="fun">timeName</span>() &lt;&lt; nl &lt;&lt; endl;</span>
+        <span class="cn-line" id="L28"></span>
+        <span class="cn-line" id="L29">        <span class="com">// --- Pressure-velocity PIMPLE corrector loop</span></span>
+        <span class="cn-line" id="L30">        <span class="kwd">while</span> (pimple.<span class="fun">loop</span>())</span>
+        <span class="cn-line" id="L31">        {</span>
+        <span class="cn-line" id="L32">            fluid.<span class="fun">solve</span>();</span>
+        <span class="cn-line" id="L33">            fluid.<span class="fun">correct</span>();</span>
+        <span class="cn-line" id="L34"></span>
+        <span class="cn-line" id="L35">            <span class="com">// Solve Conservation Equations</span></span>
+        <span class="cn-line" id="L36">            <span class="kwd">#include</span> "pU/UEqns.H"</span>
+        <span class="cn-line" id="L37">            <span class="kwd">#include</span> "EEqns.H"</span>
+        <span class="cn-line" id="L38">            <span class="kwd">#include</span> "pU/pEqn.H"</span>
+        <span class="cn-line" id="L39">        }</span>
+        <span class="cn-line" id="L40"></span>
+        <span class="cn-line" id="L41">        <span class="kwd">if</span> (runTime.<span class="fun">writeTime</span>())</span>
+        <span class="cn-line" id="L42">        {</span>
+        <span class="cn-line" id="L43">            <span class="com">// Calculate Mach Number</span></span>
+        <span class="cn-line" id="L44">            Mach = <span class="fun">mag</span>(phases[0].<span class="fun">U</span>())/<span class="fun">sqrt</span>(Gammag*p/Rhog);</span>
+        <span class="cn-line" id="L45">        }</span>
+        <span class="cn-line" id="L46"></span>
+        <span class="cn-line" id="L47">        runTime.<span class="fun">write</span>();</span>
+        <span class="cn-line" id="L48">    }</span>
+        <span class="cn-line" id="L49">    </span>
+        <span class="cn-line" id="L50">    ::_Exit(0);</span>
+        <span class="cn-line" id="L51">}</span>
+                        </pre>
+                    </div>
+                </div>
+        
+                <div class="cn-scroll-col">
+                    
+                    <div class="cn-step" data-lines="L1,L2,L3">
+                        <h3>OpenFOAM Libraries</h3>
+                        <p>We import the core Finite Volume (fvCFD) and Multiphase frameworks. This provides the mathematical foundation for solving Navier-Stokes equations across multiple fluid states (liquid propellant and gas).</p>
+                    </div>
+        
+                    <div class="cn-step" data-lines="L8,L9,L10,L11,L12">
+                        <h3>Case Initialization</h3>
+                        <p>Standard OpenFOAM boilerplate. This initializes the <code>Time</code> object, generates the 3D <code>Mesh</code>, and allocates memory for the fields (Pressure, Velocity, Temperature) defined in the case files.</p>
+                    </div>
+        
+                    <div class="cn-step" data-lines="L15,L16,L19">
+                        <h3>Phase Safety Checks</h3>
+                        <p>Before the simulation starts, we clip the volume fractions between <code>SMALL</code> and <code>1-SMALL</code> to prevent numerical instability. We also identify the specific <code>propellantIndex</code> to track the fuel phase.</p>
+                    </div>
+        
+                    <div class="cn-step" data-lines="L21,L26,L27">
+                        <h3>The Time Loop</h3>
+                        <p>The main simulation loop. <code>runTime.run()</code> checks if the simulation has reached its end time. We increment the time step and print the current state to the console.</p>
+                    </div>
+        
+                    <div class="cn-step" data-lines="L30,L31,L32,L36,L37,L38">
+                        <h3>PIMPLE Solver</h3>
+                        <p>Inside every time step, we run the PIMPLE loop (merged PISO-SIMPLE algorithm). This iteratively solves the Momentum (<code>UEqns</code>), Energy (<code>EEqns</code>), and Pressure (<code>pEqn</code>) equations until convergence is reached.</p>
+                    </div>
+        
+                     <div class="cn-step" data-lines="L41,L44">
+                        <h3>Acoustics & Output</h3>
+                        <p>When a write interval is hit, we calculate the gas phase <strong>Mach Number</strong> on the fly using the computed velocity, pressure, and density fields, then write the results to disk.</p>
+                    </div>
+        
+                    <div class="cn-spacer"></div>
+                </div>
             </div>
         </section>
     </main>
@@ -344,7 +361,7 @@
         });
     </script>
     
-    <!-- svg-pan-zoom: enable interactive pan/zoom for rendered SVG diagrams -->
+    <!-- svg-pan-zoom: enable interactive pan/zoom for rendered SVG diagrams
     <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
     <script>
         // Initialize svg-pan-zoom on every mermaid SVG once it's available
@@ -444,7 +461,7 @@
             // retry once later
             setTimeout(() => watchMermaidSvgs(), 1000);
         });
-    </script>
+    </script> -->
 
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -467,6 +484,64 @@
         menuButton.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
+    </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        
+        const steps = document.querySelectorAll('.cn-step');
+        const lines = document.querySelectorAll('.cn-line');
+        const codeWindow = document.querySelector('.cn-code-window');
+    
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // 1. Highlight the text card
+                    steps.forEach(s => s.classList.remove('active'));
+                    entry.target.classList.add('active');
+    
+                    // 2. Get lines from data attribute
+                    const activeLineIds = entry.target.getAttribute('data-lines').split(',');
+    
+                    // 3. Reset all code lines
+                    lines.forEach(l => l.classList.remove('active'));
+    
+                    // 4. Highlight specific lines AND Auto-Scroll
+                    let firstActiveLine = null;
+    
+                    activeLineIds.forEach((id, index) => {
+                        const el = document.getElementById(id);
+                        if(el) {
+                            el.classList.add('active');
+                            if (index === 0) firstActiveLine = el;
+                        }
+                    });
+    
+                    // 5. The Auto-Scroll Logic
+                    if (firstActiveLine && codeWindow) {
+                        // Calculate position to scroll to (center the line)
+                        const windowHeight = codeWindow.offsetHeight;
+                        const lineTop = firstActiveLine.offsetTop;
+                        const lineHeight = firstActiveLine.offsetHeight;
+                        
+                        // Scroll position = Line Position - Half Window Height + Half Line Height
+                        const scrollTarget = lineTop - (windowHeight / 2) + (lineHeight / 2);
+    
+                        codeWindow.scrollTo({
+                            top: scrollTarget,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        }, {
+            root: null,
+            threshold: 0.6, // Wait until 60% of text is visible
+            rootMargin: "-10% 0px -20% 0px" // Focus area in center-screen
+        });
+    
+        steps.forEach(step => observer.observe(step));
+    });
     </script>
 
 </body>

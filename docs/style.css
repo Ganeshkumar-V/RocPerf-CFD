@@ -235,10 +235,15 @@ footer p {
 
 /* 2. Give the code window more share of the screen */
 .cn-sticky-col {
-    width: 60%; /* <-- INCREASED from 50% */
-    height: auto; 
-    position: sticky; 
-    top: 100px; 
+    width: 60%;
+    height: 100vh; /* Must be full height for centering to work */
+    position: sticky;
+    top: 0;
+    
+    /* Center the code window vertically */
+    display: flex;
+    align-items: center; 
+    justify-content: center;
 }
 
 /* 3. Reduce the text column slightly to balance it out */
@@ -289,18 +294,17 @@ footer p {
     padding: 15px;
     font-family: 'Fira Code', monospace;
     font-size: 14px; /* Slightly smaller font */
-    line-height: 0.5;
+    line-height: 1.0;
     overflow-x: auto;
 }
 
 /* Animation Logic */
 .cn-line {
     display: block;
-    opacity: 0.4; 
+    opacity: 0.75; 
     transition: all 0.3s ease;
-    padding: 0 4px;
-    border-radius: 2px;
-    /* FIX 5: Removed blur filter which can look messy on some screens */
+    padding: 0 8px;
+    border-radius: 1px;
 }
 
 .cn-line.active {
@@ -318,7 +322,7 @@ footer p {
 .com { color: #8b949e; font-style: italic; }
 
 .cn-step {
-    /* FIX 6: Reduce scroll distance between steps */
+    /* Reduce scroll distance between steps */
     min-height: 40vh; 
     display: flex;
     flex-direction: column;

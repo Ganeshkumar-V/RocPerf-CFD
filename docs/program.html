@@ -189,103 +189,216 @@
                 linkStyle 0,1,2 stroke:#000000,stroke-width:2px,fill:none,color:#000000
             </div>
         </section>
-        <section class="cn-wrapper">
+        <section id="solver" class="cn-wrapper">
+            <div class="container mx-auto px-6">
+                <div class="max-w-7xl mx-auto">
+                    <p class="text-2xl font-bold text-white mb-4">🚀 CFD solver - rocketMotor</p>
+                </div>
+            </div>
             <div class="cn-container">
-                
                 <div class="cn-sticky-col">
                     <div class="cn-code-window">
                         <div class="cn-window-header">
                             <span class="cn-dot red"></span>
                             <span class="cn-dot yellow"></span>
                             <span class="cn-dot green"></span>
-                            <span class="cn-filename">rocketMotor/main.C</span>
+                            <span class="cn-filename">rocketMotor/rocketMotor.C (PIMPLE Loop)</span>
                         </div>
                         <pre>
-        <span class="cn-line" id="L1"><span class="kwd">#include</span> "fvCFD.H"</span>
-        <span class="cn-line" id="L2"><span class="kwd">#include</span> "multiPhaseSystem.H"</span>
-        <span class="cn-line" id="L3"><span class="kwd">#include</span> "pimpleControl.H"</span>
-        <span class="cn-line" id="L4"><span class="com">// ... standard OpenFOAM includes ...</span></span>
+        <span class="cn-line" style="opacity: 0.3">// ... previous code ... (For one time step)</span>
+        
+        <span class="cn-line" id="L1"><span class="kwd">while</span> (pimple.<span class="fun">loop</span>())</span>
+        <span class="cn-line" id="L2">{</span>
+        <span class="cn-line" id="L3">    fluid.<span class="fun">solve</span>();</span>
+        <span class="cn-line" id="L4">    fluid.<span class="fun">correct</span>();</span>
         <span class="cn-line" id="L5"></span>
-        <span class="cn-line" id="L6"><span class="kwd">int</span> <span class="fun">main</span>(<span class="kwd">int</span> argc, <span class="kwd">char</span> *argv[])</span>
-        <span class="cn-line" id="L7">{</span>
-        <span class="cn-line" id="L8">    <span class="kwd">#include</span> "postProcess.H"</span>
-        <span class="cn-line" id="L9">    <span class="kwd">#include</span> "setRootCase.H"</span>
-        <span class="cn-line" id="L10">    <span class="kwd">#include</span> "createTime.H"</span>
-        <span class="cn-line" id="L11">    <span class="kwd">#include</span> "createMesh.H"</span>
-        <span class="cn-line" id="L12">    <span class="kwd">#include</span> "createFields.H"</span>
-        <span class="cn-line" id="L13"></span>
-        <span class="cn-line" id="L14">    <span class="com">// Correcting Phase Volume Fractions</span></span>
-        <span class="cn-line" id="L15">    <span class="kwd">forAll</span>(fluid.phases(), phasei) {</span>
-        <span class="cn-line" id="L16">        fluid.phases()[phasei].<span class="fun">clip</span>(SMALL, 1 - SMALL);</span>
-        <span class="cn-line" id="L17">    }</span>
-        <span class="cn-line" id="L18"></span>
-        <span class="cn-line" id="L19">    <span class="typ">label</span> propellantIndex = fluid.<span class="fun">get</span>&lt;<span class="typ">label</span>&gt;(<span class="str">"propellantIndex"</span>);</span>
-        <span class="cn-line" id="L20"></span>
-        <span class="cn-line" id="L21">    <span class="kwd">while</span> (runTime.<span class="fun">run</span>())</span>
-        <span class="cn-line" id="L22">    {</span>
-        <span class="cn-line" id="L23">        <span class="kwd">#include</span> "readTimeControls.H"</span>
-        <span class="cn-line" id="L24">        <span class="kwd">#include</span> "CourantNo.H"</span>
-        <span class="cn-line" id="L25"></span>
-        <span class="cn-line" id="L26">        runTime++;</span>
-        <span class="cn-line" id="L27">        Info&lt;&lt; <span class="str">"Time = "</span> &lt;&lt; runTime.<span class="fun">timeName</span>() &lt;&lt; nl &lt;&lt; endl;</span>
-        <span class="cn-line" id="L28"></span>
-        <span class="cn-line" id="L29">        <span class="com">// --- Pressure-velocity PIMPLE corrector loop</span></span>
-        <span class="cn-line" id="L30">        <span class="kwd">while</span> (pimple.<span class="fun">loop</span>())</span>
-        <span class="cn-line" id="L31">        {</span>
-        <span class="cn-line" id="L32">            fluid.<span class="fun">solve</span>();</span>
-        <span class="cn-line" id="L33">            fluid.<span class="fun">correct</span>();</span>
-        <span class="cn-line" id="L34"></span>
-        <span class="cn-line" id="L35">            <span class="com">// Solve Conservation Equations</span></span>
-        <span class="cn-line" id="L36">            <span class="kwd">#include</span> "pU/UEqns.H"</span>
-        <span class="cn-line" id="L37">            <span class="kwd">#include</span> "EEqns.H"</span>
-        <span class="cn-line" id="L38">            <span class="kwd">#include</span> "pU/pEqn.H"</span>
-        <span class="cn-line" id="L39">        }</span>
-        <span class="cn-line" id="L40"></span>
-        <span class="cn-line" id="L41">        <span class="kwd">if</span> (runTime.<span class="fun">writeTime</span>())</span>
-        <span class="cn-line" id="L42">        {</span>
-        <span class="cn-line" id="L43">            <span class="com">// Calculate Mach Number</span></span>
-        <span class="cn-line" id="L44">            Mach = <span class="fun">mag</span>(phases[0].<span class="fun">U</span>())/<span class="fun">sqrt</span>(Gammag*p/Rhog);</span>
-        <span class="cn-line" id="L45">        }</span>
-        <span class="cn-line" id="L46"></span>
-        <span class="cn-line" id="L47">        runTime.<span class="fun">write</span>();</span>
-        <span class="cn-line" id="L48">    }</span>
-        <span class="cn-line" id="L49">    </span>
-        <span class="cn-line" id="L50">    ::_Exit(0);</span>
-        <span class="cn-line" id="L51">}</span>
+        <span class="cn-line" id="L6">    <span class="com">// Find propellant cells to restrict velocity</span></span>
+        <span class="cn-line" id="L7">    <span class="kwd">#include</span> <span class="str">"propellantCells.H"</span></span>
+        <span class="cn-line" id="L8"></span>
+        <span class="cn-line" id="L9">    <span class="com">// Find particle free cells to restrict Temp</span></span>
+        <span class="cn-line" id="L10">    <span class="kwd">#include</span> <span class="str">"particleFreeCells.H"</span></span>
+        <span class="cn-line" id="L11"></span>
+        <span class="cn-line" id="L12">    <span class="com">// Solve Conservation Equations</span></span>
+        <span class="cn-line" id="L13">    <span class="kwd">#include</span> <span class="str">"pU/UEqns.H"</span></span>
+        <span class="cn-line" id="L14">    <span class="kwd">#include</span> <span class="str">"EEqns.H"</span></span>
+        <span class="cn-line" id="L15">    <span class="kwd">#include</span> <span class="str">"pU/pEqn.H"</span></span>
+        <span class="cn-line" id="L16"></span>
+        <span class="cn-line" id="L17">    fluid.<span class="fun">correctKinematics</span>();</span>
+        <span class="cn-line" id="L18">    fluid.<span class="fun">correctTurbulence</span>();</span>
+        <span class="cn-line" id="L19">}</span>
+        
+        <span class="cn-line" style="opacity: 0.3">// ... remaining code ...</span>
                         </pre>
                     </div>
                 </div>
         
                 <div class="cn-scroll-col">
                     
-                    <div class="cn-step" data-lines="L1,L2,L3">
-                        <h3>OpenFOAM Libraries</h3>
-                        <p>We import the core Finite Volume (fvCFD) and Multiphase frameworks. This provides the mathematical foundation for solving Navier-Stokes equations across multiple fluid states (liquid propellant and gas).</p>
+                    <div class="cn-step" data-lines="L1">
+                        <h3>Outer PIMPLE Loop</h3>
+                        <p>We enter the main iterative loop for the current time step.</p>
                     </div>
         
-                    <div class="cn-step" data-lines="L8,L9,L10,L11,L12">
-                        <h3>Case Initialization</h3>
-                        <p>Standard OpenFOAM boilerplate. This initializes the <code>Time</code> object, generates the 3D <code>Mesh</code>, and allocates memory for the fields (Pressure, Velocity, Temperature) defined in the case files.</p>
+                    <div class="cn-step" data-lines="L3">
+                        <h3>Solve volume fraction equations for propellant, gas and particle phases</h3>
+                        <!-- <p>At the start of every iteration, volume fraction equations are solved by calling <code>solve()</code> method 
+                            that is present in the multiPhaseSystem object (<code>fluid</code>). This first invokes the <code>solve()</code>
+                            function present in the <code>PropellantCombustionPhaseSystem.C</code> / <code>PropellantRegressionPhaseSystem.C</code> where the 
+                            propellant mass burning rate is computed and the propellant surface is regressed as per the selected
+                            <code>interfaceTrackingModel</code>. The next step is to solve volume fractions of gas and particle phase based on 
+                            the MULES algorithm which is based on native OpenFOAM-v2112 implementation in <code>MultiPhaseSystem.C</code>
+                        </p> -->
+                        <p>
+                            At the start of every iteration, volume fraction equations are solved by calling the <code>solve()</code> method on the 
+                            <code>multiPhaseSystem</code> object (<code>fluid</code>). This triggers a specific sequence:
+                        </p>
+                        
+                        <ol style="padding-left: 20px; color: #8b949e; line-height: 1.6;">
+                            <li style="margin-bottom: 15px;">
+                                <strong style="color: #c9d1d9;">Propellant Regression:</strong><br>
+                                First, it invokes the <code>solve()</code> function in <code>PropellantCombustionPhaseSystem.C</code> 
+                                (or <code>RegressionPhaseSystem</code>). Here, the <b>mass burning rate</b> is computed, and the propellant 
+                                surface is regressed according to the selected <code>interfaceTrackingModel</code>.
+                            </li>
+                            
+                            <li>
+                                <strong style="color: #c9d1d9;">Gas & Particle Phases:</strong><br>
+                                Next, it solves the volume fractions for the remaining phases. This utilizes the <b>MULES algorithm</b> 
+                                based on the native OpenFOAM-v2112 implementation found in <code>MultiPhaseSystem.C</code>.
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="cn-step" data-lines="L4">
+                        <h3>Compute Mass Fluxes</h3>
+                        <p>
+                            The <code>correct()</code> method in <code>phaseSystem.C</code> <b>computes the mass fluxes</b> for all phases. This update is based on two key inputs:
+                        </p>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #8b949e;">
+                            <li>The <b>new volume fraction</b> fields (calculated in the previous step).</li>
+                            <li>The <b>velocity field</b> from the previous iteration.</li>
+                        </ul>
                     </div>
         
-                    <div class="cn-step" data-lines="L15,L16,L19">
-                        <h3>Phase Safety Checks</h3>
-                        <p>Before the simulation starts, we clip the volume fractions between <code>SMALL</code> and <code>1-SMALL</code> to prevent numerical instability. We also identify the specific <code>propellantIndex</code> to track the fuel phase.</p>
+                    <div class="cn-step" data-lines="L6,L7,L9,L10">
+                        <h3>Stability & Robustness</h3>
+                        <p>
+                            Unique to the <code>rocketMotor</code> solver, we apply explicit constraints to avoid non-physical 
+                            values in the shared fluid domain:
+                        </p>
+                        <ul style="margin: 15px 0; padding-left: 20px; color: #8b949e; line-height: 1.6;">
+                            <li style="margin-bottom: 15px;">
+                                <strong style="color: #c9d1d9;">Propellant Cells:</strong><br>
+                                In cells containing only solid propellant, gas and particle velocities are <b>fixed to zero</b>. 
+                                This enforces the boundary condition at the regressing surface and prevents non-physical flows inside the solid.
+                            </li>
+                            <li>
+                                <strong style="color: #c9d1d9;">Particle-Free Regions:</strong><br>
+                                Where the particle fraction is negligible ($\alpha_p < 10^{-10}$), the particle temperature is 
+                                forced to match the gas temperature ($T_p = T_g$). This prevents numerical divergence when heat 
+                                transfer coefficients become artificially large in cells with no particles.
+                            </li>
+                        </ul>
                     </div>
         
-                    <div class="cn-step" data-lines="L21,L26,L27">
-                        <h3>The Time Loop</h3>
-                        <p>The main simulation loop. <code>runTime.run()</code> checks if the simulation has reached its end time. We increment the time step and print the current state to the console.</p>
+                    <div class="cn-step" data-lines="L13">
+                        <h3>Constructs Discretized Momentum Equation for gas and particle phase</h3>
+                        <p>
+                            The base momentum equation (excluding the pressure gradient) is constructed by calling the <code>UEqn()</code> method in the native OpenFOAM-v2112 <code>movingPhaseModel.C</code>.
+                        </p>
+                        <p>
+                            However, inside <code>UEqn.H</code>, we extend this by calling <code>momentumTransfer()</code> to inject specific source terms sequentially:
+                        </p>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #8b949e; line-height: 1.6;">
+                            <li style="margin-bottom: 10px;">
+                                <b>Regression Source:</b> Added via <code>PropellantRegressionPhaseSystem.C</code> to account for momentum changes due to surface regression.
+                            </li>
+                            <li>
+                                <b>Explicit Drag:</b> Added via <code>MomentumEnergyTransferPhaseSystem.C</code> to include explicit interphase drag forces.
+                            </li>
+                        </ul>
+                        <p style="font-size: 0.9em; opacity: 0.8; border-left: 2px solid #58a6ff; padding-left: 10px; margin-top: 15px;">
+                            Note: The <b>implicit</b> drag force terms are not added here; they are reserved for the pressure equation (<code>pEqn.H</code>) in the next section.
+                        </p>
+                    </div>
+
+                    <div class="cn-step" data-lines="L14">
+                        <h3>Energy Correction Loop</h3>
+                        <!-- <p>Solves energy equation for gas and particle phase. 
+                            The energy equation for the gas phase and particle phase is constructed in <code>EEqn()</code> method of 
+                            their respective phase models. For <code>pureThermalEnergyPhaseModel</code> (recommended for gas
+                            phase), the <code>EEqn()</code> method is implemented in <code>ThermalEnergyPhaseModel.C</code>. 
+                            Similarly, for the particle phase the recommended phase model is pureParticlePhaseModel and the energy 
+                            equation is implemented in <code>AnisothermalParticlePhaseModel.C</code>. 
+                            These implementations does not include interphase interations. The interphase interations are added to the 
+                            equations separately in EEqn.H present in the solver by calling the heatTransfer() method from the 
+                            InterphaseHeatTransferPhaseSystem.C. After solving, enthalpy is converted to temperature using the Newton-Raphson method, 
+                            and transport properties are updated. This cycle repeats <code>nEnergyCorrector</code> times which is set in the 
+                            fvSolution of the case file.    
+                        </p> -->
+                            <p>
+                                The energy equations are constructed via the <code>EEqn()</code> method in the respective phase models:
+                            </p>
+                            <ul style="margin: 10px 0; padding-left: 20px; color: #8b949e;">
+                                <li><b>Gas:</b> <code>ThermalEnergyPhaseModel.C</code></li>
+                                <li><b>Particles:</b> <code>AnisothermalParticlePhaseModel.C</code></li>
+                            </ul>
+                            <p>
+                                Interphase interactions are added separately via <code>InterphaseHeatTransferPhaseSystem.C</code>. 
+                                Finally, enthalpy is converted to Temperature using a <b>Newton-Raphson</b> iterator, repeating <code>nEnergyCorrector</code> times.
+                            </p>
+                    </div>
+
+                    <div class="cn-step" data-lines="L15">
+                        <h3>Pressure-Velocity Coupling</h3>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #8b949e; line-height: 1.6;">
+                            
+                            <li style="margin-bottom: 15px;">
+                                <strong style="color: #c9d1d9;">Predict Velocity:</strong><br>
+                                Using the discretized momentum equation matrix, the <b>explicit drag force</b> terms are 
+                                included by calling <code>phiKdPhis()</code> and <code>KdUByAs()</code> in 
+                                <code>MomentumEnergyTransferPhaseSystem.C</code>. These predict the velocities and fluxes for both gas and particle phase, which 
+                                are summed to obtain the total predicted flux.
+                            </li>
+                    
+                            <li style="margin-bottom: 15px;">
+                                <strong style="color: #c9d1d9;">Pressure Poisson Equation:</strong><br>
+                                The equation for the common pressure $P$ is constructed based on the total predicted flux and the 
+                                compressibility terms of the gas and particle phases.
+                                <br>
+                                <a href="#" style="display: inline-block; margin-top: 8px; font-size: 0.85em; color: #58a6ff; text-decoration: none; border: 1px solid rgba(88,166,255,0.3); padding: 4px 12px; border-radius: 20px;">
+                                    📄 Check Detailed Derivation
+                                </a>
+                            </li>
+                    
+                            <li>
+                                <strong style="color: #c9d1d9;">Correct Velocity:</strong><br>
+                                Finally, corrections are applied to the predicted velocity and flux fields. 
+                                In addition, the <b>density is updated</b> here. This process repeats for <code>nCorrectors</code> 
+                                loops (as set in <code>fvSolution</code>).
+                            </li>
+                        </ul>
                     </div>
         
-                    <div class="cn-step" data-lines="L30,L31,L32,L36,L37,L38">
-                        <h3>PIMPLE Solver</h3>
-                        <p>Inside every time step, we run the PIMPLE loop (merged PISO-SIMPLE algorithm). This iteratively solves the Momentum (<code>UEqns</code>), Energy (<code>EEqns</code>), and Pressure (<code>pEqn</code>) equations until convergence is reached.</p>
-                    </div>
-        
-                     <div class="cn-step" data-lines="L41,L44">
-                        <h3>Acoustics & Output</h3>
-                        <p>When a write interval is hit, we calculate the gas phase <strong>Mach Number</strong> on the fly using the computed velocity, pressure, and density fields, then write the results to disk.</p>
+                    <div class="cn-step" data-lines="L17,L18">
+                        <h3>Turbulence Correction</h3>
+                        <p>
+                            Once the mean flow fields ($\alpha_k, \boldsymbol{u}_k, P, T_k$) are updated, the turbulence closure models are updated.
+                        </p>
+                    
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #8b949e; line-height: 1.6;">
+                            
+                            <li style="margin-bottom: 15px;">
+                                <strong style="color: #c9d1d9;">Gas Phase Turbulence:</strong><br>
+                                The turbulence models are corrected to update the eddy viscosity ($\nu_t$) and Reynolds stresses.
+                            </li>
+                    
+                            <li>
+                                <strong style="color: #c9d1d9;">Kinetic Theory of Granular Flow:</strong><br>
+                                Simultaneously, the <b>granular temperature</b> ($\Theta$) is solved for the particle phase. 
+                                This updates the particle pressure, shear stress, and collisional viscosities based on selected KTGF models.
+                            </li>
+                        </ul>
                     </div>
         
                     <div class="cn-spacer"></div>

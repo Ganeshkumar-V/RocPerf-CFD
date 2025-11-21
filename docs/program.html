@@ -100,9 +100,9 @@
                         <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div class="absolute -left-4 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                        <a href="#repository-structure" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Repo-structure</a>
+                        <a href="#libraries" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Libraries</a>
                         <a href="#solver" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">CFD Solver</a>
-                        <a href="#library" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Libraries</a>
+                        <a href="#boundary-condition" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Boundary Conditions</a>
                         <a href="#utilities" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Utilities</a>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
 
     <!-- Main Content -->
     <main>
-        <section id="repository-structure" class="bg-white">
+        <section id="libraries" class="bg-white">
             <div class="container mx-auto px-6">
                 <div class="max-w-7xl mx-auto">
                     <p class="text-2xl font-bold text-gray-900 mb-4">Libraries and Solver</p>
@@ -168,8 +168,11 @@
                 subgraph OpenFOAM_Multiphase_Group [<strong>OpenFOAM v2112 Multiphase Library</strong>]
                     B["libreactingMultiphaseSystem.so"]
                 end
-                C["<strong>RocIBCFD Framework source</strong> <br/> (libpropellantRegressionPhaseSystem.so)"]
-                D["<div style='padding: 30px 50px'><span style='font-size:30px; font-weight:bold'>rocketMotor</span> <br/> (Main Application)</div>"]
+                
+                subgraph Software_Group [<strong>RocIBCFD Framework</strong>]
+                    C["<strong>source library</strong> <br/> (libpropellantRegressionPhaseSystem.so)"]
+                    D["<div style='padding: 10px 50px'><span style='font-size:30px; font-weight:bold'>rocketMotor</span> <br/> (Main Application)</div>"]
+                end
 
                 List -->|Mesh, Thermophysical and <br/> Transport properties| C
                 B -->|Phase Models, Phase System <br/> and Phase Pair| C
@@ -402,6 +405,14 @@
                     </div>
         
                     <div class="cn-spacer"></div>
+                </div>
+            </div>
+        </section>
+        <section id="boundary-condition" class="bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-7xl mx-auto">
+                    <p class="text-2xl font-bold text-gray-900 mb-4">Boundary Conditions</p>
+                    
                 </div>
             </div>
         </section>

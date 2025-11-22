@@ -9,12 +9,6 @@
 │       ├── EEqns.H
 │       ├── Make
 │       │   ├── files
-│       │   ├── linux64IcxDPInt64Opt
-│       │   │   ├── options
-│       │   │   ├── rocketMotor.C.dep
-│       │   │   ├── rocketMotor.o
-│       │   │   ├── sourceFiles
-│       │   │   └── variables
 │       │   └── options
 │       ├── YEqns.H
 │       ├── additionalFunctions.H
@@ -343,12 +337,6 @@
     ├── mapVolFields
     │   ├── Make
     │   │   ├── files
-    │   │   ├── linux64IcxDPInt64Opt
-    │   │   │   ├── mapVolFields.C.dep
-    │   │   │   ├── mapVolFields.o
-    │   │   │   ├── options
-    │   │   │   ├── sourceFiles
-    │   │   │   └── variables
     │   │   └── options
     │   ├── createTimes.H
     │   ├── mapVolFields.C
@@ -356,12 +344,6 @@
     ├── postProcessRocket
     │   ├── Make
     │   │   ├── files
-    │   │   ├── linux64IcxDPInt64Opt
-    │   │   │   ├── options
-    │   │   │   ├── postProcessRocket.C.dep
-    │   │   │   ├── postProcessRocket.o
-    │   │   │   ├── sourceFiles
-    │   │   │   └── variables
     │   │   └── options
     │   ├── cellDim.H
     │   ├── postProcessRocket.C
@@ -369,12 +351,6 @@
     ├── rocketConservation
     │   ├── Make
     │   │   ├── files
-    │   │   ├── linux64IcxDPInt64Opt
-    │   │   │   ├── options
-    │   │   │   ├── rocketConservation.C.dep
-    │   │   │   ├── rocketConservation.o
-    │   │   │   ├── sourceFiles
-    │   │   │   └── variables
     │   │   └── options
     │   ├── cellDim.H
     │   ├── findInletData.H
@@ -391,12 +367,6 @@
     ├── setRocketInitField
     │   ├── Make
     │   │   ├── files
-    │   │   ├── linux64IcxDPInt64Opt
-    │   │   │   ├── options
-    │   │   │   ├── setRocketInitField.C.dep
-    │   │   │   ├── setRocketInitField.o
-    │   │   │   ├── sourceFiles
-    │   │   │   └── variables
     │   │   └── options
     │   ├── setRocketInitField.C
     │   └── setRocketInitFieldDict

@@ -181,6 +181,7 @@
                 %% Subgraphs (Outer Boxes)
                 style OpenFOAM_Base_Group fill:#fff8e1,stroke:#ffa000,stroke-width:2px;
                 style OpenFOAM_Multiphase_Group fill:#fff8e1,stroke:#ffa000,stroke-width:2px;
+                
                         
                 %% Nodes (Inner Boxes)
                 style List fill:#ffe0b2,stroke:#ffa000,stroke-width:1px;
@@ -192,6 +193,7 @@
                 linkStyle 0,1,2 stroke:#000000,stroke-width:2px,fill:none,color:#000000
             </div>
         </section>
+
         <section id="solver" class="cn-wrapper">
             <div class="container mx-auto px-6">
                 <div class="max-w-7xl mx-auto">
@@ -408,14 +410,241 @@
                 </div>
             </div>
         </section>
+
         <section id="boundary-condition" class="bg-white">
-            <div class="container mx-auto px-6">
+            <div class="container mx-auto px-6 py-8">
                 <div class="max-w-7xl mx-auto">
-                    <p class="text-2xl font-bold text-gray-900 mb-4">Boundary Conditions</p>
+                    <p class="text-2xl font-bold text-gray-900 mb-6">Boundary Conditions</p>
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        As this library is an extension of the <strong>OpenFOAM-v2112</strong> library, it fully supports all 
+                        standard boundary conditions included in the base distribution. You can use standard conditions 
+                        (e.g., <code>fixedValue</code>, <code>zeroGradient</code>) interchangeably with the specialized 
+                        boundary conditions listed below.
+                    </p>
+        
+                    <div class="bc-table-responsive">
+                        <table class="bc-table">
+                            <thead>
+                                <tr>
+                                    <th>Boundary Condition</th>
+                                    <th>Description</th>
+                                    <th>Compatible Fields</th>
+                                    <th>Usage</th>
+                                </tr>
+                            </thead>
+                            <tbody>    
+                                <tr>
+                                    <td class="bc-name">massLoadingFraction</td>
+                                    <td class="bc-desc">
+                                        Computes the particle phase volume fraction $\alpha_p$ at the inlet derived from a 
+                                        specified mass loading ratio ($X_p$).
+                                        $$
+                                            \alpha_p = \left[1 + \left(\frac{1 - X_p}{X_p}\right)\left(\frac{\rho_g\boldsymbol{u}_g\cdot\boldsymbol{S}_f}{\rho_p\boldsymbol{u}_p\cdot\boldsymbol{S}_f}\right)\right]^{-1}
+                                        $$
+                                        where $\boldsymbol{S}_f$ is the patch area. 
+                                    </td>
+                                    <td class="bc-fields">
+                                        $\alpha_p$ <br>
+                                        <span style="font-size:0.9em; color:#666;">(volume fraction)</span>
+                                    </td>
+                                    <td class="bc-usage">
+                                        <div class="foam-code-wrapper">
+                                            <button class="bc-copy-btn" onclick="copyFoamCode(this)">Copy</button>
+                                            <pre class="foam-code">
+<span class="f-key">inlet</span>
+{
+    <span class="f-key">type</span>            <span class="f-val">massLoadingFraction</span>;
+    <span class="f-key">name</span>            <span class="f-val">particles</span>; // name of the current phase
+    <span class="f-key">gasPhase</span>        <span class="f-val">gas</span>; // name of the gas phase
+    <span class="f-key">particlePhase</span>   <span class="f-val">particles</span>; // name of the particle phase
+    <span class="f-key">massFraction</span>    <span class="f-val">0.81</span>; // particle phase mass fraction at the inlet
+    <span class="f-key">value</span>           <span class="f-val">uniform 0</span>;
+}</pre>
+                                        </div>
+                                    </td>
+                                </tr>
+        
+                                <tr>
+                                    <td class="bc-name">gasFlowRateInletVelocity</td>
+                                    <td class="bc-desc">
+                                        Computes the gas phase inlet velocity based on a specified mass flow rate ($\dot{m}_g$). 
+                                        The flow rate can be defined as a constant value or a time-dependent function.
+                                        $$
+                                        \boldsymbol{u}_g = \frac{\dot{m}_g}{\alpha_g\rho_g|\boldsymbol{S}_f|}\cdot\hat{\boldsymbol{n}}_f
+                                        $$
+                                        where $\hat{\boldsymbol{n}}_f$ is the patch normal vector. 
+                                    </td>
+                                    <td class="bc-fields">
+                                        $\boldsymbol{u}_g$ <br>
+                                        <span style="font-size:0.9em; color:#666;">(vector)</span>
+                                    </td>
+                                    <td class="bc-usage">
+                                        <div class="foam-code-wrapper">
+                                            <button class="bc-copy-btn" onclick="copyFoamCode(this)">Copy</button>
+                                            <pre class="foam-code">
+<span class="f-key">inlet</span>
+{
+    <span class="f-key">type</span>           <span class="f-val">gasFlowRateInletVelocity</span>;
+    <span class="f-key">massFlowRate</span>   <span class="f-val">constant 0.0001</span>; // flow rate function
+    <span class="f-key">rho</span>            <span class="f-val">thermo:rho.gas</span>; // density of the gas phase
+    <span class="f-key">value</span>          <span class="f-val">uniform (0 0 0)</span>;
+}</pre>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="bc-name">gasBurningRateInletVelocity</td>
+                                    <td class="bc-desc">
+                                        Calculates the gas phase inlet velocity based on the propellant mass burning rate which is 
+                                        computed based on burning rate law $r_b[\text{cm/s}] = a(P[\text{MPa}])^n$, 
+                                        where $P$ is the local pressure in the units of $\text{MPa}$. 
+                                        $$
+                                        \boldsymbol{u}_g = \frac{X_g\rho_{prop}r_b}{\alpha_g\rho_g}\cdot\hat{\boldsymbol{n}}_f
+                                        $$
+                                        where $\hat{\boldsymbol{n}}_f$ is the patch normal vector.
+                                    </td>
+                                    <td class="bc-fields">
+                                        $\boldsymbol{u}_g$ <br>
+                                        <span style="font-size:0.9em; color:#666;">(Vector)</span>
+                                    </td>
+                                    <td class="bc-usage">
+                                        <div class="foam-code-wrapper">
+                                            <button class="bc-copy-btn" onclick="copyFoamCode(this)">Copy</button>
+                                            <pre class="foam-code">
+<span class="f-key">inlet</span>
+{
+    <span class="f-key">type</span>            <span class="f-val">gasBurningRateInletVelocity</span>;
+    <span class="f-key">rhoPropellant</span>   <span class="f-val">1500</span>; // density of the propellant
+    <span class="f-key">a</span>               <span class="f-val">0.607</span>; // pre-exponential factor
+    <span class="f-key">n</span>               <span class="f-val">0.798</span>; // pressure exponent
+    <span class="f-key">X</span>               <span class="f-val">0.5</span>; // gas phase mass fraction
+    <span class="f-key">value</span>           <span class="f-val">uniform (0 0 0)</span>;
+}</pre>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td class="bc-name">sameAs</td>
+                                    <td class="bc-desc">
+                                        A utility condition that copies boundary values from another specified field to the current patch. 
+                                        Useful for coupling fields directly between phases.
+                                    </td>
+                                    <td class="bc-fields">
+                                        Any Field <br>
+                                    </td>
+                                    <td class="bc-usage">
+                                        <div class="foam-code-wrapper">
+                                            <button class="bc-copy-btn" onclick="copyFoamCode(this)">Copy</button>
+                                            <pre class="foam-code">
+<span class="f-key">inlet</span>
+{
+    <span class="f-key">type</span>    <span class="f-val">sameAs</span>;
+    <span class="f-key">field</span>   <span class="f-val">T.gas</span>; // field to the copied from...
+    <span class="f-key">value</span>   <span class="f-val">uniform 0</span>;
+}</pre>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
                     
+                    <p class="text-lg text-gray-700 leading-relaxed py-8">
+                        In addition to the stable boundary conditions listed above, there are additional 
+                        boundary conditions are currently experimental and will be included in the stable distribution in 
+                        future releases.
+                    </p>
+
                 </div>
             </div>
         </section>
+        
+        <section id="utilities" class="bg-gray-50 border-t border-gray-200">
+            <div class="container mx-auto px-6 py-12">
+                <div class="max-w-5xl mx-auto"> <div class="mb-10">
+                        <p class="text-2xl font-bold text-gray-900">Solver Utilities</p>
+                        <p class="text-gray-600 mt-2">
+                            The following utilities are included to streamline the workflow, from initialization to post-processing.
+                        </p>
+                    </div>
+        
+                    <div class="flex flex-col space-y-6">
+        
+                        <div class="util-card">
+                            <div class="util-header">
+                                <h3 class="util-title">postProcessRocket</h3>
+                                <span class="util-tag">Post-processing</span>
+                            </div>
+                            <div class="util-body">
+                                <p class="util-desc">
+                                    Automatically identifies the domain outlet patch and computes the <strong>mass flow rate</strong> and <strong>thrust</strong> evolution for all available time steps.
+                                </p>
+                                
+                                <div class="util-command-box">
+                                    <div class="util-cmd-label">Usage:</div>
+                                    <div class="foam-code-wrapper">
+                                        <button class="bc-copy-btn" onclick="copyFoamCode(this)">Copy</button>
+                                        <pre class="foam-code">$ postProcessRocket</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="util-card">
+                            <div class="util-header">
+                                <h3 class="util-title">setRocketInitField</h3>
+                                <span class="util-tag">Pre-processing</span>
+                            </div>
+                            <div class="util-body">
+                                <p class="util-desc">
+                                    Sets the initial propellant volume fraction field based on geometric regions. 
+                                    <br>
+                                    <span class="text-sm text-gray-500 italic">Note: Requires a <code>setRocketInitFieldDict</code> dictionary to be present in the case directory.</span>
+                                </p>
+        
+                                <div class="util-command-box">
+                                    <div class="util-cmd-label">Usage:</div>
+                                    <div class="foam-code-wrapper">
+                                        <button class="bc-copy-btn" onclick="copyFoamCode(this)">Copy</button>
+                                        <pre class="foam-code">$ setRocketInitField</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <div class="util-card">
+                            <div class="util-header">
+                                <h3 class="util-title">mapVolFields</h3>
+                                <span class="util-tag">Grid Analysis</span>
+                            </div>
+                            <div class="util-body">
+        
+                                <p class="util-desc">
+                                    Maps solution fields from a fine grid (source) to the current coarse grid (target) using volume-weighted interpolation. Primarily used for <strong>grid independence studies</strong> and <strong>a posteriori error estimation</strong>.
+                                    <br>
+                                    <span class="text-sm text-gray-500 italic">Requirement: The fine mesh must have been generated by refining the coarse mesh using <code>refineMesh</code>.</span>
+                                    <br>
+                                    <strong>Note:</strong> You must execute this command from within the target case directory (the coarse mesh case).
+                                </p>
+                        
+                                <div class="util-command-box">
+                                    <div class="util-cmd-label">Usage:</div>
+                                    <div class="foam-code-wrapper">
+                                        <button class="bc-copy-btn" onclick="copyFoamCode(this)">Copy</button>
+                                        <pre class="foam-code">$ mapVolFields &lt;sourceDir&gt; -sourceTime &lt;time&gt;</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -666,6 +895,29 @@
     
         steps.forEach(step => observer.observe(step));
     });
+
+    function copyFoamCode(button) {
+        // Find the pre tag immediately following the button
+        const pre = button.nextElementSibling;
+        const codeText = pre.innerText;
+        
+        // Copy to clipboard
+        navigator.clipboard.writeText(codeText).then(() => {
+            const originalText = button.innerText;
+
+            // Visual feedback
+            button.innerText = "Copied!";
+            button.style.backgroundColor = "#28a745"; // Green
+            button.style.borderColor = "#28a745";
+
+            // Reset after 2 seconds
+            setTimeout(() => {
+                button.innerText = originalText;
+                button.style.backgroundColor = ""; // Revert to CSS default
+                button.style.borderColor = "";
+            }, 2000);
+        });
+    }
     </script>
 
 </body>

@@ -132,7 +132,7 @@ void Foam::burningRateInletVelocityFvPatchVectorField::updateCoeffs()
 
     const vectorField n(patch().nf());
 
-    const scalarField rb(a_*pow(P/10e6, n_));
+    const scalarField rb(a_*pow(P/1e6, n_)*0.01);
 
     operator==(-rb*n);
 

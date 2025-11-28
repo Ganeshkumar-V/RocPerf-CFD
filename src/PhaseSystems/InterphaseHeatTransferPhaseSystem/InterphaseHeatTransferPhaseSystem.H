@@ -101,6 +101,9 @@ public:
         //- Return the heat transfer matrices
         virtual autoPtr<phaseSystem::heatTransferTable> heatTransfer() const;
 
+        //- Return the mass transfer matrices
+        virtual autoPtr<phaseSystem::massTransferTable> massTransfer() const;
+
         //- Correct the energy transport e.g. alphat and Tf
         virtual void correctEnergyTransport();
 

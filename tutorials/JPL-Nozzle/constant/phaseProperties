@@ -1,0 +1,144 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      phaseProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+type            gasParticleMultiphaseSystem;
+
+phases          (gas particles);
+
+particlePhase	particles;
+
+gasPhase	gas;
+
+propellantIndex -1;
+
+limitTemperature     false;  // To limit temperature wihtin limits (minTemp, maxTemp) change the following to true
+minTemp		           100;    // Minimum temperature limit
+maxTemp		           1000;   // Maximum temperature limit
+
+gas
+{
+    type            pureThermalEnergyPhaseModel;
+    diameterModel   constant;
+    constantCoeffs
+    {
+        d               2e-6;
+    }
+    residualAlpha   1e-15;
+}
+
+particles
+{
+    type            pureParticlePhaseModel;
+    diameterModel   constant;
+    constantCoeffs
+    {
+        d               2e-6;
+    }
+    residualAlpha   1e-15;
+}
+
+interfaceTracking
+();
+
+drag
+(
+  // Drag model - CliftGauvinInviscid - use this model when the fluid is inviscid, the viscosity
+  // of the gas is calculated based on sutherland relation only for evaluating Reynolds number.
+  (particles in gas)
+  {
+    type            CliftGauvinInviscid; // Clift-Gauvin's Drag model
+    residualRe      1e-15;               // residual Reynolds number
+    As	 	          1.458e-6;            // Sutherland viscosity constants
+    Ts	            110.4;               // Sutherland viscosity constants
+    swarmCorrection
+    {
+    	type        none;
+    }
+  }
+);
+
+sharpInterfaceHeatTransfer
+(
+  // Heat transfer model - DrakeInviscid - use this model when the fluid is inviscid, the viscosity
+  // of the gas is calculated based on sutherland relation only for evaluating Reynolds number.
+  (particles in gas)
+  {
+    type            DrakeInviscid; // Drake's correlation
+    As	 	          1.458e-6;      // Sutherland viscosity constants
+    Ts	            110.4;         // Sutherland viscosity constants
+    Pr              0.7;           // Prandtl number
+    residualAlpha   1e-15;         // residual particle phase fraction
+    cutoff          1e-10;         // cutoff volume fraction of particle phase to switch-off heat transfer source
+  }
+);
+
+blending
+{
+    default
+    {
+      type            none;
+      continuousPhase gas;
+    }
+}
+
+surfaceTension
+();
+
+aspectRatio
+();
+
+virtualMass
+();
+
+interfaceComposition
+();
+
+interfaceCompression
+();
+
+// Models used to find Mass Transfer Coefficient for component transfer within the gas phase
+massTransfer.gas
+();
+
+massTransfer.propellant
+();
+
+heatTransfer.particles
+();
+
+heatTransfer.gas
+();
+
+heatTransfer.propellant
+();
+
+phaseTransfer
+();
+
+lift
+();
+
+wallLubrication
+();
+
+turbulentDispersion
+();
+
+// Minimum allowable pressure
+pMin            10;
+
+
+// ************************************************************************* //

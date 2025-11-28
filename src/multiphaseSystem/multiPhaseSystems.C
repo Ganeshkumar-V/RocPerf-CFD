@@ -62,6 +62,21 @@ namespace Foam
     );
 
     typedef
+        InterphaseHeatTransferPhaseSystem
+        <
+            MomentumEnergyTransferPhaseSystem<multiPhaseSystem>
+        >
+        gasParticleMultiphaseSystem;
+
+    addNamedToRunTimeSelectionTable
+    (
+        multiPhaseSystem,
+        gasParticleMultiphaseSystem,
+        dictionary,
+        gasParticleMultiphaseSystem
+    );
+
+    typedef
         PropellantInterfacePhaseSystem
         <
             InterphaseHeatTransferPhaseSystem

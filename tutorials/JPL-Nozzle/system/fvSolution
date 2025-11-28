@@ -1,0 +1,144 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "alpha.*"
+    {
+        nAlphaCorr      1;
+        nAlphaSubCycles 2;
+        smoothLimiter   0;
+        tolerance       1e-9;
+        relTol          0;
+        minIter         1;
+    }
+
+    p_rgh
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        preconditioner
+        {
+            preconditioner  DILU;
+            smoother        DICGaussSeidel;
+            tolerance       1e-6;
+        }
+        tolerance       1e-6;
+	relTol	      	0.1;
+	minIter		1;
+    }
+
+    p_rghFinal
+    {
+        $p_rgh;
+        relTol          0.1;
+    }
+
+    "U.*"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-5;
+        relTol          0;
+        minIter         1;
+    }
+
+    "(h|e).*"
+    {
+        //solver          GAMG;
+        solver          smoothSolver;
+	// solver		PBiCG;
+	// preconditioner  diagonal;
+        smoother        GaussSeidel;
+        tolerance       1e-6;
+        relTol          0;
+        minIter         1;
+    }
+
+    Yi
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-5;
+        relTol          0;
+        minIter         1;
+        residualAlpha   1e-5;
+    }
+
+    "Theta.*"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-6;
+        relTol          0;
+        minIter         1;
+    }
+
+    "(k|epsilon).*"
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-5;
+        relTol          0;
+        minIter         1;
+    }
+}
+
+PIMPLE
+{
+    nOuterCorrectors    3;
+    nCorrectors         5;
+    nNonOrthogonalCorrectors 0;
+    nEnergyCorrectors   3;
+    stopIfNotConverged  false;
+    transonic		yes;
+    transCo		0.1;
+    maxCo		0.5;
+    partialElimination  false;
+    residualControl
+    {
+        h.gas
+        {
+                tolerance  1e-4;
+                relTol      0;
+        }
+        h.particles
+        {
+                tolerance  1e-3;
+                relTol      0;
+        }
+        p_rgh
+        {
+                tolerance   1e-4;
+                relTol      0;
+        }
+     }
+     pRefCell        0;
+     pRefValue	     0;
+}
+
+relaxationFactors
+{
+    equations
+    {
+        h.gas            0.7;
+	h.particles      0.7;
+	p_rgh		 0.5;
+    }
+}
+
+
+// ************************************************************************* //

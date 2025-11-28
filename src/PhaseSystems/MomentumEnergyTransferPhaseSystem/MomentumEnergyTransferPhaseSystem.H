@@ -190,9 +190,6 @@ private:
 
 public:
 
-  // public Data
-  Switch totalEnergyGas;
-
     // Constructors
 
         //- Construct from fvMesh

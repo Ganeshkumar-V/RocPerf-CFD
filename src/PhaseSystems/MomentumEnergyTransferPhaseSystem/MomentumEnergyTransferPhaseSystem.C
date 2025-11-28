@@ -171,8 +171,7 @@ MomentumEnergyTransferPhaseSystem
     const fvMesh& mesh
 )
 :
-    BasePhaseSystem(mesh),
-    totalEnergyGas(this->template get<Switch>("totalEnergy"))
+    BasePhaseSystem(mesh)
 {
     this->generatePairsAndSubModels
     (
@@ -1289,11 +1288,6 @@ Foam::MomentumEnergyTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
         const volVectorField& Ug(tUg());
 
         *eqns[pair.phase2().name()] += (Up - Ug)&(K*(Up - Ug));
-        // if (totalEnergyGas)
-        // {
-        //   Info << "Workdone due to drag is getting added!" << endl;
-        //   *eqns[pair.phase2().name()] += K*(Up - Ug)&Up;
-        // }
     }
 
     return eqnsPtr;

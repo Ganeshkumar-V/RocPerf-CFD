@@ -172,6 +172,38 @@ heatTransfer() const
     return eqnsPtr;
 }
 
+template<class BasePhaseSystem>
+Foam::autoPtr<Foam::phaseSystem::massTransferTable>
+Foam::InterphaseHeatTransferPhaseSystem<BasePhaseSystem>::
+massTransfer() const
+{
+    // Create a mass transfer matrix for each species of each phase
+    // This creates empty matrix - inactive in this phase system
+    autoPtr<phaseSystem::massTransferTable> eqnsPtr
+    (
+        new phaseSystem::massTransferTable()
+    );
+
+    phaseSystem::massTransferTable& eqns = eqnsPtr();
+
+    forAll(this->phaseModels_, phasei)
+    {
+        const phaseModel& phase = this->phaseModels_[phasei];
+
+        const PtrList<volScalarField>& Yi = phase.Y();
+
+        forAll(Yi, i)
+        {
+            eqns.set
+            (
+                Yi[i].name(),
+                new fvScalarMatrix(Yi[i], dimMass/dimTime)
+            );
+        }
+    }
+
+    return eqnsPtr;
+}
 
 template<class BasePhaseSystem>
 void Foam::InterphaseHeatTransferPhaseSystem<BasePhaseSystem>::

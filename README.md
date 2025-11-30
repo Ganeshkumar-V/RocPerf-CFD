@@ -1,4 +1,4 @@
-# StoRM-CFD
+# RocPerf-CFD
 
 ![Simulation GIF](docs/media.gif)
 

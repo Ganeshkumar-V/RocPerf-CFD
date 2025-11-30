@@ -47,7 +47,7 @@ header a {
     font-size: inherit !important;
 }
 
-/* Removed scaling and vibrant effects for StoRM-CFD header
+/* Removed scaling and vibrant effects for RocPerf-CFD header
    Only apply non-color hover behavior to top-level nav items (not dropdown items)
    Top-level nav links are direct children of the main flex container inside the nav. */
 header nav > div > a:hover,

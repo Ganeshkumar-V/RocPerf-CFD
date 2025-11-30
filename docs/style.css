@@ -752,7 +752,7 @@ pre.foam-code {
 
 .tutorial-page-wrapper .media-container {
     flex: 2;
-    min-width: 280px;
+    min-width: 700px;
     text-align: center;
     background: #fafafa;
     padding: 15px;
@@ -788,13 +788,13 @@ pre.foam-code {
 .tutorial-page-wrapper .bc-table th {
     background-color: #edf2f7;
     color: #2d3748;
-    text-align: left;
+    text-align: center;
     padding: 12px 15px;
     font-weight: 600;
 }
 
 .tutorial-page-wrapper .bc-table td {
-    padding: 12px 15px;
+    padding: 12px 5px;
     border-bottom: 1px solid #e2e8f0;
 }
 
@@ -832,4 +832,67 @@ pre.foam-code {
 .tutorial-page-wrapper .btn-github:hover {
     background-color: #444;
     transform: translateY(-2px);
+}
+
+/* Main container for this specific section */
+.tutorial-page-wrapper .run-sim-guide {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 850px; /* Limits width for better readability */
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Headings specific to this section */
+.tutorial-page-wrapper .run-sim-guide h3 {
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  color: #2c3e50; /* Dark blue/grey */
+  font-size: 1.5rem;
+}
+
+/* Individual Instruction Steps */
+.tutorial-page-wrapper .run-sim-guide .sim-step {
+  margin-bottom: 25px;
+}
+
+.tutorial-page-wrapper .run-sim-guide .step-label {
+  display: block;
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+/* Code Blocks */
+.tutorial-page-wrapper .run-sim-guide .cmd-block {
+  background-color: #f6f8fa; /* Light grey background */
+  border: 1px solid #d1d5db;
+  border-left: 4px solid #0366d6; /* Blue accent on left */
+  border-radius: 4px;
+  padding: 12px 15px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.9rem;
+  color: #24292e;
+  display: block;
+  margin: 10px 0;
+  white-space: pre-wrap; /* Keeps formatting on small screens */
+  overflow-x: auto; /* Adds scrollbar if text is too long */
+}
+
+/* The "Info/Tip" Box at the bottom */
+.tutorial-page-wrapper .run-sim-guide .tip-box {
+  background-color: #e3f2fd; /* Very light blue */
+  border: 1px solid #bbdefb;
+  border-radius: 6px;
+  padding: 15px 20px;
+  font-size: 0.95em;
+  margin-top: 35px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.tutorial-page-wrapper .run-sim-guide .tip-box strong {
+  color: #0d47a1; /* Dark blue text for emphasis */
 }

@@ -142,38 +142,122 @@
                     <div class="row-split">
                         <div class="description">
                             <h3>Problem Description</h3>
-                            <p>
-                                This verification case simulates the compressible flow of a single-phase gas through a Convergent-Divergent (CD) nozzle. 
-                                The simulation aims to validate the solver's capability to capture shock waves and expansion fans in the supersonic regime.
+                            <p class="text-justify  ">
+                                This validation case simulates the inviscid transonic gas flow through a Convergent-Divergent (CD) nozzle (JPL nozzle). 
+                                The axisymmetric simulation aims to validate the solver's capability to simulate supersonic flows and capture shock waves in the flow field.
+                                The nozzle geometry is taken from Back et. al, and the inlet and throat curvature points is generated in MATLAB. These data points 
+                                are then provided to modify the boundaries of domain block in the <code>blockMeshDict</code>. The MATLAB code is available with the case files.   
+                                The CD nozzle mesh along with the boundaries marked are shown in the figure and the boundary conditions are presented in the table.    
+                                Initially pressure and temperature is 1.0 bar and 300 K and is set to be uniform throughout the domain. The specific heat capacity
+                                of the gas is 1.07 J/kg.K and the ideal gas equation of state is employed. The molecular weight of the gas is 28.786 kg/kmol.
                             </p>
                         </div>
                         <div class="media-container">
-                            <img src="images/schematic_gas_nozzle.png" alt="CD Nozzle Schematic" class="schematic-img">
-                            <p class="caption">Fig 1.1: Domain boundaries and mesh topology.</p>
+                            <img src="images/Mesh.png" alt="CD Nozzle Schematic" class="schematic-img">
+                            <p class="caption">JPL Nozzle Mesh with Boundaries</p>
                         </div>
                     </div>
         
-                    <h3>Case Setup & Boundary Conditions</h3>
+                    <h3>Boundary Conditions</h3>
                     <table class="bc-table">
                         <thead>
-                            <tr><th>Patch Name</th><th>Condition Type</th><th>Value / Details</th></tr>
+                            <tr><th>Variables</th><th>Inlet</th><th>Outlet</th><th>Wall</th><th>Wedge faces</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><strong>Inlet</strong></td><td>Total Pressure / Temperature</td><td>100 bar / 3000 K</td></tr>
-                            <tr><td><strong>Outlet</strong></td><td>Wave Transmissive</td><td>Atmospheric (1 bar)</td></tr>
-                            <tr><td><strong>Walls</strong></td><td>Slip / No-Slip</td><td>Adiabatic Wall</td></tr>
+                            <tr><td><strong>$P$</strong></td><td>Total Pressure (10.34 bar) </td><td>zeroGradient</td><td>zeroGradient</td><td>cyclic</td></tr>
+                            <tr><td><strong>$\boldsymbol{u}_g$</strong></td><td>PressureDirectedInletVelocity (inlet direction: +z axis)</td><td>zeroGradient</td><td>Slip</td><td>cyclic</td></tr>
+                            <tr><td><strong>$T_g$</strong></td><td>Total Temperature (555 K)</td><td>zeroGradient</td><td>zeroGradient</td><td>cyclic</td></tr>
                         </tbody>
                     </table>
+                    <h3>Numerical Schemes</h3>
+                    Initially, the simulation is conducted till steady state (t = 0.01 s) with first order <code>upwind</code> scheme for all 
+                    the convective terms. To improve the accuracy the the convective schemes are updated to <code>vanLeer</code> scheme for 
+                    all the convective terms. The generalized <code>Crank Nicolson</code> scheme is used for time integration for second order 
+                    accuracy and stability.
+                    
+                    <div class="run-sim-guide">
+  
+                        <h3>Instructions to Run the Simulation</h3>
+                      
+                        <div class="sim-step">
+                          <span class="step-label">1. Environment Setup</span>
+                          <p>Before beginning, ensure you source the native <strong>OpenFOAM-v2112 bashrc</strong> file and the <strong>RocPerf-CFD bashrc</strong> file.</p>
+                        </div>
+                      
+                        <div class="sim-step">
+                          <span class="step-label">2. Prepare the Case</span>
+                          <p>The case file is available in the directory <code>tutorials/JPL-Nozzle</code>. Copy the case file to your working directory. To mesh the geometry, run:</p>
+                          <code class="cmd-block">blockMesh</code>
+                        </div>
+                      
+                        <div class="sim-step">
+                          <span class="step-label">3. Run the Simulation</span>
+                          <p>You can run the simulation in either serial or parallel mode:</p>
+                          
+                          <p><strong>Option A: Serial Run</strong></p>
+                          <code class="cmd-block">rocketMotor</code>
+                      
+                          <p><strong>Option B: Parallel Run</strong></p>
+                          <p>First, perform mesh decomposition, then run with MPI (default is 8 processors):</p>
+                          <code class="cmd-block">decomposePar<br>mpirun -np 8 rocketMotor -parallel</br></code>
+                          <p><small><em>Note: The number of processors can be adjusted in the <code>decomposeParDict</code> file.</em></small></p>
+                        </div>
+                      
+                        <div class="tip-box">
+                          <div>
+                            <strong>💡 Tip for Higher Accuracy:</strong><br>
+                            To obtain accurate simulation results (as shown in the plots below), simply double the mesh size in the <code>blockMeshDict</code> file before running the mesh generation.
+                          </div>
+                        </div>
+                      
+                      </div>  
         
                     <div class="results-container">
-                        <h3>Results</h3>
-                        <p>Steady-state Mach number distribution showing the shock location.</p>
-                        <img src="images/result_gas_nozzle_mach.png" alt="Mach Number Contour" class="result-img">
+                        <h3 class="font-bold">Results</h3>
+                        <p>The predicted centreline Mach number and the wall Mach number is plotted with experimental data and the computational 
+                            data from F. Moukalled et al.</p>
+                        <table class="bc-table">
+                            <tbody>
+                                <tr>
+                                    <td><img src="images/gasPhaseCenterlineMach.png" alt="Centerline Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
+                                        Variation of Centerline Mach number along the length
+                                    </figcaption></td>
+                                    <td><img src="images/gasPhaseWallMach.png" alt="Wall Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
+                                        Variation of Wall Mach number along the length
+                                    </figcaption></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">References</h3>
+                        <ul class="list-disc list-outside space-y-3 pl-5 leading-relaxed">
+                            <li>
+                                Moukalled, F., Darwish, M., and Sekar, B., “A Pressure-Based Algorithm for Multi-Phase Flow at All Speeds,” 
+                                Journal of Computational Physics, Vol. 190, No. 2, 2003, pp. 550–571. doi:<a href="https://doi.org/10.1016/S0021-9991(03)00297-3" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
+                                10.1016/S0021-9991(03)00297-3</a>.
+                            </li>
+                            <li>
+                                Back, L., and Cuffel, R., “Detection of Oblique Shocks in a Conical Nozzle with a Circular-Arc Throat,” 
+                                AIAA Journal, Vol. 4, No. 12, 1966, pp. 2219–2221. doi:<a href="https://doi.org/10.2514/3.3881" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
+                                10.2514/3.3881</a>.
+                            </li>
+                            <li>
+                                Chang, H. T., Hourng, L. W., Chien, L. C., and Chien, L. C., “Application of Flux-Vector-Splitting Scheme 
+                                to a Dilute Gas-Particle JPL Nozzle Flow,” International Journal for Numerical Methods in Fluids, 
+                                Vol. 22, No. 10, 1996, pp. 921–935. doi:<a href="https://doi.org/10.1002/(SICI)1097-0363(19960530)22" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
+                                10.1002/(SICI)1097-0363(19960530)22</a>.
+                            </li>
+                        </ul>
                     </div>
         
                     <div class="github-link-container">
-                        <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/tree/main/tutorials/nozzle/gasNozzle" target="_blank" class="btn-github">
-                            View Case Files on GitHub
+                        <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/tree/master/tutorials/JPL-Nozzle" 
+                        target="_blank" class="inline-flex items-center bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg">
+                            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 16 16" version="1.1" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                            </svg>
+                            <span>View Case Files on GitHub</span>
                         </a>
                     </div>
                 </div>
@@ -194,38 +278,125 @@
                     <div class="row-split">
                         <div class="description">
                             <h3>Problem Description</h3>
-                            <p>
-                                This tutorial demonstrates the Euler-Euler multiphase solver capability. 
-                                It simulates a gas carrying solid particles through a nozzle, highlighting the momentum and energy transfer between phases and the resulting velocity lag.
+                            <p class="text-justify  ">
+                                This tutorial demonstrates the Euler-Euler multiphase solver capability. It simulates a gas carrying solid particles through a nozzle, 
+                                highlighting the momentum and energy transfer between phases and the resulting velocity lag.
+
+                                This validation case simulates the inviscid transonic gas flow through a Convergent-Divergent (CD) nozzle (JPL nozzle). 
+                                The axisymmetric simulation aims to validate the solver's capability to simulate supersonic flows and capture shock waves in the flow field.
+                                The nozzle geometry is taken from Back et. al, and the inlet and throat curvature points is generated in MATLAB. These data points 
+                                are then provided to modify the boundaries of domain block in the <code>blockMeshDict</code>. The MATLAB code is available with the case files.   
+                                The CD nozzle mesh along with the boundaries marked are shown in the figure and the boundary conditions are presented in the table.    
+                                Initially pressure and temperature is 1.0 bar and 300 K and is set to be uniform throughout the domain. The specific heat capacity
+                                of the gas is 1.07 J/kg.K and the ideal gas equation of state is employed. The molecular weight of the gas is 28.786 kg/kmol.
                             </p>
                         </div>
                         <div class="media-container">
-                            <img src="images/schematic_twophase.png" alt="Two Phase Nozzle Schematic" class="schematic-img">
-                            <p class="caption">Fig 2.1: Two-phase flow domain.</p>
+                            <img src="images/Mesh.png" alt="CD Nozzle Schematic" class="schematic-img">
+                            <p class="caption">JPL Nozzle Mesh with Boundaries</p>
                         </div>
                     </div>
         
-                    <h3>Case Setup & Boundary Conditions</h3>
+                    <h3>Boundary Conditions</h3>
                     <table class="bc-table">
                         <thead>
-                            <tr><th>Parameter</th><th>Gas Phase</th><th>Particle Phase</th></tr>
+                            <tr><th>Variables</th><th>Inlet</th><th>Outlet</th><th>Wall</th><th>Wedge faces</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><strong>Inlet</strong></td><td>Total P/T</td><td>Fixed Mass Flow Rate</td></tr>
-                            <tr><td><strong>Particle Size</strong></td><td>-</td><td>Uniform (e.g., 50 µm)</td></tr>
-                            <tr><td><strong>Interphase Model</strong></td><td colspan="2">Schiller-Naumann Drag / Ranz-Marshall Heat Transfer</td></tr>
+                            <tr><td><strong>$P$</strong></td><td>Total Pressure (10.34 bar) </td><td>zeroGradient</td><td>zeroGradient</td><td>cyclic</td></tr>
+                            <tr><td><strong>$\boldsymbol{u}_g$</strong></td><td>PressureDirectedInletVelocity (inlet direction: +z axis)</td><td>zeroGradient</td><td>Slip</td><td>cyclic</td></tr>
+                            <tr><td><strong>$T_g$</strong></td><td>Total Temperature (555 K)</td><td>zeroGradient</td><td>zeroGradient</td><td>cyclic</td></tr>
                         </tbody>
                     </table>
+                    <h3>Numerical Schemes</h3>
+                    Initially, the simulation is conducted till steady state (t = 0.01 s) with first order <code>upwind</code> scheme for all 
+                    the convective terms. To improve the accuracy the the convective schemes are updated to <code>vanLeer</code> scheme for 
+                    all the convective terms. The generalized <code>Crank Nicolson</code> scheme is used for time integration for second order 
+                    accuracy and stability.
+                    
+                    <div class="run-sim-guide">
+  
+                        <h3>Instructions to Run the Simulation</h3>
+                      
+                        <div class="sim-step">
+                          <span class="step-label">1. Environment Setup</span>
+                          <p>Before beginning, ensure you source the native <strong>OpenFOAM-v2112 bashrc</strong> file and the <strong>RocPerf-CFD bashrc</strong> file.</p>
+                        </div>
+                      
+                        <div class="sim-step">
+                          <span class="step-label">2. Prepare the Case</span>
+                          <p>The case file is available in the directory <code>tutorials/JPL-Nozzle</code>. Copy the case file to your working directory. To mesh the geometry, run:</p>
+                          <code class="cmd-block">blockMesh</code>
+                        </div>
+                      
+                        <div class="sim-step">
+                          <span class="step-label">3. Run the Simulation</span>
+                          <p>You can run the simulation in either serial or parallel mode:</p>
+                          
+                          <p><strong>Option A: Serial Run</strong></p>
+                          <code class="cmd-block">rocketMotor</code>
+                      
+                          <p><strong>Option B: Parallel Run</strong></p>
+                          <p>First, perform mesh decomposition, then run with MPI (default is 8 processors):</p>
+                          <code class="cmd-block">decomposePar<br>mpirun -np 8 rocketMotor -parallel</br></code>
+                          <p><small><em>Note: The number of processors can be adjusted in the <code>decomposeParDict</code> file.</em></small></p>
+                        </div>
+                      
+                        <div class="tip-box">
+                          <div>
+                            <strong>💡 Tip for Higher Accuracy:</strong><br>
+                            To obtain accurate simulation results (as shown in the plots below), simply double the mesh size in the <code>blockMeshDict</code> file before running the mesh generation.
+                          </div>
+                        </div>
+                      
+                      </div>  
         
                     <div class="results-container">
-                        <h3>Results</h3>
-                        <p>Comparison of Gas vs. Particle Velocity along the centerline showing lag.</p>
-                        <img src="images/result_twophase_velocity_lag.png" alt="Velocity Lag Plot" class="result-img">
+                        <h3 class="font-bold">Results</h3>
+                        <p>The predicted centreline Mach number and the wall Mach number is plotted with experimental data and the computational 
+                            data from F. Moukalled et al.</p>
+                        <table class="bc-table">
+                            <tbody>
+                                <tr>
+                                    <td><img src="images/gasPhaseCenterlineMach.png" alt="Centerline Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
+                                        Variation of Centerline Mach number along the length
+                                    </figcaption></td>
+                                    <td><img src="images/gasPhaseWallMach.png" alt="Wall Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
+                                        Variation of Wall Mach number along the length
+                                    </figcaption></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <h3 class="font-bold">References</h3>
+                        <ul class="list-disc list-outside space-y-3 pl-5 leading-relaxed">
+                            <li>
+                                Moukalled, F., Darwish, M., and Sekar, B., “A Pressure-Based Algorithm for Multi-Phase Flow at All Speeds,” 
+                                Journal of Computational Physics, Vol. 190, No. 2, 2003, pp. 550–571. doi:<a href="https://doi.org/10.1016/S0021-9991(03)00297-3" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
+                                10.1016/S0021-9991(03)00297-3</a>.
+                            </li>
+                            <li>
+                                Back, L., and Cuffel, R., “Detection of Oblique Shocks in a Conical Nozzle with a Circular-Arc Throat,” 
+                                AIAA Journal, Vol. 4, No. 12, 1966, pp. 2219–2221. doi:<a href="https://doi.org/10.2514/3.3881" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
+                                10.2514/3.3881</a>.
+                            </li>
+                            <li>
+                                Chang, H. T., Hourng, L. W., Chien, L. C., and Chien, L. C., “Application of Flux-Vector-Splitting Scheme 
+                                to a Dilute Gas-Particle JPL Nozzle Flow,” International Journal for Numerical Methods in Fluids, 
+                                Vol. 22, No. 10, 1996, pp. 921–935. doi:<a href="https://doi.org/10.1002/(SICI)1097-0363(19960530)22" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
+                                10.1002/(SICI)1097-0363(19960530)22</a>.
+                            </li>
+                        </ul>
                     </div>
         
                     <div class="github-link-container">
-                        <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/tree/main/tutorials/nozzle/gasParticleNozzle" target="_blank" class="btn-github">
-                            View Case Files on GitHub
+                        <a href="https://github.com/Ganeshkumar-V/Propellant-Regression-Framework/tree/master/tutorials/JPL-TwoPhase-Nozzle" 
+                        target="_blank" class="inline-flex items-center bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-8 rounded-lg text-lg transition-all transform hover:scale-105 shadow-lg">
+                            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 16 16" version="1.1" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                            </svg>
+                            <span>View Case Files on GitHub</span>
                         </a>
                     </div>
                 </div>

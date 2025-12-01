@@ -269,7 +269,7 @@
                     <span class="acc-title">2. Gas-Particle CD Nozzle Flow</span>
                     <span class="acc-desc">Euler-Euler multiphase simulation demonstrating momentum and energy transfer (drag/heat) between phases.</span>
                 </div>
-                <img src="images/result_twophase_velocity_lag.png" alt="Two Phase Thumb" class="acc-thumb">
+                <img src="images/particleVolumeFractionContour.png" alt="Two Phase Thumb" class="acc-thumb">
             </button>
         
             <div class="panel">
@@ -279,16 +279,23 @@
                         <div class="description">
                             <h3>Problem Description</h3>
                             <p class="text-justify  ">
-                                This tutorial demonstrates the Euler-Euler multiphase solver capability. It simulates a gas carrying solid particles through a nozzle, 
-                                highlighting the momentum and energy transfer between phases and the resulting velocity lag.
+                                This validation case simulates the inviscid transonic dusty gas flow in a Convergent-Divergent (CD) nozzle (JPL nozzle). 
+                                The axisymmetric simulation aims to validate the solver's capability to model gas-particle interactions.
+                                The nozzle geometry and mesh is same as the previous case. The particle phase is introduced at the inlet. 
+                                The boundary conditions for the gas and particle phase flow variables are presented in the table.    
+                                Initial condition is taken to be steady state solution of gas phase from the previous tutorial. The particle 
+                                phase volume fraction is initially zero. The gas phase properties remains same as the previous case. The 
+                                particle phase density is 4004.62 kg/m^3 and the specific heat capacity of the particle phase is 1.38 kJ/kg.K .
+                                The diameter of the particle is 20 $\mu$m. The velocity and temperature slip at  the inlet is assumed to be zero in this case.
+                                The coefficient of drag and Nusselt number correlation used for this validation simulation are given by,
 
-                                This validation case simulates the inviscid transonic gas flow through a Convergent-Divergent (CD) nozzle (JPL nozzle). 
-                                The axisymmetric simulation aims to validate the solver's capability to simulate supersonic flows and capture shock waves in the flow field.
-                                The nozzle geometry is taken from Back et. al, and the inlet and throat curvature points is generated in MATLAB. These data points 
-                                are then provided to modify the boundaries of domain block in the <code>blockMeshDict</code>. The MATLAB code is available with the case files.   
-                                The CD nozzle mesh along with the boundaries marked are shown in the figure and the boundary conditions are presented in the table.    
-                                Initially pressure and temperature is 1.0 bar and 300 K and is set to be uniform throughout the domain. The specific heat capacity
-                                of the gas is 1.07 J/kg.K and the ideal gas equation of state is employed. The molecular weight of the gas is 28.786 kg/kmol.
+                                $$
+                                C_D = \frac{24}{Re_p}\left(1 + 0.15Re_p^{0.687} + \frac{0.0175Re_p}{1 + 4.25\times 10^4Re_p^{-1.16}}\right)
+                                $$ 
+                                $$
+                                Nu = 2 + 0.459Re_p^{0.55}Pr^{0.33}
+                                $$
+                                
                             </p>
                         </div>
                         <div class="media-container">
@@ -305,13 +312,13 @@
                         <tbody>
                             <tr><td><strong>$P$</strong></td><td>Total Pressure (10.34 bar) </td><td>zeroGradient</td><td>zeroGradient</td><td>cyclic</td></tr>
                             <tr><td><strong>$\boldsymbol{u}_g$</strong></td><td>PressureDirectedInletVelocity (inlet direction: +z axis)</td><td>zeroGradient</td><td>Slip</td><td>cyclic</td></tr>
+                            <tr><td><strong>$\boldsymbol{u}_p$</strong></td><td>sameAs - gas phase ($\boldsymbol{u}_g = \boldsymbol{u}_p$)</td><td>outletInlet (no reverse flow)</td><td>Slip</td><td>cyclic</td></tr>
                             <tr><td><strong>$T_g$</strong></td><td>Total Temperature (555 K)</td><td>zeroGradient</td><td>zeroGradient</td><td>cyclic</td></tr>
+                            <tr><td><strong>$T_p$</strong></td><td>sameAs - gas phase ($T_p = T_g$)</td><td>zeroGradient</td><td>zeroGradient</td><td>cyclic</td></tr>
                         </tbody>
                     </table>
                     <h3>Numerical Schemes</h3>
-                    Initially, the simulation is conducted till steady state (t = 0.01 s) with first order <code>upwind</code> scheme for all 
-                    the convective terms. To improve the accuracy the the convective schemes are updated to <code>vanLeer</code> scheme for 
-                    all the convective terms. The generalized <code>Crank Nicolson</code> scheme is used for time integration for second order 
+                    The convective terms are discretized using  second order shock capturing <code>vanLeer</code> scheme. The generalized <code>Crank Nicolson</code> scheme is used for time integration for second order 
                     accuracy and stability.
                     
                     <div class="run-sim-guide">
@@ -325,7 +332,7 @@
                       
                         <div class="sim-step">
                           <span class="step-label">2. Prepare the Case</span>
-                          <p>The case file is available in the directory <code>tutorials/JPL-Nozzle</code>. Copy the case file to your working directory. To mesh the geometry, run:</p>
+                          <p>The case file is available in the directory <code>tutorials/JPL-TwoPhase-Nozzle</code>. Copy the case file to your working directory. To mesh the geometry, run:</p>
                           <code class="cmd-block">blockMesh</code>
                         </div>
                       
@@ -354,14 +361,15 @@
                     <div class="results-container">
                         <h3 class="font-bold">Results</h3>
                         <p>The predicted centreline Mach number and the wall Mach number is plotted with experimental data and the computational 
-                            data from F. Moukalled et al.</p>
+                            data from F. Moukalled et al. A similar analysis can be repeated for 2 $\mu$m particle size. The particle size 
+                            can be changed from the <code>phaseProperties</code> file in the constant folder.</p>
                         <table class="bc-table">
                             <tbody>
                                 <tr>
-                                    <td><img src="images/gasPhaseCenterlineMach.png" alt="Centerline Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
+                                    <td><img src="images/20micronCenterline.png" alt="Centerline Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
                                         Variation of Centerline Mach number along the length
                                     </figcaption></td>
-                                    <td><img src="images/gasPhaseWallMach.png" alt="Wall Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
+                                    <td><img src="images/20micronWall.png" alt="Wall Mach number" class="result-img"><figcaption class="text-center font-bold py-4">
                                         Variation of Wall Mach number along the length
                                     </figcaption></td>
                                 </tr>

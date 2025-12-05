@@ -13,4 +13,5 @@ wmake $targetType applications/rocketMotor
 wmake $targetType utilities/postProcessRocket
 wmake $targetType utilities/mapVolFields
 wmake $targetType utilities/rocketConservation
+wmake $targetType utilities/setRocketInitField/implicitFunctions
 wmake $targetType utilities/setRocketInitField

@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenCFD Ltd.
     Copyright (C) 2019-2020 DLR
+    Copyright (C) 2025 Ganeshkumar V
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.

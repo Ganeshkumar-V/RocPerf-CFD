@@ -80,7 +80,6 @@ $(HTModel)/KavanauRanzMarshall/KavanauRanzMarshall.C
 $(HTModel)/Brenner/Brenner.C
 
 PhaseSystems/EntrainedPropellantCombustionPhaseSystem/EntrainedSystem.C
-PhaseSystems/EntrainedGCPCombustionPhaseSystem/GCPSystem.C
 multiphaseSystem/multiPhaseSystem.C
 multiphaseSystem/multiPhaseSystemNew.C
 multiphaseSystem/multiPhaseSystems.C

@@ -97,10 +97,6 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::PropellantRegressionPhas
         IOobject("Uparticle", mesh), mesh,
         dimensionedVector("", dimVelocity, vector(0, 0, 0))
       )
-    ),
-    saturationModel_
-    (
-        saturationModel::New(this->subDict("saturationModel"), mesh)
     )
 {
     this->generatePairsAndSubModels
@@ -201,12 +197,6 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-template<class BasePhaseSystem>
-const Foam::saturationModel&
-Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::saturation() const
-{
-    return saturationModel_();
-}
 
 template<class BasePhaseSystem>
 Foam::tmp<Foam::volScalarField>

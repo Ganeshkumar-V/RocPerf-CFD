@@ -126,9 +126,6 @@ protected:
             //        for gas phase it is 1.0 - coeff
             coeffTable coeff_;
 
-            //- The saturation model used to evaluate Tsat = Tf
-            autoPtr<saturationModel> saturationModel_;
-
     // Protected member functions
 
         //- Return the representation mass transfer rate
@@ -150,9 +147,6 @@ public:
 
 
     // Member Functions
-
-    //- Return the saturationModel
-    const saturationModel& saturation() const;
 
         //- Return the mass transfer rate for a pair
         virtual tmp<volScalarField> dmdt(const phasePairKey& key) const;

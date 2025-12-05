@@ -41,7 +41,23 @@ License
 
 namespace Foam
 {
+    // For gas-particle flows without propellant phase regression
+    typedef
+        InterphaseHeatTransferPhaseSystem
+        <
+            MomentumEnergyTransferPhaseSystem<multiPhaseSystem>
+        >
+        gasParticleMultiphaseSystem;
 
+    addNamedToRunTimeSelectionTable
+    (
+        multiPhaseSystem,
+        gasParticleMultiphaseSystem,
+        dictionary,
+        gasParticleMultiphaseSystem
+    );
+
+    // Includes propellant regression
     typedef
         PropellantRegressionPhaseSystem
         <
@@ -58,21 +74,6 @@ namespace Foam
         regressionMultiphaseSystem,
         dictionary,
         regressionMultiphaseSystem
-    );
-
-    typedef
-        InterphaseHeatTransferPhaseSystem
-        <
-            MomentumEnergyTransferPhaseSystem<multiPhaseSystem>
-        >
-        gasParticleMultiphaseSystem;
-
-    addNamedToRunTimeSelectionTable
-    (
-        multiPhaseSystem,
-        gasParticleMultiphaseSystem,
-        dictionary,
-        gasParticleMultiphaseSystem
     );
 
     typedef
@@ -129,6 +130,8 @@ namespace Foam
         propellantTransferMultiphaseSystem
     );
 
+    // Advanced phase system - tailored for ALICE propellant rocket motor simulations
+    // Inputs include combustion efficiency, entrainment factor - relevant ALICE rocket motors
     typedef
         EntrainedPropellantCombustionPhaseSystem
         <

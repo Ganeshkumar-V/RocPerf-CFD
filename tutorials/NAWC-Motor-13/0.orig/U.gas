@@ -1,0 +1,57 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U.gas;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+
+    "(outlet|outlet-front|outlet-top)"
+    {
+        type               zeroGradient;
+	gamma		   1.3255;
+	psi		   thermo:psi.gas;
+	phi	    	   phi.gas;
+	rho		   thermo:rho.gas;
+	lInf	   	   10;
+	fieldInf	   (0 0 0);
+	value		   uniform (0 0 0);
+    }
+
+    Wall
+    {
+        type               noSlip;
+    }
+
+    front
+    {
+        type            wedge;
+    }
+    back
+    {
+        type            wedge;
+    }
+    "(WallChamber|nozzleWall|nozzleAtmWall|atmWall)"
+    {
+        $Wall;
+    }
+
+  }
+
+
+// ************************************************************************* //

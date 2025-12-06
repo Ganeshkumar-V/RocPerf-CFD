@@ -76,6 +76,9 @@ protected:
 
     // Protected data
 
+        // Solve Particle Phase?
+        bool solveParticle;
+
         // Adiabatic Flame Temperature
         volScalarField Tad;
         volScalarField Hs1;

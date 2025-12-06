@@ -59,6 +59,7 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::PropellantRegressionPhas
 )
 :
     BasePhaseSystem(mesh),
+    solveParticle(true),
     Tad
     (
       volScalarField
@@ -193,6 +194,10 @@ Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::PropellantRegressionPhas
             FatalErrorInFunction 
               << "Mass fraction of particles in combustion products cannot be 1.0" 
               << exit(FatalError);
+        }
+        if(Xp == 0.0)
+        {
+            solveParticle = false;
         }
 
         this->coeff_.set
@@ -370,8 +375,67 @@ void Foam::PropellantRegressionPhaseSystem<BasePhaseSystem>::solve()
         interfaceTrackingModelIter()->regress(alpha, alphaOld);
     }
   
-    // Solve other phase volume fraction equations
-    BasePhaseSystem::solve();
+    // Solve other phase volume fraction equations if required
+    if (solveParticle)
+    {
+        BasePhaseSystem::solve();
+    }
+    else
+    {
+        forAllIter
+        (
+            interfaceTrackingModelTable,
+            interfaceTrackingModels_,
+            interfaceTrackingModelIter
+        )
+        {
+            const phasePair& pair = this->phasePairs_[interfaceTrackingModelIter.key()];
+
+            word propellant = "alpha." + interfaceTrackingModelIter()->propellant_;
+            const volScalarField& alphaPropellant = this->db().template lookupObject<volScalarField>(propellant);
+
+            forAll(this->phases(), phasei)
+            {
+                phaseModel& phase = this->phases()[phasei];
+                volScalarField& alpha = phase;
+                
+                if (phase.stationary())
+                {
+                    Info << phase.name() << " fraction, min, max = "
+                         << phase.weightedAverage(phase.mesh().V()).value()
+                         << ' ' << min(phase).value()
+                         << ' ' << max(phase).value()
+                         << endl;
+
+                    continue;
+                };
+                
+                if (phase.name() == pair.phase2().name()) // Gas phase
+                {
+                    alpha = 1.0 - alphaPropellant;
+                    phase.alphaPhiRef() = fvc::interpolate(alpha)*phase.phi();
+                    phase.alphaRhoPhiRef() =
+                    fvc::interpolate(phase.rho())*phase.alphaPhi();
+                }
+                else // particle phase
+                {
+                    alpha = 0*alphaPropellant;
+                    phase.alphaPhiRef() = 0*phase.phi();
+                    phase.alphaRhoPhiRef() =
+                    fvc::interpolate(phase.rho())*phase.alphaPhi();
+                }
+                phase.clip(SMALL, 1 - SMALL);
+
+                Info << phase.name() << " fraction, min, max = "
+                     << phase.weightedAverage(phase.mesh().V()).value()
+                     << ' ' << min(phase).value()
+                     << ' ' << max(phase).value()
+                     << endl;
+            }
+            
+        }
+    }
+    
 }
 
 template<class BasePhaseSystem>

@@ -1,0 +1,61 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      setRocketInitFieldDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+gasField            "alpha.gas";
+propellantField     "alpha.propellant";
+
+type composedFunction;
+mode add;
+composedFunction
+{
+    cylinder
+    {
+        type           generalizedCylinder;
+        direction      (0 0 1);
+        radius    table
+        (
+            (0           0.0381)
+            (0.792607    0.0381)
+            (0.833501    0.0465582)
+        );
+        origin         (0 0 0);
+    }
+
+    plane
+    {
+        type plane;
+        origin (0 0 0.1524);
+        normal (0 0 -1);
+    }
+    
+}
+
+regions
+(
+    // Select regions of nozzle and initialize
+    boxToCell
+    {
+        box (0 -1 0.833501) (1 1 1);
+        fieldValues
+        (
+            volScalarFieldValue alpha.gas 1.0
+            volScalarFieldValue alpha.propellant 0.0
+        );
+    }
+);
+
+// ************************************************************************* //

@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2112                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default     CrankNicolson 0.5;
+}
+
+gradSchemes
+{
+    default     Gauss linear;
+}
+
+divSchemes
+{
+    default                         none;
+
+    div(phid.gas,p_rgh)			Gauss limitedLinear 1.0;
+    div(phi,alpha.propellant)            Gauss limitedLinear 1.0;
+    div(phi,alpha.particles)            Gauss limitedLinear 1.0;
+    div(phi,alpha.gas)            Gauss limitedLinear 1.0;
+    
+    div(phir,alpha.propellant)           Gauss limitedLinear 1.0;
+    "div\(phir,alpha.*\)"           Gauss limitedLinear 1.0;
+
+    "div\(alphaRhoPhi.*,U.*\)"      Gauss limitedLinearV 1.0;
+    "div\(alphaRhoPhi.*,Yi\)"       Gauss limitedLinear 1.0;
+    "div\(phi.*,U.*\)"              Gauss limitedLinearV 1.0;
+
+    "div\(alphaRhoPhi.*,(h|e).*\)"  Gauss limitedLinear 1.0;
+    "div\(alphaPhi.*,p\)"           Gauss limitedLinear 1.0;
+
+    "div\(\(\(\(alpha.*\*thermo:rho.*\)*nuEff.*\)\*dev2\(T\(grad\(U.*\)\)\)\)\)" Gauss linear;
+}
+
+laplacianSchemes
+{
+    default     Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default     linear;
+}
+
+snGradSchemes
+{
+    default     corrected;
+}
+
+
+// ************************************************************************* //
